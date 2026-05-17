@@ -2,64 +2,85 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
     function isAdmin() {
-      return request.auth != null &&
+      return isSignedIn() &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
     }
 
+    // Users
     match /users/{uid} {
-      allow read, write: if request.auth != null && request.auth.uid == uid;
-      allow read, write: if isAdmin();
+      allow read: if isOwner(uid) || isAdmin();
+      allow create: if isOwner(uid);
+      // Users can update own profile but cannot self-promote to admin
+      allow update: if isOwner(uid) && !("isAdmin" in request.resource.data) || isAdmin();
     }
 
+    // Transactions (append-only for users, full access for admin)
     match /transactions/{id} {
-      allow create: if request.auth != null && request.resource.data.uid == request.auth.uid;
-      allow read: if request.auth != null && resource.data.uid == request.auth.uid;
+      allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid;
+      allow read: if isSignedIn() && resource.data.uid == request.auth.uid;
       allow read, write: if isAdmin();
     }
 
+    // Payments
     match /payments/{id} {
-      allow create: if request.auth != null && request.resource.data.uid == request.auth.uid;
-      allow read: if request.auth != null && resource.data.uid == request.auth.uid;
-      allow read, update: if isAdmin();
+      allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid;
+      allow read: if isSignedIn() && resource.data.uid == request.auth.uid;
+      allow read, update, delete: if isAdmin();
     }
 
+    // Withdrawals
     match /withdrawals/{id} {
-      allow create: if request.auth != null && request.resource.data.uid == request.auth.uid;
-      allow read: if request.auth != null && resource.data.uid == request.auth.uid;
-      allow read, update: if isAdmin();
+      allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid;
+      allow read: if isSignedIn() && resource.data.uid == request.auth.uid;
+      allow read, update, delete: if isAdmin();
     }
 
+    // Referrals
     match /referrals/{id} {
-      allow read: if request.auth != null &&
+      allow create: if isSignedIn();
+      allow read: if isSignedIn() &&
         (resource.data.referrerUid == request.auth.uid ||
          resource.data.refereeUid == request.auth.uid);
       allow read, write: if isAdmin();
     }
 
+    // Notifications (per-user subcollection)
     match /notifications/{uid}/items/{notifId} {
-      allow read, write: if request.auth != null && request.auth.uid == uid;
+      allow read, write: if isOwner(uid);
       allow read, write: if isAdmin();
     }
 
+    // Admin logs (admin write/read only)
     match /admin_logs/{id} {
       allow read, write: if isAdmin();
     }
 
+    // Platform settings (all users read, admin write)
     match /settings/{doc} {
-      allow read: if request.auth != null;
+      allow read: if isSignedIn();
       allow write: if isAdmin();
     }
 
+    // Tasks (all users read, admin write)
     match /tasks/{id} {
-      allow read: if request.auth != null;
+      allow read: if isSignedIn();
       allow write: if isAdmin();
     }
 
+    // Task submissions
     match /task_submissions/{id} {
-      allow create: if request.auth != null && request.resource.data.uid == request.auth.uid;
-      allow read: if request.auth != null && resource.data.uid == request.auth.uid;
-      allow read, update: if isAdmin();
+      allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid;
+      allow read: if isSignedIn() && resource.data.uid == request.auth.uid;
+      allow read, update, delete: if isAdmin();
     }
   }
 }

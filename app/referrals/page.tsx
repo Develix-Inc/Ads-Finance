@@ -26,18 +26,24 @@ export default function ReferralsPage() {
     const unsub = onAuthStateChanged(auth, async u => {
       if (!u) { router.push("/login"); return; }
       setUser(u);
-      const profile = await getUserProfile(u.uid);
-      const rc      = profile?.referralCode ?? generateReferralCode(u.uid);
-      setCode(rc);
-      const [refs, earn] = await Promise.all([getUserReferrals(u.uid), getReferralEarnings(u.uid)]);
-      setReferrals(refs);
-      setEarnings(earn);
-      setLoading(false);
+      try {
+        const profile = await getUserProfile(u.uid);
+        const rc      = profile?.referralCode ?? generateReferralCode(u.uid);
+        setCode(rc);
+        const [refs, earn] = await Promise.all([getUserReferrals(u.uid), getReferralEarnings(u.uid)]);
+        setReferrals(refs);
+        setEarnings(earn);
+      } catch (e) {
+        console.error("Referrals load error:", e);
+      } finally {
+        setLoading(false);
+      }
     });
     return unsub;
   }, [router]);
 
-  const refLink = typeof window !== "undefined" ? `${window.location.origin}/login?ref=${code}` : "";
+  const BASE_URL = "https://adsfinance.vercel.app";
+  const refLink  = code ? `${BASE_URL}/login?ref=${code}` : "";
 
   const copy = (val: string, label: string) => {
     navigator.clipboard.writeText(val);

@@ -11,6 +11,7 @@ interface Props {
   userEmail: string;
   balance: number;
   minWithdrawal?: number;
+  withdrawalPin?: string;
   bankName: string;
   accountNumber: string;
   accountName: string;
@@ -27,15 +28,23 @@ const INTERLOCK_STAGES = [
   { label: "Disbursement Complete",  ms: 1000, icon: FaCircleCheck },
 ];
 
-export function WithdrawModal({ uid, userEmail, balance, minWithdrawal = 500, bankName, accountNumber, accountName, onClose, onSuccess }: Props) {
-  const [step, setStep]       = useState(0);
-  const [amount, setAmount]   = useState("");
+export function WithdrawModal({ uid, userEmail, balance, minWithdrawal = 500, withdrawalPin, bankName, accountNumber, accountName, onClose, onSuccess }: Props) {
+  // -1 = PIN gate (if pin set), 0 = amount, 1 = confirm, 2 = processing, 3 = done
+  const [step, setStep]         = useState(withdrawalPin ? -1 : 0);
+  const [pinInput, setPinInput] = useState("");
+  const [pinError, setPinError] = useState("");
+  const [amount, setAmount]     = useState("");
   const [editBank, setEditBank] = useState({ bankName, accountNumber, accountName });
   const [interlockStep, setInterlockStep] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
 
   const numAmount = parseFloat(amount) || 0;
   const valid     = numAmount >= minWithdrawal && numAmount <= balance;
+
+  function verifyPin() {
+    if (pinInput === withdrawalPin) { setStep(0); setPinError(""); }
+    else { setPinError("Incorrect PIN. Try again."); setPinInput(""); }
+  }
 
   /* run the interlock animation then submit */
   async function runInterlock() {
@@ -67,6 +76,7 @@ export function WithdrawModal({ uid, userEmail, balance, minWithdrawal = 500, ba
         <div className="px-7 pt-7 pb-5 border-b border-white/10">
           <p className="text-xs font-mono text-teal-400 uppercase tracking-widest mb-1">Withdrawal Interlock</p>
           <h2 className="text-xl font-black text-white">
+            {step === -1 && "Security Verification"}
             {step === 0 && "Enter Amount"}
             {step === 1 && "Confirm Details"}
             {step === 2 && "Processing…"}
@@ -82,6 +92,28 @@ export function WithdrawModal({ uid, userEmail, balance, minWithdrawal = 500, ba
 
         <div className="px-7 py-6">
           <AnimatePresence mode="wait">
+
+            {/* ── PIN Gate ── */}
+            {step === -1 && (
+              <motion.div key="pin" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-4">
+                <p className="text-slate-400 text-sm">Enter your 4-digit withdrawal PIN to continue.</p>
+                <input
+                  type="password" value={pinInput} onChange={e => setPinInput(e.target.value.slice(0, 4))}
+                  onKeyDown={e => e.key === "Enter" && verifyPin()}
+                  placeholder="••••" maxLength={4} inputMode="numeric"
+                  className="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-4 text-white text-2xl text-center tracking-[1em] font-mono focus:outline-none focus:border-teal-500 transition-colors"
+                  autoFocus
+                />
+                {pinError && <p className="text-rose-400 text-xs text-center">{pinError}</p>}
+                <button onClick={verifyPin} disabled={pinInput.length !== 4}
+                  className="w-full py-3.5 rounded-2xl bg-teal-500 hover:bg-teal-400 disabled:opacity-40 text-slate-950 font-black text-sm transition-colors">
+                  Verify PIN
+                </button>
+                <p className="text-center text-xs text-slate-600">
+                  Forgot PIN? Update it in <a href="/settings" className="text-teal-400 hover:underline">Settings → Withdrawal PIN</a>.
+                </p>
+              </motion.div>
+            )}
 
             {/* ── Step 0: Amount ── */}
             {step === 0 && (

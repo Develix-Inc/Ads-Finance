@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 import { upsertUserProfile } from "@/lib/admin";
 import { sendNotification } from "@/lib/notifications";
-import { generateReferralCode } from "@/lib/referrals";
+import { generateReferralCode, processReferralSignup } from "@/lib/referrals";
 
 const SWAL_DARK = {
   background: "#020617",
@@ -172,6 +172,12 @@ export function OnboardingWizard({ uid, userEmail, onComplete }: Props) {
         `Your profile is set up. Your referral code is ${generateReferralCode(uid)}. Now activate a Validator Node to start earning.`,
         "success"
       );
+      // process referral if someone referred this user
+      const pendingRef = localStorage.getItem("pendingRef");
+      if (pendingRef) {
+        await processReferralSignup(uid, pendingRef);
+        localStorage.removeItem("pendingRef");
+      }
     } catch (e) {
       console.error("Firestore save error", e);
     }

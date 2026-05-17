@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://adsfinance.vercel.app"),
   title: "AdsFinance | Ads. Growth. Financial Freedom.",
   description: "The institutional-grade digital engagement network. Purchase a Validator License and earn up to 600% ROI through verified ad tasks.",
   icons: {

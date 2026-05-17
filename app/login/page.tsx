@@ -5,8 +5,8 @@ declare global {
     recaptchaVerifier: any;
   }
 }
-import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import React, { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { auth, googleProvider } from "@/lib/firebase";
 import { signInWithPopup, RecaptchaVerifier, signInWithPhoneNumber, onAuthStateChanged } from "firebase/auth";
 import Swal from "sweetalert2";
@@ -30,13 +30,22 @@ const swalConfig = {
   }
 };
 
-export default function LoginPage() {
+function LoginInner() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [authMethod, setAuthMethod] = useState<"select" | "phone">("select");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
   const [confirmationResult, setConfirmationResult] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Capture referral code from URL and save to localStorage
+  useEffect(() => {
+    const ref = searchParams?.get("ref");
+    if (ref) {
+      localStorage.setItem("pendingRef", ref);
+    }
+  }, [searchParams]);
 
   // Redirect if already logged in
   useEffect(() => {
@@ -281,5 +290,13 @@ export default function LoginPage() {
         </div>
       </motion.div>
     </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-slate-950 flex items-center justify-center"><div className="w-8 h-8 border-4 border-teal-500 border-t-transparent rounded-full animate-spin" /></div>}>
+      <LoginInner />
+    </Suspense>
   );
 }

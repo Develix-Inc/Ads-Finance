@@ -141,6 +141,7 @@ export default function DashboardPage() {
           <WithdrawModal
             uid={user.uid} userEmail={user.email || user.phoneNumber || ""}
             balance={balance} minWithdrawal={minWithdraw}
+            withdrawalPin={profile?.withdrawalPin}
             bankName={profile?.bankName ?? ""} accountNumber={profile?.accountNumber ?? ""} accountName={profile?.accountName ?? ""}
             onClose={() => setShowWithdraw(false)}
           />
