@@ -1,0 +1,65 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAdmin() {
+      return request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+    }
+
+    match /users/{uid} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+      allow read, write: if isAdmin();
+    }
+
+    match /transactions/{id} {
+      allow create: if request.auth != null && request.resource.data.uid == request.auth.uid;
+      allow read: if request.auth != null && resource.data.uid == request.auth.uid;
+      allow read, write: if isAdmin();
+    }
+
+    match /payments/{id} {
+      allow create: if request.auth != null && request.resource.data.uid == request.auth.uid;
+      allow read: if request.auth != null && resource.data.uid == request.auth.uid;
+      allow read, update: if isAdmin();
+    }
+
+    match /withdrawals/{id} {
+      allow create: if request.auth != null && request.resource.data.uid == request.auth.uid;
+      allow read: if request.auth != null && resource.data.uid == request.auth.uid;
+      allow read, update: if isAdmin();
+    }
+
+    match /referrals/{id} {
+      allow read: if request.auth != null &&
+        (resource.data.referrerUid == request.auth.uid ||
+         resource.data.refereeUid == request.auth.uid);
+      allow read, write: if isAdmin();
+    }
+
+    match /notifications/{uid}/items/{notifId} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+      allow read, write: if isAdmin();
+    }
+
+    match /admin_logs/{id} {
+      allow read, write: if isAdmin();
+    }
+
+    match /settings/{doc} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin();
+    }
+
+    match /tasks/{id} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin();
+    }
+
+    match /task_submissions/{id} {
+      allow create: if request.auth != null && request.resource.data.uid == request.auth.uid;
+      allow read: if request.auth != null && resource.data.uid == request.auth.uid;
+      allow read, update: if isAdmin();
+    }
+  }
+}
