@@ -49,36 +49,36 @@ export default function PremiumLandingPage() {
       </div>
 
       {/* Navigation */}
-      <nav className="fixed top-0 w-full z-50 bg-slate-950/80 backdrop-blur-xl border-b border-white/5">
-        <div className="flex items-center justify-between p-6 max-w-7xl mx-auto">
-          <div className="flex items-center gap-3">
-            <div className="relative w-16 h-16 flex items-center justify-center">
-              <img src="/logo-transparent.png" alt="AdsFinance Logo" className="w-full h-full object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]" 
+      <nav className="fixed top-0 w-full z-50 bg-slate-950/90 backdrop-blur-xl border-b border-white/5">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3 max-w-7xl mx-auto">
+          <div className="flex items-center gap-2">
+            <div className="relative w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center shrink-0">
+              <img src="/logo-transparent.png" alt="AdsFinance Logo" className="w-full h-full object-contain"
                 onError={(e) => {
                   (e.target as HTMLImageElement).style.display = 'none';
-                  (e.target as HTMLImageElement).parentElement!.innerHTML = '<span class="text-white font-black text-xl">AF</span>';
+                  (e.target as HTMLImageElement).parentElement!.innerHTML = '<span class="text-white font-black text-lg">AF</span>';
                 }}
               />
             </div>
             <div className="flex flex-col">
-              <span className="font-black text-2xl tracking-tighter text-white leading-none">AdsFinance</span>
-              <span className="text-[9px] font-mono text-slate-400 tracking-[0.2em] uppercase mt-1">ADS. GROWTH. FINANCIAL FREEDOM.</span>
+              <span className="font-black text-lg sm:text-2xl tracking-tighter text-white leading-none">AdsFinance</span>
+              <span className="text-[8px] font-mono text-slate-400 tracking-[0.15em] uppercase mt-0.5 hidden sm:block">ADS. GROWTH. FINANCIAL FREEDOM.</span>
             </div>
           </div>
-          <div className="flex items-center gap-6 text-sm font-semibold">
-            <Link href="#" className="text-slate-400 hover:text-white transition-colors hidden md:block uppercase tracking-wider">Merchants</Link>
-            <Link href="/login" className="text-slate-300 hover:text-white transition-colors uppercase tracking-wider">Login</Link>
+          <div className="flex items-center gap-3 sm:gap-6 text-sm font-semibold">
+            <Link href="#" className="text-slate-400 hover:text-white transition-colors hidden md:block uppercase tracking-wider text-xs">Merchants</Link>
+            <Link href="/login" className="text-slate-300 hover:text-white transition-colors uppercase tracking-wider text-xs sm:text-sm">Login</Link>
             <Link href="/login">
-              <Button className="rounded-full font-bold bg-white text-black hover:bg-slate-200 shadow-lg shadow-white/10 px-6 h-12">
-                Get Started <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
+              <button className="rounded-full font-bold bg-white text-black hover:bg-slate-200 transition-colors shadow-lg px-4 sm:px-6 py-2 sm:py-2.5 text-xs sm:text-sm flex items-center gap-1.5">
+                Get Started <ArrowRight className="w-3.5 h-3.5" />
+              </button>
             </Link>
           </div>
         </div>
       </nav>
 
       {/* Hero Section */}
-      <section ref={targetRef} className="relative pt-40 pb-32 flex flex-col items-center justify-center min-h-screen px-6">
+      <section ref={targetRef} className="relative pt-24 sm:pt-32 pb-32 flex flex-col items-center justify-center min-h-screen px-4 sm:px-6">
         <motion.div 
           style={{ opacity, scale, y }}
           className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center"

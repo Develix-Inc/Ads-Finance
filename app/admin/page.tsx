@@ -3,7 +3,7 @@ import React, { useEffect, useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { auth, db } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
-import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
+import { collection, onSnapshot } from "firebase/firestore";
 import {
   adminVerifyPayment, adminRejectPayment, adminProcessWithdrawal,
   adminRejectWithdrawal, adminCreditUser, adminDebitUser,
@@ -43,20 +43,29 @@ export default function AdminDashboard() {
   const [editBal, setEditBal]         = useState("");
   const unsubRefs                     = useRef<(() => void)[]>([]);
 
-  /* ── Real-time listeners ── */
+  /* ── Real-time listeners (no orderBy = no composite index needed) ── */
   function startListeners() {
-    // Users
-    const u1 = onSnapshot(query(collection(db, "users")), snap => {
-      setUsers(snap.docs.map(d => d.data()).sort((a: any, b: any) => (b.createdAt ?? "") > (a.createdAt ?? "") ? 1 : -1));
-    });
-    // Payments
-    const u2 = onSnapshot(query(collection(db, "payments"), orderBy("submittedAt", "desc")), snap => {
-      setPayments(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-    });
-    // Withdrawals
-    const u3 = onSnapshot(query(collection(db, "withdrawals"), orderBy("requestedAt", "desc")), snap => {
-      setWithdrawals(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-    });
+    const u1 = onSnapshot(collection(db, "users"), snap => {
+      const sorted = snap.docs
+        .map(d => ({ uid: d.id, ...d.data() }))
+        .sort((a: any, b: any) => (b.createdAt?.seconds ?? 0) - (a.createdAt?.seconds ?? 0));
+      setUsers(sorted);
+    }, err => console.error("users snapshot:", err));
+
+    const u2 = onSnapshot(collection(db, "payments"), snap => {
+      const sorted = snap.docs
+        .map(d => ({ id: d.id, ...d.data() }))
+        .sort((a: any, b: any) => (b.submittedAt?.seconds ?? 0) - (a.submittedAt?.seconds ?? 0));
+      setPayments(sorted);
+    }, err => console.error("payments snapshot:", err));
+
+    const u3 = onSnapshot(collection(db, "withdrawals"), snap => {
+      const sorted = snap.docs
+        .map(d => ({ id: d.id, ...d.data() }))
+        .sort((a: any, b: any) => (b.requestedAt?.seconds ?? 0) - (a.requestedAt?.seconds ?? 0));
+      setWithdrawals(sorted);
+    }, err => console.error("withdrawals snapshot:", err));
+
     unsubRefs.current = [u1, u2, u3];
   }
 

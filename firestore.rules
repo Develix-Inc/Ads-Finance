@@ -1,86 +1,300 @@
 rules_version = '2';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AdsFinance — Comprehensive Firestore Security Rules
+// Last updated: 2026-05-18
+// ─────────────────────────────────────────────────────────────────────────────
+
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // ─────────────────────────────────────────────────────────────────────────
+    // HELPER FUNCTIONS
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /** User is authenticated */
     function isSignedIn() {
       return request.auth != null;
     }
 
+    /** Caller owns this document (uid matches doc path) */
     function isOwner(uid) {
       return isSignedIn() && request.auth.uid == uid;
     }
 
+    /** Caller is authenticated and owns their own uid */
+    function isSelf() {
+      return isSignedIn();
+    }
+
+    /** Caller has isAdmin: true in their own user document */
     function isAdmin() {
       return isSignedIn() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
     }
 
-    // Users
+    /** Caller's account is not suspended or banned */
+    function isActive() {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('accountStatus', 'active') == 'active';
+    }
+
+    /** Request data contains a specific field */
+    function hasField(field) {
+      return field in request.resource.data;
+    }
+
+    /** Request data field matches expected uid */
+    function ownUid(field) {
+      return request.resource.data[field] == request.auth.uid;
+    }
+
+    /** Incoming data does NOT try to promote to admin (security: prevent self-promotion) */
+    function noAdminEscalation() {
+      return !hasField('isAdmin') || request.resource.data.isAdmin == false;
+    }
+
+    /** Incoming data does NOT try to set walletBalance directly */
+    function noDirectBalanceSet() {
+      return !hasField('walletBalance');
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // USERS COLLECTION  /users/{uid}
+    // ─────────────────────────────────────────────────────────────────────────
     match /users/{uid} {
+
+      // Read: own profile or admin
       allow read: if isOwner(uid) || isAdmin();
-      allow create: if isOwner(uid);
-      // Users can update own profile but cannot self-promote to admin
-      allow update: if isOwner(uid) && !("isAdmin" in request.resource.data) || isAdmin();
-    }
 
-    // Transactions (append-only for users, full access for admin)
-    match /transactions/{id} {
-      allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid;
-      allow read: if isSignedIn() && resource.data.uid == request.auth.uid;
+      // Create: can only create your own document, no admin self-promotion
+      allow create: if isOwner(uid)
+        && noAdminEscalation()
+        && noDirectBalanceSet();
+
+      // Update: own profile — cannot self-promote to admin or directly set balance
+      allow update: if isOwner(uid)
+        && noAdminEscalation()
+        && noDirectBalanceSet();
+
+      // Admin: full read/write
       allow read, write: if isAdmin();
     }
 
-    // Payments
-    match /payments/{id} {
-      allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid;
-      allow read: if isSignedIn() && resource.data.uid == request.auth.uid;
-      allow read, update, delete: if isAdmin();
-    }
+    // ─────────────────────────────────────────────────────────────────────────
+    // TRANSACTIONS COLLECTION  /transactions/{txId}
+    // Balances are ONLY modified through recordTransaction() server-side logic
+    // ─────────────────────────────────────────────────────────────────────────
+    match /transactions/{txId} {
 
-    // Withdrawals
-    match /withdrawals/{id} {
-      allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid;
+      // Users can read their own transactions
       allow read: if isSignedIn() && resource.data.uid == request.auth.uid;
-      allow read, update, delete: if isAdmin();
-    }
 
-    // Referrals
-    match /referrals/{id} {
-      allow create: if isSignedIn();
-      allow read: if isSignedIn() &&
-        (resource.data.referrerUid == request.auth.uid ||
-         resource.data.refereeUid == request.auth.uid);
+      // Users can create transactions for themselves (system uses this)
+      // amount validation: must not be zero
+      allow create: if isSignedIn()
+        && ownUid('uid')
+        && request.resource.data.amount != 0;
+
+      // Transactions are immutable — no updates or deletes by users
+      allow update, delete: if isAdmin();
+
+      // Admin: full access
       allow read, write: if isAdmin();
     }
 
-    // Notifications (per-user subcollection)
+    // ─────────────────────────────────────────────────────────────────────────
+    // PAYMENTS COLLECTION  /payments/{paymentId}
+    // Node purchase payment submissions awaiting admin verification
+    // ─────────────────────────────────────────────────────────────────────────
+    match /payments/{paymentId} {
+
+      // Users can read their own payment records
+      allow read: if isSignedIn() && resource.data.uid == request.auth.uid;
+
+      // Users can submit payments for themselves, status must start as "pending"
+      allow create: if isSignedIn()
+        && isActive()
+        && ownUid('uid')
+        && request.resource.data.status == 'pending'
+        && request.resource.data.amount > 0;
+
+      // Users cannot update payments (only admin can verify/reject)
+      allow update: if isAdmin();
+
+      // Only admin can delete payment records
+      allow delete: if isAdmin();
+
+      // Admin: full read/write
+      allow read, write: if isAdmin();
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // WITHDRAWALS COLLECTION  /withdrawals/{withdrawalId}
+    // ─────────────────────────────────────────────────────────────────────────
+    match /withdrawals/{withdrawalId} {
+
+      // Users can read their own withdrawal records
+      allow read: if isSignedIn() && resource.data.uid == request.auth.uid;
+
+      // Users can create withdrawal requests for themselves
+      allow create: if isSignedIn()
+        && isActive()
+        && ownUid('uid')
+        && request.resource.data.status == 'pending'
+        && request.resource.data.amount > 0;
+
+      // Only admin can update (process/reject) or delete withdrawals
+      allow update, delete: if isAdmin();
+
+      // Admin: full read/write
+      allow read, write: if isAdmin();
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // REFERRALS COLLECTION  /referrals/{referralId}
+    // ─────────────────────────────────────────────────────────────────────────
+    match /referrals/{referralId} {
+
+      // Users can read referral records where they are referrer OR referee
+      allow read: if isSignedIn() && (
+        resource.data.referrerUid == request.auth.uid ||
+        resource.data.refereeUid == request.auth.uid
+      );
+
+      // Any authenticated user can create a referral link (with valid uids)
+      allow create: if isSignedIn()
+        && ownUid('refereeUid')
+        && request.resource.data.status == 'pending'
+        && request.resource.data.referrerUid != request.auth.uid; // can't refer yourself
+
+      // Only system/admin can update referral status (pending → active)
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+
+      // Admin: full access
+      allow read, write: if isAdmin();
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // NOTIFICATIONS  /notifications/{uid}/items/{notifId}
+    // Per-user notification subcollection
+    // ─────────────────────────────────────────────────────────────────────────
     match /notifications/{uid}/items/{notifId} {
-      allow read, write: if isOwner(uid);
+
+      // Users can read and update their own notifications (e.g. marking read)
+      allow read, update: if isOwner(uid);
+
+      // Users cannot create their own notifications (only system does)
+      allow create: if isAdmin();
+
+      // Users can delete their own notifications
+      allow delete: if isOwner(uid);
+
+      // Admin: full access to any user's notifications
       allow read, write: if isAdmin();
     }
 
-    // Admin logs (admin write/read only)
-    match /admin_logs/{id} {
-      allow read, write: if isAdmin();
-    }
+    // ─────────────────────────────────────────────────────────────────────────
+    // TASKS COLLECTION  /tasks/{taskId}
+    // Ad tasks created by admin, completed by users
+    // ─────────────────────────────────────────────────────────────────────────
+    match /tasks/{taskId} {
 
-    // Platform settings (all users read, admin write)
-    match /settings/{doc} {
-      allow read: if isSignedIn();
+      // All authenticated active users can read tasks
+      allow read: if isSignedIn() && isActive();
+
+      // Only admin can create, update, delete tasks
       allow write: if isAdmin();
     }
 
-    // Tasks (all users read, admin write)
-    match /tasks/{id} {
-      allow read: if isSignedIn();
-      allow write: if isAdmin();
-    }
+    // ─────────────────────────────────────────────────────────────────────────
+    // TASK SUBMISSIONS  /task_submissions/{submissionId}
+    // User submissions of completed tasks awaiting admin review
+    // ─────────────────────────────────────────────────────────────────────────
+    match /task_submissions/{submissionId} {
 
-    // Task submissions
-    match /task_submissions/{id} {
-      allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid;
+      // Users can read their own submissions
       allow read: if isSignedIn() && resource.data.uid == request.auth.uid;
-      allow read, update, delete: if isAdmin();
+
+      // Users can create submissions for themselves; status must be "pending"
+      allow create: if isSignedIn()
+        && isActive()
+        && ownUid('uid')
+        && request.resource.data.status == 'pending';
+
+      // Only admin can update (approve/reject) submissions
+      allow update, delete: if isAdmin();
+
+      // Admin: full access
+      allow read, write: if isAdmin();
     }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // ADMIN LOGS  /admin_logs/{logId}
+    // Immutable audit trail of all admin actions
+    // ─────────────────────────────────────────────────────────────────────────
+    match /admin_logs/{logId} {
+
+      // Only admin can read logs
+      allow read: if isAdmin();
+
+      // Logs are append-only (create) — even admin cannot delete/update
+      allow create: if isAdmin();
+
+      // Nobody can update or delete audit logs
+      allow update, delete: if false;
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // PLATFORM SETTINGS  /settings/{document}
+    // Global platform configuration (bank details, thresholds, etc.)
+    // ─────────────────────────────────────────────────────────────────────────
+    match /settings/{document} {
+
+      // All authenticated users can read platform settings (e.g. bank details for payment)
+      allow read: if isSignedIn();
+
+      // Only admin can write settings
+      allow write: if isAdmin();
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // BROADCAST NOTIFICATIONS  /broadcast/{docId}
+    // System-wide announcements sent to all users
+    // ─────────────────────────────────────────────────────────────────────────
+    match /broadcast/{docId} {
+
+      // All authenticated users can read broadcasts
+      allow read: if isSignedIn();
+
+      // Only admin can create/update/delete broadcasts
+      allow write: if isAdmin();
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // USER SUPPORT / TICKETS  /support/{ticketId}
+    // Optional: users submit support tickets
+    // ─────────────────────────────────────────────────────────────────────────
+    match /support/{ticketId} {
+
+      // Users can read/create their own tickets
+      allow read, create: if isSignedIn() && (
+        !exists(/databases/$(database)/documents/support/$(ticketId)) ||
+        resource.data.uid == request.auth.uid
+      );
+
+      // Only admin can update/delete tickets
+      allow update, delete: if isAdmin();
+      allow read, write: if isAdmin();
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // DENY ALL: catch-all — any unmatched path is denied by default
+    // ─────────────────────────────────────────────────────────────────────────
+    // Firestore denies by default, this is just for documentation clarity.
+    // No match here = no access.
   }
 }

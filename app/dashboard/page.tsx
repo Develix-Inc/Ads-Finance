@@ -395,15 +395,15 @@ export default function DashboardPage() {
       </main>
 
       {/* MOBILE BOTTOM NAV */}
-      <nav className={`md:hidden fixed bottom-0 left-0 right-0 z-50 border-t ${darkMode ? "border-white/10 bg-slate-950/95" : "border-slate-200 bg-white/95"} backdrop-blur-xl`}>
-        <div className="flex items-center justify-around h-16 px-2">
+      <nav className={`md:hidden fixed bottom-0 left-0 right-0 z-50 border-t ${darkMode ? "border-white/10 bg-slate-950/98" : "border-slate-200 bg-white/98"} backdrop-blur-xl safe-area-bottom`}>
+        <div className="grid grid-cols-5 h-16">
           {NAV.slice(0, 5).map((item, i) => {
             const active = item.href === "/dashboard";
             return (
               <Link key={i} href={item.href}
-                className={`flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all ${active ? "text-teal-400" : darkMode ? "text-slate-500" : "text-slate-400"}`}>
-                <item.icon className="w-5 h-5" />
-                <span className="text-[9px] font-bold uppercase tracking-wide">{item.label.split(" ")[0]}</span>
+                className={`flex flex-col items-center justify-center gap-1 transition-all active:scale-95 ${active ? "text-teal-400" : darkMode ? "text-slate-500 hover:text-slate-300" : "text-slate-400 hover:text-slate-600"}`}>
+                <item.icon className="w-[18px] h-[18px]" />
+                <span className="text-[9px] font-bold uppercase tracking-wide leading-none">{item.label.split(" ")[0]}</span>
               </Link>
             );
           })}
