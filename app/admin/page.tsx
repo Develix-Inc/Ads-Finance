@@ -44,14 +44,24 @@ export default function AdminDashboard() {
   const [editBal, setEditBal]   = useState("");
 
   const load = useCallback(async () => {
-    const [u, p, w] = await Promise.all([adminGetAllUsers(), adminGetAllPayments(), adminGetWithdrawals()]);
-    setUsers(u); setPayments(p); setWithdrawals(w);
+    try {
+      const [u, p, w] = await Promise.all([adminGetAllUsers(), adminGetAllPayments(), adminGetWithdrawals()]);
+      setUsers(u); setPayments(p); setWithdrawals(w);
+    } catch (e) {
+      console.error("Admin load error:", e);
+    }
   }, []);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async u => {
-      if (!u || !ADMIN_EMAILS.includes(u.email ?? "")) {
-        router.push("/dashboard"); return;
+      if (!u) { router.push("/dashboard"); return; }
+      // case-insensitive email check + Firestore isAdmin fallback
+      const email = (u.email ?? "").toLowerCase();
+      const isEmailAdmin = ADMIN_EMAILS.map(e => e.toLowerCase()).includes(email);
+      if (!isEmailAdmin) {
+        // check Firestore isAdmin field as fallback
+        const profile = await getUserProfile(u.uid);
+        if (!profile?.isAdmin) { router.push("/dashboard"); return; }
       }
       setAdmin(u);
       await load();

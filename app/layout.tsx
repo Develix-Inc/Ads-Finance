@@ -2,8 +2,27 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "AdsFinance | ADS. GROWTH. FINANCIAL FREEDOM.",
-  description: "The institutional-grade digital engagement network. Purchase a Validator License and earn up to 600% ROI.",
+  title: "AdsFinance | Ads. Growth. Financial Freedom.",
+  description: "The institutional-grade digital engagement network. Purchase a Validator License and earn up to 600% ROI through verified ad tasks.",
+  icons: {
+    icon: [
+      { url: "/logo-transparent.png", type: "image/png" },
+    ],
+    apple: "/logo-transparent.png",
+    shortcut: "/logo-transparent.png",
+  },
+  openGraph: {
+    title: "AdsFinance | Ads. Growth. Financial Freedom.",
+    description: "Purchase a Validator Node License and earn passive income through verified digital ad engagement tasks.",
+    images: [{ url: "/logo-transparent.png", width: 512, height: 512, alt: "AdsFinance Logo" }],
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "AdsFinance",
+    description: "Earn passive income through verified ad engagement. Join AdsFinance today.",
+    images: ["/logo-transparent.png"],
+  },
 };
 
 export default function RootLayout({
@@ -24,3 +43,4 @@ export default function RootLayout({
     </html>
   );
 }
+

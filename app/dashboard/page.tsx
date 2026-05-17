@@ -198,7 +198,7 @@ export default function DashboardPage() {
             <img src="/logo-transparent.png" alt="AdsFinance" className="w-8 h-8 object-contain" onError={e => { (e.target as any).style.display = "none"; }} />
             <span className="font-black text-base tracking-tight">AdsFinance</span>
           </div>
-          <h1 className="hidden md:block text-xl font-black tracking-tight">Command Center</h1>
+          <h1 className="hidden md:block text-xl font-black tracking-tight">My Dashboard</h1>
 
           <div className="flex items-center gap-2">
             {nodePending && (
