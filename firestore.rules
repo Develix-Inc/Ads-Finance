@@ -22,10 +22,7 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == uid;
     }
 
-    /** Caller is authenticated and owns their own uid */
-    function isSelf() {
-      return isSignedIn();
-    }
+
 
     /** Caller has isAdmin: true in their own user document */
     function isAdmin() {
