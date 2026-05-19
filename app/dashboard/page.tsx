@@ -80,10 +80,18 @@ export default function DashboardPage() {
     const unsub = onAuthStateChanged(auth, async u => {
       if (!u) { router.push("/login"); return; }
       setUser(u);
+      // Fast localStorage check first — avoids flash of onboarding for returning users
+      const localDone = localStorage.getItem(`onboarding_${u.uid}`) === "done";
       const p = await getUserProfile(u.uid);
-      if (!p || !p.onboardingComplete) { setShowOnboarding(true); }
       setProfile(p);
       setBalance(p?.walletBalance ?? 0);
+      // Show onboarding only if Firestore AND localStorage both confirm it's needed
+      if (!localDone && (!p || !p.onboardingComplete)) {
+        setShowOnboarding(true);
+      } else if (p?.onboardingComplete) {
+        // Sync localStorage in case it was cleared
+        localStorage.setItem(`onboarding_${u.uid}`, "done");
+      }
       setLoading(false);
     });
     return unsub;

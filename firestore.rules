@@ -200,6 +200,17 @@ service cloud.firestore {
     }
 
     // ─────────────────────────────────────────────────────────────────────────
+    // AD REWARDS  /ad_rewards/{uid}
+    // Daily ad-watching tracking: earnings, watched video IDs, daily reset
+    // ─────────────────────────────────────────────────────────────────────────
+    match /ad_rewards/{uid} {
+      // Users can read and write ONLY their own doc
+      allow read, write: if isOwner(uid);
+      // Admin can read/write all
+      allow read, write: if isAdmin();
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
     // TASKS COLLECTION  /tasks/{taskId}
     // Ad tasks created by admin, completed by users
     // ─────────────────────────────────────────────────────────────────────────

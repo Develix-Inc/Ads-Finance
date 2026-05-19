@@ -29,13 +29,18 @@ export async function processReferralSignup(newUid: string, referralCode: string
   const existSnap = await getDocs(existQ);
   if (!existSnap.empty) return; // already linked
 
+  // fetch referee profile for display
+  const refSnap = await getDocs(query(collection(db, "users"), where("uid", "==", newUid)));
+  const refereeEmail = refSnap.docs[0]?.data()?.email || "";
+
   await addDoc(collection(db, "referrals"), {
     referrerUid,
-    refereeUid:  newUid,
-    status:      "pending",
-    commission:  REFERRAL_COMMISSION,
-    createdAt:   serverTimestamp(),
-    paidAt:      null,
+    refereeUid:    newUid,
+    refereeEmail,
+    status:        "pending",
+    commission:    REFERRAL_COMMISSION,
+    createdAt:     serverTimestamp(),
+    paidAt:        null,
   });
 }
 

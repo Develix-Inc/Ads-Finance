@@ -178,6 +178,8 @@ export function OnboardingWizard({ uid, userEmail, onComplete }: Props) {
         await processReferralSignup(uid, pendingRef);
         localStorage.removeItem("pendingRef");
       }
+      // Mark onboarding done locally so next login is instant
+      localStorage.setItem(`onboarding_${uid}`, "done");
     } catch (e) {
       console.error("Firestore save error", e);
     }
