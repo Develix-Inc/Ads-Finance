@@ -311,6 +311,7 @@ export default function TasksPage() {
 
   const [uid,         setUid]         = useState("");
   const [loading,     setLoading]     = useState(true);
+  const [loadError,   setLoadError]   = useState(false);
   const [rewardData,  setRewardData]  = useState<AdRewardData | null>(null);
   const [videos,      setVideos]      = useState<VideoItem[]>([]);
   const [activeVideo, setActiveVideo] = useState<VideoItem | null>(null);
@@ -322,12 +323,18 @@ export default function TasksPage() {
       try {
         const [data, todayVids] = await Promise.all([
           getAdRewardData(u.uid),
-          Promise.resolve(getTodayVideos()),
+          getTodayVideos(),          // now async — reads Firestore first, static fallback
         ]);
         setRewardData(data);
-        setVideos(todayVids);
+        // CRITICAL: only set videos if we actually got some back
+        if (todayVids.length > 0) {
+          setVideos(todayVids);
+        } else {
+          setLoadError(true);
+        }
       } catch (e) {
         console.error(e);
+        setLoadError(true);
       } finally {
         setLoading(false);
       }
@@ -475,12 +482,21 @@ export default function TasksPage() {
           ))}
         </div>
 
-        {/* Watched all */}
-        {watched.length === videos.length && (
+        {/* Watched all — ONLY show if videos actually loaded AND all are watched */}
+        {videos.length > 0 && watched.length >= videos.length && (
           <div className="bg-teal-500/10 border border-teal-500/20 rounded-[20px] p-6 text-center">
             <FaCircleCheck className="w-8 h-8 text-teal-400 mx-auto mb-2" />
             <p className="font-black text-white text-base">All videos watched!</p>
             <p className="text-slate-400 text-sm mt-1">New videos available tomorrow. Check back at midnight.</p>
+          </div>
+        )}
+
+        {/* Error loading videos */}
+        {loadError && (
+          <div className="bg-rose-500/10 border border-rose-500/20 rounded-[20px] p-6 text-center">
+            <FaTriangleExclamation className="w-8 h-8 text-rose-400 mx-auto mb-2" />
+            <p className="font-black text-white text-base">Couldn't load today's videos</p>
+            <p className="text-slate-400 text-sm mt-1">Please refresh the page to try again.</p>
           </div>
         )}
       </div>

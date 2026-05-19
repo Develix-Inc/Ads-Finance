@@ -29,7 +29,7 @@ service cloud.firestore {
       return isSignedIn() && (
         // Hardcoded admin emails — always have access regardless of Firestore field
         request.auth.token.email == 'info.vendrainc@gmail.com' ||
-        request.auth.token.email == 'admin@adsfinance.com' ||
+        request.auth.token.email == 'admin@adsfinanccom' ||
         // OR has isAdmin:true set in their Firestore profile
         (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('isAdmin', false) == true)
@@ -201,13 +201,22 @@ service cloud.firestore {
 
     // ─────────────────────────────────────────────────────────────────────────
     // AD REWARDS  /ad_rewards/{uid}
-    // Daily ad-watching tracking: earnings, watched video IDs, daily reset
+    // Daily ad watch tracking per user — dailyEarnings, watchedToday, reset
     // ─────────────────────────────────────────────────────────────────────────
     match /ad_rewards/{uid} {
-      // Users can read and write ONLY their own doc
       allow read, write: if isOwner(uid);
-      // Admin can read/write all
       allow read, write: if isAdmin();
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // DAILY VIDEOS  /daily_videos/{date}
+    // Auto-fetched YouTube video feed populated by the cron job
+    // ─────────────────────────────────────────────────────────────────────────
+    match /daily_videos/{date} {
+      // All authenticated users can read today's video feed
+      allow read: if isSignedIn();
+      // Only admin (and the cron via API key) can write
+      allow write: if isAdmin();
     }
 
     // ─────────────────────────────────────────────────────────────────────────

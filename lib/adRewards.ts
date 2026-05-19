@@ -53,18 +53,32 @@ export const VIDEO_POOL: VideoItem[] = [
 ];
 
 
-// ─── Daily video rotation (7 videos/day, changes every day) ────────────────
-export function getTodayVideos(): VideoItem[] {
-  const today     = new Date();
-  const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / 86_400_000);
+// ─── Today's date string (YYYY-MM-DD in WAT/UTC+1) ──────────────────────────
+export function todayStr(): string {
+  return new Date(Date.now() + 3600_000).toISOString().split("T")[0]; // WAT = UTC+1
+}
+
+// ─── Static fallback rotation (7 videos/day from pool) ───────────────────────
+export function getStaticTodayVideos(): VideoItem[] {
+  const dayOfYear = Math.floor((Date.now() + 3600_000) / 86_400_000); // WAT days since epoch
   const start     = (dayOfYear * 7) % VIDEO_POOL.length;
-  const pool      = [...VIDEO_POOL, ...VIDEO_POOL]; // double to handle wraparound
+  const pool      = [...VIDEO_POOL, ...VIDEO_POOL];
   return pool.slice(start, start + 7);
 }
 
-// ─── Today's date string (YYYY-MM-DD) ────────────────────────────────────────
-export function todayStr(): string {
-  return new Date().toISOString().split("T")[0];
+// ─── Primary: read from Firestore daily_videos (filled by YouTube API cron) ──
+export async function getTodayVideos(): Promise<VideoItem[]> {
+  try {
+    const today = todayStr();
+    const snap  = await getDoc(doc(db, "daily_videos", today));
+    if (snap.exists()) {
+      const data = snap.data();
+      if (Array.isArray(data.videos) && data.videos.length > 0) {
+        return data.videos as VideoItem[];
+      }
+    }
+  } catch (_) { /* silent – fall through to static */ }
+  return getStaticTodayVideos();
 }
 
 // ─── Fetch (or initialise) the user's daily reward doc ───────────────────────
