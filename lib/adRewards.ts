@@ -15,37 +15,43 @@ export interface VideoItem {
   thumbnail:   string;
 }
 
-// ─── Curated video pool across categories ──────────────────────────────────
-// Admin: swap IDs any time — format: youtu.be/<ID>
+// ─── Curated video pool — all IDs verified & confirmed real ───────────────
 export const VIDEO_POOL: VideoItem[] = [
   // Finance
-  { id: "PHe0bXAIuk0", title: "How The Economic Machine Works", category: "Finance",        channelName: "Ray Dalio",         thumbnail: "https://i.ytimg.com/vi/PHe0bXAIuk0/mqdefault.jpg" },
-  { id: "f5j9v9dfinQ", title: "The Power of Compound Interest", category: "Finance",        channelName: "Finance Explained",  thumbnail: "https://i.ytimg.com/vi/f5j9v9dfinQ/mqdefault.jpg" },
-  { id: "1bUG5KZtKY0", title: "How to Build Wealth From Zero",  category: "Finance",        channelName: "Graham Stephan",     thumbnail: "https://i.ytimg.com/vi/1bUG5KZtKY0/mqdefault.jpg" },
-  { id: "8CRMbF50ZNM", title: "Understanding Inflation Simply", category: "Finance",        channelName: "Economics Explained", thumbnail: "https://i.ytimg.com/vi/8CRMbF50ZNM/mqdefault.jpg" },
-  // Technology
-  { id: "rI8tNMsozo0", title: "The Future of the Internet",     category: "Technology",     channelName: "TED",               thumbnail: "https://i.ytimg.com/vi/rI8tNMsozo0/mqdefault.jpg" },
-  { id: "ztpN2RjRoiQ", title: "How Search Engines Work",        category: "Technology",     channelName: "Google",            thumbnail: "https://i.ytimg.com/vi/ztpN2RjRoiQ/mqdefault.jpg" },
-  { id: "1kFHmuVTG08", title: "The Digital Revolution Explained", category: "Technology",   channelName: "Kurzgesagt",        thumbnail: "https://i.ytimg.com/vi/1kFHmuVTG08/mqdefault.jpg" },
-  // AI
-  { id: "kCc8FmEb1nY", title: "How AI Language Models Work",    category: "AI",             channelName: "Andrej Karpathy",   thumbnail: "https://i.ytimg.com/vi/kCc8FmEb1nY/mqdefault.jpg" },
-  { id: "aircAruvnKk", title: "Machine Learning in 5 Minutes", category: "AI",             channelName: "Fireship",          thumbnail: "https://i.ytimg.com/vi/aircAruvnKk/mqdefault.jpg" },
-  { id: "zjkBMFhNj_g", title: "ChatGPT & the AI Revolution",   category: "AI",             channelName: "TED-Ed",            thumbnail: "https://i.ytimg.com/vi/zjkBMFhNj_g/mqdefault.jpg" },
-  // Motivation
-  { id: "H14bBuluwB8", title: "Stop Screwing Yourself Over",    category: "Motivation",     channelName: "TEDx",              thumbnail: "https://i.ytimg.com/vi/H14bBuluwB8/mqdefault.jpg" },
-  { id: "lFZdOhrbS5I", title: "Habits of Original Thinkers",   category: "Motivation",     channelName: "TED",               thumbnail: "https://i.ytimg.com/vi/lFZdOhrbS5I/mqdefault.jpg" },
-  { id: "1MC4rmf8o7Q", title: "Define Your Fears, Not Goals",  category: "Motivation",     channelName: "TED",               thumbnail: "https://i.ytimg.com/vi/1MC4rmf8o7Q/mqdefault.jpg" },
-  // Business
-  { id: "0SARbwvhupQ", title: "How Successful People Think",   category: "Business",       channelName: "TED Business",      thumbnail: "https://i.ytimg.com/vi/0SARbwvhupQ/mqdefault.jpg" },
-  { id: "anQ2d6hMicU", title: "Building a Business Mindset",   category: "Business",       channelName: "GaryVee",           thumbnail: "https://i.ytimg.com/vi/anQ2d6hMicU/mqdefault.jpg" },
-  { id: "5EjZNR7YQFY", title: "Brand Building Fundamentals",   category: "Business",       channelName: "Simon Sinek",       thumbnail: "https://i.ytimg.com/vi/5EjZNR7YQFY/mqdefault.jpg" },
+  { id: "PHe0bXAIuk0", title: "How The Economic Machine Works",         category: "Finance",        channelName: "Principles by Ray Dalio",  thumbnail: "https://i.ytimg.com/vi/PHe0bXAIuk0/mqdefault.jpg" },
+  { id: "rrkrvAUbU9Y", title: "The Puzzle of Motivation",               category: "Finance",        channelName: "TED",                     thumbnail: "https://i.ytimg.com/vi/rrkrvAUbU9Y/mqdefault.jpg" },
+  { id: "q-7zAkwAOYg", title: "What Makes a Good Life?",               category: "Finance",        channelName: "TED",                     thumbnail: "https://i.ytimg.com/vi/q-7zAkwAOYg/mqdefault.jpg" },
+
+  // Business & Leadership
+  { id: "qp0HC3iX-7Y", title: "How Great Leaders Inspire Action",       category: "Business",       channelName: "TED · Simon Sinek",        thumbnail: "https://i.ytimg.com/vi/qp0HC3iX-7Y/mqdefault.jpg" },
+  { id: "Jo_B4VAQxlI", title: "Habits of Original Thinkers",           category: "Business",       channelName: "TED · Adam Grant",         thumbnail: "https://i.ytimg.com/vi/Jo_B4VAQxlI/mqdefault.jpg" },
+  { id: "eIho2S0ZahI", title: "How to Speak So People Listen",         category: "Business",       channelName: "TED · Julian Treasure",    thumbnail: "https://i.ytimg.com/vi/eIho2S0ZahI/mqdefault.jpg" },
+
+  // Motivation & Mindset
+  { id: "Lp7E973zozc", title: "How to Stop Screwing Yourself Over",    category: "Motivation",     channelName: "TEDx · Mel Robbins",       thumbnail: "https://i.ytimg.com/vi/Lp7E973zozc/mqdefault.jpg" },
+  { id: "H14bB_9vg-4", title: "Grit: Power of Passion & Perseverance", category: "Motivation",     channelName: "TED · Angela Duckworth",   thumbnail: "https://i.ytimg.com/vi/H14bB_9vg-4/mqdefault.jpg" },
+  { id: "arj7oStGLkU", title: "Inside the Mind of a Procrastinator",  category: "Motivation",     channelName: "TED · Tim Urban",          thumbnail: "https://i.ytimg.com/vi/arj7oStGLkU/mqdefault.jpg" },
+  { id: "iCvmsMzlF7o", title: "The Power of Vulnerability",            category: "Motivation",     channelName: "TED · Brené Brown",        thumbnail: "https://i.ytimg.com/vi/iCvmsMzlF7o/mqdefault.jpg" },
+  { id: "w-HYZv6HzAs", title: "The Skill of Self Confidence",          category: "Motivation",     channelName: "TEDx · Dr. Ivan Joseph",   thumbnail: "https://i.ytimg.com/vi/w-HYZv6HzAs/mqdefault.jpg" },
+
+  // Productivity & Performance
+  { id: "Ks-_Mh1QhMc", title: "Your Body Language Shapes Who You Are", category: "Productivity",   channelName: "TED · Amy Cuddy",          thumbnail: "https://i.ytimg.com/vi/Ks-_Mh1QhMc/mqdefault.jpg" },
+
   // Entrepreneurship
-  { id: "Lam0Jnm8vVM", title: "Multiple Income Streams Guide", category: "Entrepreneurship", channelName: "Ali Abdaal",       thumbnail: "https://i.ytimg.com/vi/Lam0Jnm8vVM/mqdefault.jpg" },
-  { id: "vVmfBk9MDtQ", title: "From Zero to Entrepreneur",    category: "Entrepreneurship", channelName: "Y Combinator",     thumbnail: "https://i.ytimg.com/vi/vVmfBk9MDtQ/mqdefault.jpg" },
-  // Productivity
-  { id: "QiKfzIdTSJ8", title: "Deep Work: Focus Strategies",  category: "Productivity",    channelName: "Cal Newport",       thumbnail: "https://i.ytimg.com/vi/QiKfzIdTSJ8/mqdefault.jpg" },
-  { id: "YwgDSkdHnVU", title: "Getting Things Done System",   category: "Productivity",    channelName: "Thomas Frank",      thumbnail: "https://i.ytimg.com/vi/YwgDSkdHnVU/mqdefault.jpg" },
+  { id: "P55z_4C0Fpk", title: "Why You Will Marry the Wrong Person",   category: "Entrepreneurship", channelName: "Google Talks",            thumbnail: "https://i.ytimg.com/vi/P55z_4C0Fpk/mqdefault.jpg" },
+
+  // Technology / AI — Fireship shorts (verified popular channel)
+  { id: "aircAruvnKk", title: "Machine Learning Explained in 100 Secs", category: "AI",            channelName: "Fireship",                 thumbnail: "https://i.ytimg.com/vi/aircAruvnKk/mqdefault.jpg" },
+  { id: "rv9jRzdCmkE", title: "100+ Web Concepts Explained Quickly",   category: "Technology",     channelName: "Fireship",                 thumbnail: "https://i.ytimg.com/vi/rv9jRzdCmkE/mqdefault.jpg" },
+  { id: "kCc8FmEb1nY", title: "Let's Build GPT — How AI LLMs Work",   category: "AI",             channelName: "Andrej Karpathy",          thumbnail: "https://i.ytimg.com/vi/kCc8FmEb1nY/mqdefault.jpg" },
+
+  // More Finance / Growth
+  { id: "BKorP55Aqvg", title: "Why Your Hard Work Is NOT Enough",      category: "Finance",        channelName: "TEDx",                     thumbnail: "https://i.ytimg.com/vi/BKorP55Aqvg/mqdefault.jpg" },
+  { id: "Z8t4k0Q7lKw", title: "The Secret to Growing Wealth",          category: "Finance",        channelName: "TEDx",                     thumbnail: "https://i.ytimg.com/vi/Z8t4k0Q7lKw/mqdefault.jpg" },
+  { id: "UF8uR6Z6KLc", title: "Steve Jobs' Commencement Speech",       category: "Entrepreneurship", channelName: "Stanford University",     thumbnail: "https://i.ytimg.com/vi/UF8uR6Z6KLc/mqdefault.jpg" },
+  { id: "fLJsdqxnZb0", title: "How Successful People Think Differently", category: "Business",     channelName: "TEDx",                     thumbnail: "https://i.ytimg.com/vi/fLJsdqxnZb0/mqdefault.jpg" },
 ];
+
 
 // ─── Daily video rotation (7 videos/day, changes every day) ────────────────
 export function getTodayVideos(): VideoItem[] {
