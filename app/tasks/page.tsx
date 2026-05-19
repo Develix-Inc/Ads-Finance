@@ -312,7 +312,6 @@ export default function TasksPage() {
   const [uid,         setUid]         = useState("");
   const [loading,     setLoading]     = useState(true);
   const [loadError,   setLoadError]   = useState(false);
-  const [rulesError,  setRulesError]  = useState(false);
   const [rewardData,  setRewardData]  = useState<AdRewardData | null>(null);
   const [videos,      setVideos]      = useState<VideoItem[]>([]);
   const [activeVideo, setActiveVideo] = useState<VideoItem | null>(null);
@@ -335,12 +334,7 @@ export default function TasksPage() {
         }
       } catch (e: any) {
         console.error("Tasks page load error:", e);
-        const errMsg = e?.message || String(e);
-        if (errMsg.toLowerCase().includes("permission") || e?.code === "permission-denied") {
-          setRulesError(true);
-        } else {
-          setLoadError(true);
-        }
+        setLoadError(true);
       } finally {
         setLoading(false);
       }
@@ -502,34 +496,7 @@ export default function TasksPage() {
           <div className="bg-rose-500/10 border border-rose-500/20 rounded-[20px] p-6 text-center">
             <FaTriangleExclamation className="w-8 h-8 text-rose-400 mx-auto mb-2" />
             <p className="font-black text-white text-base">Couldn't load today's videos</p>
-            <p className="text-slate-400 text-sm mt-1">Please refresh the page to try again.</p>
-          </div>
-        )}
-
-        {/* Firestore Rules Deployment Error */}
-        {rulesError && (
-          <div className="bg-amber-500/10 border border-amber-500/20 rounded-[22px] p-6 space-y-4">
-            <div className="flex items-center gap-3 text-amber-400">
-              <FaShield className="w-8 h-8 shrink-0" />
-              <div>
-                <h3 className="font-black text-white text-base">Firestore Security Rules Required</h3>
-                <p className="text-xs text-slate-400">Firebase blocked the request due to missing collection rules.</p>
-              </div>
-            </div>
-            
-            <div className="bg-slate-950/60 rounded-xl p-4 border border-white/5 space-y-2.5 text-xs text-slate-300">
-              <p className="font-semibold text-amber-300">To resolve this error instantly:</p>
-              <ol className="list-decimal list-inside space-y-1.5 leading-relaxed">
-                <li>Open your Firebase Console.</li>
-                <li>Navigate to <strong className="text-white">Firestore Database</strong> → <strong className="text-white">Rules</strong> tab.</li>
-                <li>Copy the content of your local <strong className="text-teal-400">firestore.rules</strong> file.</li>
-                <li>Paste it into the Firebase console editor and click <strong className="text-white">Publish</strong>.</li>
-              </ol>
-            </div>
-
-            <p className="text-[11px] text-slate-500 italic">
-              * The new "ad_rewards" and "daily_videos" collections require permission authorization rules before queries are permitted.
-            </p>
+            <p className="text-slate-400 text-sm mt-1">Please try again later or contact support.</p>
           </div>
         )}
       </div>
