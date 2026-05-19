@@ -8,6 +8,7 @@ declare global {
 import React, { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { auth, googleProvider } from "@/lib/firebase";
+import { getUserProfile, upsertUserProfile } from "@/lib/admin";
 import { signInWithPopup, RecaptchaVerifier, signInWithPhoneNumber, onAuthStateChanged } from "firebase/auth";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
@@ -56,7 +57,36 @@ function LoginInner() {
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
     try {
-      await signInWithPopup(auth, googleProvider);
+      const cred = await signInWithPopup(auth, googleProvider);
+      const u = cred.user;
+
+      // Auto-create/sync Firestore profile immediately on sign in so there is absolutely no lag!
+      const p = await getUserProfile(u.uid);
+      if (!p) {
+        const defaultName = u.displayName || u.email?.split("@")[0] || "User";
+        const placeholderReferralCode = u.uid.slice(0, 6).toUpperCase();
+        await upsertUserProfile(u.uid, {
+          email: u.email || "",
+          displayName: defaultName,
+          photoURL: u.photoURL || "",
+          investmentGoal: "passive_income",
+          riskLevel: "moderate",
+          bankName: "Pending Setup",
+          accountNumber: "0000000000",
+          accountName: "Pending Setup",
+          onboardingComplete: false,
+          referralCode: placeholderReferralCode,
+          walletBalance: 0,
+          totalEarned: 0,
+          dailyTaskEarnings: 0,
+          salesCommission: 0,
+          nodeStatus: "none",
+          nodeTier: null,
+          accountStatus: "active",
+          createdAt: new Date().toISOString(),
+        });
+      }
+
       MySwal.fire({
         ...swalConfig,
         icon: 'success',

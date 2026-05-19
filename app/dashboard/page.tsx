@@ -6,7 +6,7 @@ import Link from "next/link";
 import { auth, db } from "@/lib/firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { doc, onSnapshot } from "firebase/firestore";
-import { getUserProfile, NODE_MULTIPLIERS, NODE_MIN_WITHDRAWAL } from "@/lib/admin";
+import { getUserProfile, upsertUserProfile, NODE_MULTIPLIERS, NODE_MIN_WITHDRAWAL } from "@/lib/admin";
 import { listenTransactions } from "@/lib/transactions";
 import { OnboardingWizard } from "@/components/ui/OnboardingWizard";
 import { WithdrawModal } from "@/components/ui/WithdrawModal";
@@ -82,7 +82,36 @@ export default function DashboardPage() {
       setUser(u);
       // Fast localStorage check first — avoids flash of onboarding for returning users
       const localDone = localStorage.getItem(`onboarding_${u.uid}`) === "done";
-      const p = await getUserProfile(u.uid);
+      let p = await getUserProfile(u.uid);
+
+      if (!p) {
+        // Auto-heal missing Firestore profile doc to ensure Auth & Firestore sync immediately!
+        const defaultName = u.displayName || u.email?.split("@")[0] || "User";
+        const placeholderReferralCode = u.uid.slice(0, 6).toUpperCase();
+        const fallbackProfile = {
+          email: u.email || "",
+          displayName: defaultName,
+          photoURL: u.photoURL || "",
+          investmentGoal: "passive_income",
+          riskLevel: "moderate",
+          bankName: "Pending Setup",
+          accountNumber: "0000000000",
+          accountName: "Pending Setup",
+          onboardingComplete: false,
+          referralCode: placeholderReferralCode,
+          walletBalance: 0,
+          totalEarned: 0,
+          dailyTaskEarnings: 0,
+          salesCommission: 0,
+          nodeStatus: "none",
+          nodeTier: null,
+          accountStatus: "active",
+          createdAt: new Date().toISOString(),
+        };
+        await upsertUserProfile(u.uid, fallbackProfile);
+        p = { uid: u.uid, ...fallbackProfile };
+      }
+
       setProfile(p);
       setBalance(p?.walletBalance ?? 0);
       // Show onboarding only if Firestore AND localStorage both confirm it's needed
