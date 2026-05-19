@@ -252,7 +252,11 @@ export default function DashboardPage() {
                 <p className={`text-sm ${sub}`}>Welcome back</p>
                 <h2 className="text-2xl md:text-3xl font-black tracking-tight capitalize">{name}</h2>
               </div>
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-teal-600 to-slate-800 flex items-center justify-center font-black text-white text-xl shadow-lg">{avatar}</div>
+              {profile?.photoURL || user?.photoURL ? (
+                <img src={profile?.photoURL || user?.photoURL} alt={name} className="w-12 h-12 rounded-full object-cover border-2 border-teal-500/30 shadow-lg" />
+              ) : (
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-teal-600 to-slate-800 flex items-center justify-center font-black text-white text-xl shadow-lg">{avatar}</div>
+              )}
             </div>
 
             {/* WALLET CARD */}

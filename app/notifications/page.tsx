@@ -5,8 +5,8 @@ import Link from "next/link";
 import { auth, db } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { doc, onSnapshot } from "firebase/firestore";
-import { listenNotifications, markAllRead, markRead, type Notification } from "@/lib/notifications";
-import { FaBell, FaCheckDouble, FaArrowLeft, FaCircleInfo, FaCircleCheck, FaTriangleExclamation, FaCircleXmark, FaCreditCard, FaArrowDown, FaBullseye } from "react-icons/fa6";
+import { listenNotifications, markAllRead, markRead, deleteNotification, type Notification } from "@/lib/notifications";
+import { FaBell, FaCheckDouble, FaArrowLeft, FaCircleInfo, FaCircleCheck, FaTriangleExclamation, FaCircleXmark, FaCreditCard, FaArrowDown, FaBullseye, FaTrashCan } from "react-icons/fa6";
 import { motion } from "framer-motion";
 
 const ICON: Record<string, any> = {
@@ -75,20 +75,33 @@ export default function NotificationsPage() {
           const color = COLOR[n.type] ?? COLOR.info;
           return (
             <motion.div key={n.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}
-              onClick={() => !n.read && markRead(uid, n.id)}
-              className={`flex items-start gap-4 p-5 rounded-[18px] border cursor-pointer transition-all ${n.read ? "bg-slate-900 border-white/10" : "bg-slate-900 border-teal-500/20 shadow-lg shadow-teal-500/5"}`}
+              className={`flex items-start gap-4 p-5 rounded-[18px] border relative group transition-all ${n.read ? "bg-slate-900 border-white/10" : "bg-slate-900 border-teal-500/20 shadow-lg shadow-teal-500/5"}`}
             >
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${color}`}>
-                <Icon className="w-5 h-5" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-start justify-between gap-2">
-                  <p className={`text-sm font-bold leading-tight ${n.read ? "text-slate-300" : "text-white"}`}>{n.title}</p>
-                  {!n.read && <span className="w-2 h-2 bg-teal-400 rounded-full shrink-0 mt-1.5" />}
+              <div onClick={() => !n.read && markRead(uid, n.id)} className="flex items-start gap-4 flex-1 min-w-0 cursor-pointer">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${color}`}>
+                  <Icon className="w-5 h-5" />
                 </div>
-                <p className="text-slate-400 text-xs mt-1 leading-relaxed">{n.body}</p>
-                <p className="text-slate-600 text-[11px] font-mono mt-2">{ts(n.createdAt)}</p>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-2">
+                    <p className={`text-sm font-bold leading-tight ${n.read ? "text-slate-300" : "text-white"}`}>{n.title}</p>
+                    {!n.read && <span className="w-2 h-2 bg-teal-400 rounded-full shrink-0 mt-1.5" />}
+                  </div>
+                  <p className="text-slate-400 text-xs mt-1 leading-relaxed">{n.body}</p>
+                  <p className="text-slate-600 text-[11px] font-mono mt-2">{ts(n.createdAt)}</p>
+                </div>
               </div>
+
+              {/* Clear single notification button */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  deleteNotification(uid, n.id);
+                }}
+                title="Delete notification"
+                className="p-2 rounded-lg bg-white/0 hover:bg-white/5 hover:text-rose-400 border border-transparent hover:border-white/5 transition-all text-slate-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 self-center shrink-0"
+              >
+                <FaTrashCan className="w-4 h-4" />
+              </button>
             </motion.div>
           );
         })}

@@ -3,6 +3,7 @@
 import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
+import { auth } from "@/lib/firebase";
 import { upsertUserProfile } from "@/lib/admin";
 import { sendNotification } from "@/lib/notifications";
 import { generateReferralCode, processReferralSignup } from "@/lib/referrals";
@@ -146,9 +147,12 @@ export function OnboardingWizard({ uid, userEmail, onComplete }: Props) {
 
     /* ── Save to Firestore ── */
     try {
+      const currentUser = auth.currentUser;
       const referralCode = generateReferralCode(uid);
       await upsertUserProfile(uid, {
         email: userEmail,
+        displayName: currentUser?.displayName || userEmail.split("@")[0],
+        photoURL: currentUser?.photoURL || "",
         investmentGoal,
         riskLevel,
         bankName,

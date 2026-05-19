@@ -58,12 +58,12 @@ export function todayStr(): string {
   return new Date(Date.now() + 3600_000).toISOString().split("T")[0]; // WAT = UTC+1
 }
 
-// ─── Static fallback rotation (7 videos/day from pool) ───────────────────────
+// ─── Static fallback rotation (15 videos/day from pool) ───────────────────────
 export function getStaticTodayVideos(): VideoItem[] {
   const dayOfYear = Math.floor((Date.now() + 3600_000) / 86_400_000); // WAT days since epoch
-  const start     = (dayOfYear * 7) % VIDEO_POOL.length;
-  const pool      = [...VIDEO_POOL, ...VIDEO_POOL];
-  return pool.slice(start, start + 7);
+  const start     = (dayOfYear * 15) % VIDEO_POOL.length;
+  const pool      = [...VIDEO_POOL, ...VIDEO_POOL, ...VIDEO_POOL];
+  return pool.slice(start, start + 15);
 }
 
 // ─── Primary: read from Firestore daily_videos (filled by YouTube API cron) ──

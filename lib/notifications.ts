@@ -1,6 +1,6 @@
 import { db } from "./firebase";
 import {
-  collection, doc, addDoc, updateDoc, getDocs,
+  collection, doc, addDoc, updateDoc, getDocs, deleteDoc,
   query, where, orderBy, onSnapshot, serverTimestamp, writeBatch, limit
 } from "firebase/firestore";
 
@@ -90,4 +90,9 @@ export async function markAllRead(uid: string) {
   const batch = writeBatch(db);
   snap.docs.forEach(d => batch.update(d.ref, { read: true }));
   await batch.commit();
+}
+
+/** Delete/Clear a single notification */
+export async function deleteNotification(uid: string, notifId: string) {
+  await deleteDoc(doc(db, "notifications", uid, "items", notifId));
 }

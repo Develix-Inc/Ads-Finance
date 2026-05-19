@@ -1,15 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
 import { todayStr, VIDEO_POOL, VideoItem } from "@/lib/adRewards";
 
-// ─── Category search queries ──────────────────────────────────────────────────
+// ─── Category search queries (expanded to 20 unique queries to fetch 20 videos) ──
 const SEARCH_QUERIES = [
-  { q: "finance investing money tips",             category: "Finance" },
-  { q: "business leadership entrepreneurship",     category: "Business" },
-  { q: "motivation self improvement mindset",      category: "Motivation" },
-  { q: "artificial intelligence technology 2024",  category: "AI" },
-  { q: "startup entrepreneurship success",         category: "Entrepreneurship" },
-  { q: "productivity focus deep work habits",      category: "Productivity" },
-  { q: "financial freedom wealth building",        category: "Finance" },
+  { q: "finance investing money tips",                  category: "Finance" },
+  { q: "business leadership entrepreneurship",          category: "Business" },
+  { q: "motivation self improvement mindset",           category: "Motivation" },
+  { q: "artificial intelligence technology future",     category: "AI" },
+  { q: "startup entrepreneurship success",              category: "Entrepreneurship" },
+  { q: "productivity focus deep work habits",           category: "Productivity" },
+  { q: "financial freedom wealth building",             category: "Finance" },
+  { q: "steve jobs vision wisdom",                      category: "Entrepreneurship" },
+  { q: "principles for success ray dalio",             category: "Finance" },
+  { q: "simon sinek leadership inspiration",            category: "Business" },
+  { q: "mel robbins habits motivation",                 category: "Motivation" },
+  { q: "tim urban inside procrastinator",               category: "Productivity" },
+  { q: "angela duckworth grit power",                  category: "Productivity" },
+  { q: "warren buffett investing lessons",              category: "Finance" },
+  { q: "tony robbins wealth strategies",                category: "Motivation" },
+  { q: "rich dad poor dad robert kiyosaki",             category: "Finance" },
+  { q: "elon musk business vision advice",              category: "Business" },
+  { q: "naval ravikant how to get rich",                category: "Entrepreneurship" },
+  { q: "how algorithms rule the world tech",            category: "AI" },
+  { q: "james clear atomic habits productivity",        category: "Productivity" },
 ];
 
 const YT = "https://www.googleapis.com/youtube/v3";
@@ -102,7 +115,7 @@ export async function GET(req: NextRequest) {
       .filter(r => r.status === "fulfilled" && r.value)
       .map(r => (r as PromiseFulfilledResult<VideoItem>).value!);
 
-    if (videos.length < 3) {
+    if (videos.length < 5) {
       // Insufficient YouTube results — log and return error (static pool will be used by clients)
       console.error("YouTube API returned insufficient results:", videos.length);
       return NextResponse.json({ warning: "Too few results from YouTube API. Static pool will be used.", count: videos.length }, { status: 200 });

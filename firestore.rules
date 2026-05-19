@@ -58,10 +58,7 @@ service cloud.firestore {
       return !hasField('isAdmin') || request.resource.data.isAdmin == false;
     }
 
-    /** Incoming data does NOT try to set walletBalance directly */
-    function noDirectBalanceSet() {
-      return !hasField('walletBalance');
-    }
+
 
     // ─────────────────────────────────────────────────────────────────────────
     // USERS COLLECTION  /users/{uid}
@@ -73,13 +70,11 @@ service cloud.firestore {
 
       // Create: can only create your own document, no admin self-promotion
       allow create: if isOwner(uid)
-        && noAdminEscalation()
-        && noDirectBalanceSet();
+        && noAdminEscalation();
 
-      // Update: own profile — cannot self-promote to admin or directly set balance
+      // Update: own profile — cannot self-promote to admin
       allow update: if isOwner(uid)
-        && noAdminEscalation()
-        && noDirectBalanceSet();
+        && noAdminEscalation();
 
       // Admin: full read/write
       allow read, write: if isAdmin();

@@ -146,6 +146,22 @@ export default function SettingsPage() {
         {tab === "profile" && (
           <div className="bg-slate-900 border border-white/10 rounded-[22px] p-6 space-y-4">
             <h2 className="font-bold text-base">Profile Information</h2>
+            
+            {/* Avatar display */}
+            <div className="flex items-center gap-4 py-2 border-b border-white/5 pb-4">
+              {profile?.photoURL || user?.photoURL ? (
+                <img src={profile?.photoURL || user?.photoURL} alt={displayName} className="w-16 h-16 rounded-full object-cover border-2 border-teal-500/30 shadow-lg" />
+              ) : (
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-teal-600 to-slate-800 flex items-center justify-center font-black text-white text-2xl shadow-lg">
+                  {(displayName || "V")[0].toUpperCase()}
+                </div>
+              )}
+              <div>
+                <p className="text-sm font-bold text-white">{displayName || "Validator Node Owner"}</p>
+                <p className="text-xs text-slate-500">{user?.email || "No email"}</p>
+              </div>
+            </div>
+
             <div>
               <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">Display Name</label>
               <input value={displayName} onChange={e => setDisplayName(e.target.value)} placeholder="Your name"
