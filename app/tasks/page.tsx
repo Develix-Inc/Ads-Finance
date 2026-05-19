@@ -3,8 +3,9 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { auth } from "@/lib/firebase";
+import { auth, db } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
+import { doc, onSnapshot } from "firebase/firestore";
 import {
   getTodayVideos, getAdRewardData, claimAdReward,
   DAILY_AD_LIMIT, MIN_WATCH_SECS, VideoItem, AdRewardData
@@ -313,8 +314,29 @@ export default function TasksPage() {
   const [loading,     setLoading]     = useState(true);
   const [loadError,   setLoadError]   = useState(false);
   const [rewardData,  setRewardData]  = useState<AdRewardData | null>(null);
+  const [walletBalance, setWalletBalance] = useState(0);
   const [videos,      setVideos]      = useState<VideoItem[]>([]);
   const [activeVideo, setActiveVideo] = useState<VideoItem | null>(null);
+
+  // Real-time listener for ad rewards to ensure Today's stats update instantly
+  useEffect(() => {
+    if (!uid) return;
+    return onSnapshot(doc(db, "ad_rewards", uid), snap => {
+      if (snap.exists()) {
+        setRewardData(snap.data() as AdRewardData);
+      }
+    }, err => console.error("ad_rewards snapshot error:", err));
+  }, [uid]);
+
+  // Real-time listener for user wallet balance to ensure it updates instantly in the header
+  useEffect(() => {
+    if (!uid) return;
+    return onSnapshot(doc(db, "users", uid), snap => {
+      if (snap.exists()) {
+        setWalletBalance(snap.data().walletBalance ?? 0);
+      }
+    }, err => console.error("users snapshot error:", err));
+  }, [uid]);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async u => {
@@ -444,10 +466,15 @@ export default function TasksPage() {
           <h1 className="text-base font-black text-white tracking-tight">Ad Feed</h1>
           <p className="text-xs text-slate-500">Watch videos · Earn daily rewards</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-2xl px-4 py-2">
           <div className="text-right">
-            <p className="text-[10px] text-slate-500 uppercase tracking-wider">Today</p>
-            <p className="text-teal-400 font-black text-sm">{fmt(daily)}</p>
+            <p className="text-[9px] text-slate-500 uppercase font-bold tracking-wider leading-none">Today</p>
+            <p className="text-teal-400 font-black text-xs mt-0.5">{fmt(daily)}</p>
+          </div>
+          <div className="h-4 w-[1px] bg-white/15" />
+          <div className="text-right">
+            <p className="text-[9px] text-slate-500 uppercase font-bold tracking-wider leading-none">Wallet</p>
+            <p className="text-white font-black text-xs mt-0.5">{fmt(walletBalance)}</p>
           </div>
         </div>
       </header>
