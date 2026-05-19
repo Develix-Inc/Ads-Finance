@@ -52,23 +52,33 @@ export async function recordTransaction(
 export async function getUserTransactions(uid: string, pageLimit = 20) {
   const q = query(
     collection(db, "transactions"),
-    where("uid", "==", uid),
-    orderBy("createdAt", "desc"),
-    limit(pageLimit)
+    where("uid", "==", uid)
   );
   const snap = await getDocs(q);
-  return snap.docs.map(d => d.data());
+  const docs = snap.docs.map(d => d.data());
+  docs.sort((a: any, b: any) => {
+    const tA = a.createdAt?.seconds ? a.createdAt.seconds * 1000 : (a.createdAt?.toMillis ? a.createdAt.toMillis() : new Date(a.createdAt || 0).getTime());
+    const tB = b.createdAt?.seconds ? b.createdAt.seconds * 1000 : (b.createdAt?.toMillis ? b.createdAt.toMillis() : new Date(b.createdAt || 0).getTime());
+    return tB - tA;
+  });
+  return docs.slice(0, pageLimit);
 }
 
 /** Real-time listener for user transactions */
 export function listenTransactions(uid: string, pageLimit: number, cb: (txs: any[]) => void) {
   const q = query(
     collection(db, "transactions"),
-    where("uid", "==", uid),
-    orderBy("createdAt", "desc"),
-    limit(pageLimit)
+    where("uid", "==", uid)
   );
-  return onSnapshot(q, snap => cb(snap.docs.map(d => d.data())));
+  return onSnapshot(q, snap => {
+    const docs = snap.docs.map(d => d.data());
+    docs.sort((a: any, b: any) => {
+      const tA = a.createdAt?.seconds ? a.createdAt.seconds * 1000 : (a.createdAt?.toMillis ? a.createdAt.toMillis() : new Date(a.createdAt || 0).getTime());
+      const tB = b.createdAt?.seconds ? b.createdAt.seconds * 1000 : (b.createdAt?.toMillis ? b.createdAt.toMillis() : new Date(b.createdAt || 0).getTime());
+      return tB - tA;
+    });
+    cb(docs.slice(0, pageLimit));
+  });
 }
 
 /** System-wide stats for admin overview */

@@ -354,28 +354,62 @@ export default function TasksPage() {
 
   const handleClaim = useCallback(async (videoId: string) => {
     if (!uid) return;
-    const result = await claimAdReward(uid, videoId);
+    try {
+      const result = await claimAdReward(uid, videoId);
 
-    if (result.success) {
-      // Refresh reward data
-      const fresh = await getAdRewardData(uid);
-      setRewardData(fresh);
-      setActiveVideo(null);
+      if (result.success) {
+        // Refresh reward data
+        const fresh = await getAdRewardData(uid);
+        setRewardData(fresh);
+        setActiveVideo(null);
 
-      await Swal.fire({
-        ...SWAL_DARK,
-        icon: "success",
-        title: "Congratulations!",
-        html: `<p style="color:#94a3b8;font-size:15px">You earned</p>
-               <p style="color:#14b8a6;font-size:2.5rem;font-weight:900;margin:8px 0">₦${result.reward.toLocaleString()}</p>
-               <p style="color:#64748b;font-size:13px">Added to your wallet instantly.</p>`,
-        confirmButtonText: "View Wallet",
-        timer: 4000,
-        timerProgressBar: true,
-      }).then(r => { if (r.isConfirmed) router.push("/dashboard"); });
-    } else {
+        setTimeout(() => {
+          Swal.fire({
+            background: "#0f172a",
+            color: "#f8fafc",
+            icon: "success",
+            title: "Congratulations!",
+            html: `
+              <div style="font-family: inherit; text-align: center;">
+                <p style="color: #94a3b8; font-size: 14px; margin-bottom: 8px;">You successfully watched the ad and earned</p>
+                <p style="color: #14b8a6; font-size: 2.25rem; font-weight: 900; margin: 12px 0;">₦${result.reward.toLocaleString()}</p>
+                <p style="color: #64748b; font-size: 12px;">Credited to your main dashboard wallet instantly.</p>
+              </div>
+            `,
+            confirmButtonText: "Return to Dashboard",
+            confirmButtonColor: "#0d9488",
+            timer: 5000,
+            timerProgressBar: true,
+          }).then(r => {
+            if (r.isConfirmed) router.push("/dashboard");
+          });
+        }, 150);
+      } else {
+        setActiveVideo(null);
+        setTimeout(() => {
+          Swal.fire({
+            background: "#0f172a",
+            color: "#f8fafc",
+            icon: "info",
+            title: "Heads up",
+            text: result.message,
+            confirmButtonColor: "#0d9488",
+          });
+        }, 150);
+      }
+    } catch (err: any) {
+      console.error("Error claiming reward:", err);
       setActiveVideo(null);
-      Swal.fire({ ...SWAL_DARK, icon: "info", title: "Heads up", text: result.message });
+      setTimeout(() => {
+        Swal.fire({
+          background: "#0f172a",
+          color: "#f8fafc",
+          icon: "error",
+          title: "Claim Failed",
+          text: "Something went wrong while processing your reward. Please try again.",
+          confirmButtonColor: "#e11d48",
+        });
+      }, 150);
     }
   }, [uid, router]);
 

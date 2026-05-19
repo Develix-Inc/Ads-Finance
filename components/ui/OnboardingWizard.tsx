@@ -35,8 +35,8 @@ export function OnboardingWizard({ uid, userEmail, onComplete }: Props) {
   }, []);
 
   async function runWizard() {
-    /* ── Step 1: Welcome ── */
-    await Swal.fire({
+    /* ── Step 1: Welcome & Skip Option ── */
+    const welcomeResult = await Swal.fire({
       ...SWAL_DARK,
       title: "Welcome to AdsFinance",
       html: `
@@ -48,10 +48,40 @@ export function OnboardingWizard({ uid, userEmail, onComplete }: Props) {
           </p>
         </div>
       `,
+      showCancelButton: true,
       confirmButtonText: "Let's Go →",
-      showCancelButton: false,
+      cancelButtonText: "Skip Setup ✕",
       allowOutsideClick: false,
     });
+
+    if (welcomeResult.isDismissed || welcomeResult.dismiss === Swal.DismissReason.cancel) {
+      await saveProfileAndFinish(
+        "passive_income",
+        "moderate",
+        "Pending Setup",
+        "0000000000",
+        "Pending Setup"
+      );
+      
+      await Swal.fire({
+        ...SWAL_DARK,
+        icon: "success",
+        title: "Setup Skipped",
+        html: `<p style="color:#94a3b8; font-size:14px">Your account has been initialized with basic defaults. You can update your bank settings anytime under Profile Settings.</p>`,
+        showCancelButton: true,
+        confirmButtonText: "⚡ Upgrade Node",
+        cancelButtonText: "📅 Go to Dashboard",
+        allowOutsideClick: false,
+      }).then(r => {
+        onComplete();
+        if (r.isConfirmed) {
+          router.push("/upgrade");
+        } else {
+          router.push("/dashboard");
+        }
+      });
+      return;
+    }
 
     /* ── Step 2: Investment Goal ── */
     const goalResult = await Swal.fire({
@@ -68,7 +98,8 @@ export function OnboardingWizard({ uid, userEmail, onComplete }: Props) {
         </div>
       `,
       confirmButtonText: "Next →",
-      showCancelButton: false,
+      showCancelButton: true,
+      cancelButtonText: "Skip Setup ✕",
       allowOutsideClick: false,
       preConfirm: () => {
         const val = (document.querySelector('input[name="goal"]:checked') as HTMLInputElement)?.value;
@@ -76,7 +107,13 @@ export function OnboardingWizard({ uid, userEmail, onComplete }: Props) {
         return val;
       },
     });
-    if (!goalResult.isConfirmed) return;
+
+    if (goalResult.isDismissed || goalResult.dismiss === Swal.DismissReason.cancel) {
+      await saveProfileAndFinish("passive_income", "moderate", "Pending Setup", "0000000000", "Pending Setup");
+      onComplete();
+      router.push("/dashboard");
+      return;
+    }
     const investmentGoal = goalResult.value;
 
     /* ── Step 3: Risk Level ── */
@@ -98,7 +135,8 @@ export function OnboardingWizard({ uid, userEmail, onComplete }: Props) {
         </div>
       `,
       confirmButtonText: "Next →",
-      showCancelButton: false,
+      showCancelButton: true,
+      cancelButtonText: "Skip Setup ✕",
       allowOutsideClick: false,
       preConfirm: () => {
         const val = (document.querySelector('input[name="risk"]:checked') as HTMLInputElement)?.value;
@@ -106,7 +144,13 @@ export function OnboardingWizard({ uid, userEmail, onComplete }: Props) {
         return val;
       },
     });
-    if (!riskResult.isConfirmed) return;
+
+    if (riskResult.isDismissed || riskResult.dismiss === Swal.DismissReason.cancel) {
+      await saveProfileAndFinish(investmentGoal, "moderate", "Pending Setup", "0000000000", "Pending Setup");
+      onComplete();
+      router.push("/dashboard");
+      return;
+    }
     const riskLevel = riskResult.value;
 
     /* ── Step 4: Bank Account Setup ── */
@@ -131,7 +175,8 @@ export function OnboardingWizard({ uid, userEmail, onComplete }: Props) {
         </div>
       `,
       confirmButtonText: "Save & Continue →",
-      showCancelButton: false,
+      showCancelButton: true,
+      cancelButtonText: "Skip Setup ✕",
       allowOutsideClick: false,
       preConfirm: () => {
         const bank    = (document.getElementById("swal-bank") as HTMLInputElement)?.value.trim();
@@ -142,10 +187,39 @@ export function OnboardingWizard({ uid, userEmail, onComplete }: Props) {
         return { bankName: bank, accountNumber: accnum, accountName: accname };
       },
     });
-    if (!bankResult.isConfirmed) return;
+
+    if (bankResult.isDismissed || bankResult.dismiss === Swal.DismissReason.cancel) {
+      await saveProfileAndFinish(investmentGoal, riskLevel, "Pending Setup", "0000000000", "Pending Setup");
+      onComplete();
+      router.push("/dashboard");
+      return;
+    }
     const { bankName, accountNumber, accountName } = bankResult.value;
 
     /* ── Save to Firestore ── */
+    await saveProfileAndFinish(investmentGoal, riskLevel, bankName, accountNumber, accountName);
+
+    /* ── Step 5: All done → go to upgrade ── */
+    const choiceResult = await Swal.fire({
+      ...SWAL_DARK,
+      icon: "success",
+      title: "Profile Complete!",
+      html: `<p style="color:#94a3b8; font-size:14px">Your Validator Node profile has been successfully built.<br/><br/>Choose to activate your node tier now, or head straight to the dashboard to look around.</p>`,
+      showCancelButton: true,
+      confirmButtonText: "⚡ Upgrade / Pay Now",
+      cancelButtonText: "📅 Pay Later (Dashboard)",
+      allowOutsideClick: false,
+    });
+
+    onComplete();
+    if (choiceResult.isConfirmed) {
+      router.push("/upgrade");
+    } else {
+      router.push("/dashboard");
+    }
+  }
+
+  async function saveProfileAndFinish(goal: string, risk: string, bank: string, accnum: string, accname: string) {
     try {
       const currentUser = auth.currentUser;
       const referralCode = generateReferralCode(uid);
@@ -153,11 +227,11 @@ export function OnboardingWizard({ uid, userEmail, onComplete }: Props) {
         email: userEmail,
         displayName: currentUser?.displayName || userEmail.split("@")[0],
         photoURL: currentUser?.photoURL || "",
-        investmentGoal,
-        riskLevel,
-        bankName,
-        accountNumber,
-        accountName,
+        investmentGoal: goal,
+        riskLevel: risk,
+        bankName: bank,
+        accountNumber: accnum,
+        accountName: accname,
         onboardingComplete: true,
         referralCode,
         walletBalance: 0,
@@ -173,7 +247,7 @@ export function OnboardingWizard({ uid, userEmail, onComplete }: Props) {
       await sendNotification(
         uid,
         "Welcome to AdsFinance!",
-        `Your profile is set up. Your referral code is ${generateReferralCode(uid)}. Now activate a Validator Node to start earning.`,
+        `Your profile is set up. Your referral code is ${referralCode}. Now activate a Validator Node to start earning.`,
         "success"
       );
       // process referral if someone referred this user
@@ -187,20 +261,6 @@ export function OnboardingWizard({ uid, userEmail, onComplete }: Props) {
     } catch (e) {
       console.error("Firestore save error", e);
     }
-
-    /* ── Step 5: All done → go to upgrade ── */
-    await Swal.fire({
-      ...SWAL_DARK,
-      icon: "success",
-      title: "Profile Complete!",
-      html: `<p style="color:#94a3b8; font-size:14px">Now choose a <strong style="color:#fff">Validator Node</strong> to activate your account and start earning.</p>`,
-      confirmButtonText: "Choose My Node →",
-      showCancelButton: false,
-      allowOutsideClick: false,
-    });
-
-    onComplete();
-    router.push("/upgrade");
   }
 
   return null; // wizard is fully SweetAlert driven
