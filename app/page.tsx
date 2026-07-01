@@ -304,8 +304,13 @@ export default function PremiumLandingPage() {
         <div className="max-w-7xl mx-auto px-6 pb-16 grid grid-cols-2 md:grid-cols-4 gap-8">
           <div className="col-span-2">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-                <span className="text-white font-bold">A</span>
+              <div className="relative w-10 h-10 flex items-center justify-center shrink-0">
+                <Image src="/logo-transparent.png" alt="AdsFinance Logo" width={48} height={48} className="w-full h-full object-contain"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = 'none';
+                    (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center"><span class="text-white font-bold">A</span></div>';
+                  }}
+                />
               </div>
               <span className="font-bold text-xl tracking-tighter text-white">AdsFinance</span>
             </div>

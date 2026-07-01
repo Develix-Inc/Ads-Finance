@@ -15,7 +15,7 @@ export const COMPANY_BANK = {
 };
 
 export const NODE_PRICES: Record<string, number> = {
-  "Node Alpha": 17000,
+  "Node Alpha": 100,
   "Node Sigma": 45000,
   "Node Omega": 120000,
 };
