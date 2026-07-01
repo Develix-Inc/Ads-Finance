@@ -258,8 +258,9 @@ export default function AdminDashboard() {
                       <th className="text-left px-5 py-4">User</th>
                       <th className="text-left px-5 py-4">Node</th>
                       <th className="text-left px-5 py-4">Balance</th>
+                      <th className="text-left px-5 py-4">Bank Details</th>
                       <th className="text-left px-5 py-4">Status</th>
-                      <th className="px-5 py-4">Actions</th>
+                      <th className="px-5 py-4 text-center">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5">
@@ -276,6 +277,10 @@ export default function AdminDashboard() {
                         </td>
                         <td className="px-5 py-4 font-bold text-white">{fmt(u.walletBalance ?? 0)}</td>
                         <td className="px-5 py-4">
+                          <p className="text-xs text-slate-300 truncate max-w-[150px] font-semibold">{u.bankName || "No Bank"}</p>
+                          <p className="text-xs text-slate-500 font-mono mt-0.5">{u.accountNumber || "—"}</p>
+                        </td>
+                        <td className="px-5 py-4">
                           <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
                             u.nodeStatus === "active"  ? "bg-emerald-500/10 text-emerald-400" :
                             u.nodeStatus === "pending" ? "bg-amber-500/10 text-amber-400" :
@@ -285,12 +290,16 @@ export default function AdminDashboard() {
                         </td>
                         <td className="px-5 py-4">
                           <div className="flex items-center justify-center gap-2">
+                            <button onClick={() => setStatus(u.uid, u.accountStatus === "suspended" ? "active" : "suspended")}
+                              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors border ${u.accountStatus === "suspended" ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20" : "bg-rose-500/10 border-rose-500/20 text-rose-400 hover:bg-rose-500/20"}`}>
+                              {u.accountStatus === "suspended" ? "Unsuspend" : "Suspend"}
+                            </button>
                             <button onClick={() => setSelectedUser(u)}
-                              className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 transition-colors">
+                              className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 transition-colors">
                               <FaEye className="w-3.5 h-3.5" />
                             </button>
                             <button onClick={() => creditUser(u.uid)}
-                              className="p-2 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-400 transition-colors">
+                              className="p-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-400 transition-colors">
                               <FaArrowTrendUp className="w-3.5 h-3.5" />
                             </button>
                           </div>

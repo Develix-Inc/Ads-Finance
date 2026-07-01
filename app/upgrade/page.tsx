@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
-import { COMPANY_BANK, NODE_PRICES, NODE_MULTIPLIERS, NODE_MIN_WITHDRAWAL, submitPayment, getUserProfile } from "@/lib/admin";
+import { COMPANY_BANK, NODE_PRICES, NODE_MULTIPLIERS, NODE_MIN_WITHDRAWAL, submitPayment, getUserProfile, upsertUserProfile } from "@/lib/admin";
 import {
   FaShieldHalved, FaBolt, FaStar, FaCircleCheck, FaArrowLeft,
   FaCopy, FaClock, FaReceipt, FaChevronRight
@@ -50,7 +50,25 @@ export default function UpgradePage() {
     const unsub = onAuthStateChanged(auth, async u => {
       if (!u) { router.push("/login"); return; }
       setUser(u);
-      const p = await getUserProfile(u.uid);
+      let p = await getUserProfile(u.uid);
+      if (!p) {
+        // Auto-heal missing profile if the user went straight to upgrade instead of dashboard
+        const defaultName = u.displayName || (u.email ? u.email.split("@")[0] : "User");
+        const fallbackProfile = {
+          email: u.email || "",
+          displayName: defaultName,
+          walletBalance: 0,
+          totalEarned: 0,
+          nodeTier: "",
+          nodeStatus: "none",
+          referralCode: `REF-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
+          referredBy: "",
+          onboardingComplete: false,
+          accountStatus: "active",
+        };
+        await upsertUserProfile(u.uid, fallbackProfile);
+        p = { uid: u.uid, ...fallbackProfile };
+      }
       setProfile(p);
       if (p?.nodeStatus === "pending") setView("pending");
     });
