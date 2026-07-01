@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import Link from "next/link";
 import { auth, db } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
@@ -246,7 +247,7 @@ function VideoCard({ video, watched, onWatch, disabled }: { video: VideoItem; wa
       className={`relative bg-slate-900 border rounded-[22px] overflow-hidden transition-all ${watched ? "border-teal-500/30" : "border-white/10 hover:border-white/20"}`}>
       {/* Thumbnail */}
       <div className="relative aspect-video bg-slate-800 overflow-hidden">
-        <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover"
+        <Image src={video.thumbnail} alt={video.title} width={640} height={360} className="w-full h-full object-cover"
           onError={e => { (e.target as any).src = "https://i.ytimg.com/vi/default/mqdefault.jpg"; }} />
         {/* Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />

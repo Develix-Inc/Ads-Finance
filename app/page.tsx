@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useRef } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ComplianceBadge } from "@/components/ui/ComplianceBadge";
@@ -30,9 +31,9 @@ const Marquee = () => {
 };
 
 export default function PremiumLandingPage() {
-  const targetRef = useRef(null);
+  const heroRef = useRef(null);
   const { scrollYProgress } = useScroll({
-    target: targetRef,
+    target: heroRef,
     offset: ["start start", "end start"],
   });
 
@@ -53,7 +54,7 @@ export default function PremiumLandingPage() {
         <div className="flex items-center justify-between px-4 sm:px-6 py-3 max-w-7xl mx-auto">
           <div className="flex items-center gap-2">
             <div className="relative w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center shrink-0">
-              <img src="/logo-transparent.png" alt="AdsFinance Logo" className="w-full h-full object-contain"
+              <Image src="/logo-transparent.png" alt="AdsFinance Logo" width={48} height={48} className="w-full h-full object-contain"
                 onError={(e) => {
                   (e.target as HTMLImageElement).style.display = 'none';
                   (e.target as HTMLImageElement).parentElement!.innerHTML = '<span class="text-white font-black text-lg">AF</span>';
@@ -78,7 +79,7 @@ export default function PremiumLandingPage() {
       </nav>
 
       {/* Hero Section */}
-      <section ref={targetRef} className="relative pt-24 sm:pt-32 pb-32 flex flex-col items-center justify-center min-h-screen px-4 sm:px-6">
+      <section ref={heroRef} className="relative pt-24 sm:pt-32 pb-32 flex flex-col items-center justify-center min-h-screen px-4 sm:px-6">
         <motion.div 
           style={{ opacity, scale, y }}
           className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center"

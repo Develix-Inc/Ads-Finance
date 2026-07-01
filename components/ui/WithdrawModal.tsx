@@ -50,15 +50,22 @@ export function WithdrawModal({ uid, userEmail, balance, minWithdrawal = 500, wi
   async function runInterlock() {
     setIsRunning(true);
     setStep(2);
-    for (let i = 0; i < INTERLOCK_STAGES.length; i++) {
-      setInterlockStep(i);
-      await new Promise(r => setTimeout(r, INTERLOCK_STAGES[i].ms));
-    }
     setInterlockStep(INTERLOCK_STAGES.length);
     try {
       await submitWithdrawal(uid, userEmail, numAmount, editBank);
-    } catch (e) { console.error(e); }
-    setStep(3);
+      setStep(3);
+    } catch (e: any) { 
+      console.error(e);
+      Swal.fire({
+        background: "#020617",
+        color: "#f8fafc",
+        icon: "error",
+        title: "Withdrawal Failed",
+        text: e.message || "An error occurred.",
+        customClass: { popup: "!rounded-2xl !border !border-white/10", confirmButton: "!rounded-full !bg-rose-600" }
+      });
+      setStep(1);
+    }
     setIsRunning(false);
   }
 
@@ -177,24 +184,9 @@ export function WithdrawModal({ uid, userEmail, balance, minWithdrawal = 500, wi
             {/* ── Step 2: Interlock ── */}
             {step === 2 && (
               <motion.div key="s2" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4 py-2">
-                <div className="relative">
-                  <div className="absolute left-5 top-5 bottom-5 w-[2px] bg-slate-800" />
-                  {INTERLOCK_STAGES.map((s, i) => {
-                    const done   = interlockStep > i;
-                    const active = interlockStep === i;
-                    const Icon   = s.icon;
-                    return (
-                      <div key={i} className={`flex items-center gap-4 py-3 z-10 relative transition-opacity duration-500 ${interlockStep >= i ? "opacity-100" : "opacity-25"}`}>
-                        <div className={`w-10 h-10 rounded-full border-2 flex items-center justify-center shrink-0 z-10 transition-all ${done ? "border-teal-500 bg-teal-500/20 text-teal-400" : active ? "border-amber-400 bg-amber-400/10 text-amber-400" : "border-slate-700 bg-slate-900 text-slate-600"}`}>
-                          <Icon className={`w-4 h-4 ${active ? "animate-spin" : ""}`} />
-                        </div>
-                        <div>
-                          <p className={`font-semibold text-sm ${done ? "text-teal-400" : active ? "text-amber-400" : "text-slate-500"}`}>{s.label}</p>
-                          {active && <p className="text-xs text-slate-500 mt-0.5 font-mono">Verifying protocol…</p>}
-                        </div>
-                      </div>
-                    );
-                  })}
+                <div className="flex flex-col items-center justify-center py-6">
+                  <div className="w-12 h-12 border-4 border-teal-500 border-t-transparent rounded-full animate-spin mb-4" />
+                  <p className="text-white font-bold">Processing Withdrawal…</p>
                 </div>
               </motion.div>
             )}

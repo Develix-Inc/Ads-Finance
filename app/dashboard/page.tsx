@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import Link from "next/link";
 import { auth, db } from "@/lib/firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
@@ -71,7 +72,6 @@ export default function DashboardPage() {
   const [loading, setLoading]     = useState(true);
   const [balance, setBalance]     = useState(0);
   const [transactions, setTxs]    = useState<any[]>([]);
-  const [darkMode, setDarkMode]   = useState(true);
   const [showWithdraw, setShowWithdraw] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
 
@@ -80,8 +80,6 @@ export default function DashboardPage() {
     const unsub = onAuthStateChanged(auth, async u => {
       if (!u) { router.push("/login"); return; }
       setUser(u);
-      // Fast localStorage check first — avoids flash of onboarding for returning users
-      const localDone = localStorage.getItem(`onboarding_${u.uid}`) === "done";
       let p = await getUserProfile(u.uid);
 
       if (!p) {
@@ -114,12 +112,8 @@ export default function DashboardPage() {
 
       setProfile(p);
       setBalance(p?.walletBalance ?? 0);
-      // Show onboarding only if Firestore AND localStorage both confirm it's needed
-      if (!localDone && (!p || !p.onboardingComplete)) {
+      if (!p || !p.onboardingComplete) {
         setShowOnboarding(true);
-      } else if (p?.onboardingComplete) {
-        // Sync localStorage in case it was cleared
-        localStorage.setItem(`onboarding_${u.uid}`, "done");
       }
       setLoading(false);
     });
@@ -162,9 +156,9 @@ export default function DashboardPage() {
   const mult       = (NODE_MULTIPLIERS as Record<string, number>)[nodeTier] ?? 4;
   const minWithdraw= (NODE_MIN_WITHDRAWAL as Record<string, number>)[nodeTier] ?? 75000;
 
-  const bg   = darkMode ? "bg-slate-950 text-slate-200" : "bg-slate-100 text-slate-800";
-  const card = darkMode ? "bg-slate-900 border-white/10" : "bg-white border-slate-200";
-  const sub  = darkMode ? "text-slate-500" : "text-slate-400";
+  const bg   = "bg-slate-950 text-slate-200";
+  const card = "bg-slate-900 border-white/10";
+  const sub  = "text-slate-500";
 
   return (
     <div className={`min-h-screen ${bg} flex transition-colors duration-300`}>
@@ -186,10 +180,10 @@ export default function DashboardPage() {
       </AnimatePresence>
 
       {/* ── SIDEBAR (md+) ── */}
-      <aside className={`hidden md:flex w-64 shrink-0 flex-col border-r ${darkMode ? "border-white/10 bg-slate-900/60" : "border-slate-200 bg-white"} sticky top-0 h-screen`}>
-        <div className={`p-6 border-b ${darkMode ? "border-white/10" : "border-slate-100"}`}>
+      <aside className={`hidden md:flex w-64 shrink-0 flex-col border-r border-white/10 bg-slate-900/60 sticky top-0 h-screen`}>
+        <div className={`p-6 border-b border-white/10`}>
           <div className="flex items-center gap-3">
-            <img src="/logo-transparent.png" alt="AdsFinance" className="w-9 h-9 object-contain" onError={e => { (e.target as any).style.display = "none"; }} />
+            <Image src="/logo-transparent.png" alt="AdsFinance" width={36} height={36} className="w-9 h-9 object-contain" onError={e => { (e.target as any).style.display = "none"; }} />
             <div>
               <p className="font-black text-base tracking-tight leading-none">AdsFinance</p>
               <p className={`text-[9px] font-mono tracking-widest uppercase mt-0.5 ${sub}`}>Node Dashboard</p>
@@ -204,8 +198,7 @@ export default function DashboardPage() {
               <Link key={item.label} href={item.href}
                 className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all text-sm
                   ${active ? "bg-teal-500/10 text-teal-400 border border-teal-500/20"
-                           : darkMode ? "text-slate-400 hover:bg-white/5 hover:text-white"
-                                      : "text-slate-500 hover:bg-slate-100 hover:text-slate-800"}`}>
+                           : "text-slate-400 hover:bg-white/5 hover:text-white"}`}>
                 <item.icon className="w-4 h-4 shrink-0" />
                 {item.label}
               </Link>
@@ -213,7 +206,7 @@ export default function DashboardPage() {
           })}
         </nav>
 
-        <div className={`p-4 border-t ${darkMode ? "border-white/10" : "border-slate-100"} space-y-3`}>
+        <div className={`p-4 border-t border-white/10 space-y-3`}>
           <div className="flex items-center gap-3 px-2">
             <div className="w-9 h-9 rounded-full bg-gradient-to-br from-teal-600 to-slate-800 flex items-center justify-center font-black text-white text-sm shrink-0">{avatar}</div>
             <div className="min-w-0">
@@ -231,9 +224,9 @@ export default function DashboardPage() {
       {/* ── MAIN ── */}
       <main className="flex-1 min-w-0 flex flex-col">
         {/* topbar */}
-        <header className={`sticky top-0 z-40 border-b ${darkMode ? "border-white/10 bg-slate-950/80" : "border-slate-200 bg-white/80"} backdrop-blur-xl px-4 md:px-8 py-4 flex items-center justify-between`}>
+        <header className={`sticky top-0 z-40 border-b border-white/10 bg-slate-950/80 backdrop-blur-xl px-4 md:px-8 py-4 flex items-center justify-between`}>
           <div className="flex items-center gap-3 md:hidden">
-            <img src="/logo-transparent.png" alt="AdsFinance" className="w-8 h-8 object-contain" onError={e => { (e.target as any).style.display = "none"; }} />
+            <Image src="/logo-transparent.png" alt="AdsFinance" width={32} height={32} className="w-8 h-8 object-contain" onError={e => { (e.target as any).style.display = "none"; }} />
             <span className="font-black text-base tracking-tight">AdsFinance</span>
           </div>
           <h1 className="hidden md:block text-xl font-black tracking-tight">My Dashboard</h1>
@@ -249,10 +242,6 @@ export default function DashboardPage() {
                 <span className="w-1.5 h-1.5 bg-teal-400 rounded-full animate-pulse" /> Online
               </span>
             )}
-            <button onClick={() => setDarkMode(d => !d)}
-              className={`p-2.5 rounded-xl border transition-colors ${darkMode ? "bg-white/5 border-white/10 text-yellow-300" : "bg-slate-100 border-slate-200 text-slate-600"}`}>
-              {darkMode ? <FaSun className="w-4 h-4" /> : <FaMoon className="w-4 h-4" />}
-            </button>
             {user?.uid && <NotificationBell uid={user.uid} />}
             <button onClick={logout} className="md:hidden p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400">
               <FaRightFromBracket className="w-4 h-4" />
@@ -282,7 +271,7 @@ export default function DashboardPage() {
                 <h2 className="text-2xl md:text-3xl font-black tracking-tight capitalize">{name}</h2>
               </div>
               {profile?.photoURL || user?.photoURL ? (
-                <img src={profile?.photoURL || user?.photoURL} alt={name} className="w-12 h-12 rounded-full object-cover border-2 border-teal-500/30 shadow-lg" />
+                <Image src={profile?.photoURL || user?.photoURL} alt={name} width={48} height={48} className="w-12 h-12 rounded-full object-cover border-2 border-teal-500/30 shadow-lg" />
               ) : (
                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-teal-600 to-slate-800 flex items-center justify-center font-black text-white text-xl shadow-lg">{avatar}</div>
               )}
@@ -401,7 +390,7 @@ export default function DashboardPage() {
                   History <FaChevronRight className="w-3 h-3" />
                 </Link>
               </div>
-              <div className={`rounded-[22px] border ${card} overflow-hidden divide-y ${darkMode ? "divide-white/5" : "divide-slate-100"}`}>
+              <div className={`rounded-[22px] border ${card} overflow-hidden divide-y divide-white/5`}>
                 {transactions.length === 0 ? (
                   <div className="py-10 text-center">
                     <FaWallet className={`w-8 h-8 ${sub} mx-auto mb-2`} />
@@ -436,13 +425,13 @@ export default function DashboardPage() {
       </main>
 
       {/* MOBILE BOTTOM NAV */}
-      <nav className={`md:hidden fixed bottom-0 left-0 right-0 z-50 border-t ${darkMode ? "border-white/10 bg-slate-950/98" : "border-slate-200 bg-white/98"} backdrop-blur-xl safe-area-bottom`}>
+      <nav className={`md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-slate-950/98 backdrop-blur-xl safe-area-bottom`}>
         <div className="grid grid-cols-5 h-16">
           {NAV.slice(0, 5).map((item, i) => {
             const active = item.href === "/dashboard";
             return (
               <Link key={i} href={item.href}
-                className={`flex flex-col items-center justify-center gap-1 transition-all active:scale-95 ${active ? "text-teal-400" : darkMode ? "text-slate-500 hover:text-slate-300" : "text-slate-400 hover:text-slate-600"}`}>
+                className={`flex flex-col items-center justify-center gap-1 transition-all active:scale-95 ${active ? "text-teal-400" : "text-slate-500 hover:text-slate-300"}`}>
                 <item.icon className="w-[18px] h-[18px]" />
                 <span className="text-[9px] font-bold uppercase tracking-wide leading-none">{item.label.split(" ")[0]}</span>
               </Link>

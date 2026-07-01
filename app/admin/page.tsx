@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { auth, db } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { collection, onSnapshot } from "firebase/firestore";
@@ -177,7 +178,7 @@ export default function AdminDashboard() {
       {/* header */}
       <header className="border-b border-white/10 px-6 py-4 flex items-center justify-between bg-slate-900/60 sticky top-0 z-40 backdrop-blur-xl">
         <div className="flex items-center gap-3">
-          <img src="/logo-transparent.png" alt="" className="w-8 h-8 object-contain" onError={e => { (e.target as any).style.display = "none"; }} />
+          <Image src="/logo-transparent.png" alt="" width={32} height={32} className="w-8 h-8 object-contain" onError={e => { (e.target as any).style.display = "none"; }} />
           <div>
             <p className="font-black text-white text-base leading-none">AdsFinance</p>
             <p className="text-[10px] text-teal-400 font-mono tracking-widest uppercase">Admin Panel</p>

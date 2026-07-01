@@ -20,7 +20,7 @@ export function WithdrawalInterlock() {
 
     const timer = setTimeout(() => {
       setStep((prev) => prev + 1);
-    }, steps[step].duration);
+    }, 100); // reduced from high duration to almost instant
 
     return () => clearTimeout(timer);
   }, [isOpen, step]);

@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged, updateProfile } from "firebase/auth";
 import { getUserProfile, upsertUserProfile } from "@/lib/admin";
@@ -150,7 +151,7 @@ export default function SettingsPage() {
             {/* Avatar display */}
             <div className="flex items-center gap-4 py-2 border-b border-white/5 pb-4">
               {profile?.photoURL || user?.photoURL ? (
-                <img src={profile?.photoURL || user?.photoURL} alt={displayName} className="w-16 h-16 rounded-full object-cover border-2 border-teal-500/30 shadow-lg" />
+                <Image src={profile?.photoURL || user?.photoURL} alt={displayName} width={64} height={64} className="w-16 h-16 rounded-full object-cover border-2 border-teal-500/30 shadow-lg" />
               ) : (
                 <div className="w-16 h-16 rounded-full bg-gradient-to-br from-teal-600 to-slate-800 flex items-center justify-center font-black text-white text-2xl shadow-lg">
                   {(displayName || "V")[0].toUpperCase()}

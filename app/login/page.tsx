@@ -15,6 +15,7 @@ import withReactContent from "sweetalert2-react-content";
 import { Button } from "@/components/ui/button";
 import { Phone, ArrowRight, ShieldCheck, Mail } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 
 const MySwal = withReactContent(Swal);
 
@@ -122,9 +123,10 @@ function LoginInner() {
         {/* Logo Header */}
         <div className="text-center mb-10 flex flex-col items-center">
           <div className="relative w-40 h-40 mb-2 flex items-center justify-center drop-shadow-[0_0_20px_rgba(255,255,255,0.15)]">
-            <img 
+            <Image 
               src="/logo-transparent.png" 
               alt="AdsFinance Logo" 
+              width={160} height={160}
               className="w-full h-full object-contain"
               onError={(e) => {
                 (e.target as HTMLImageElement).style.display = 'none';

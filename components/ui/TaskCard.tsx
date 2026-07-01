@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Play, Pause, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 
 interface TaskCardProps {
   taskId: string;
@@ -102,7 +103,7 @@ export function TaskCard({ taskId, sponsor, payout, tags, thumbnailUrl, onComple
       {/* Top Media Area */}
       <div className="relative h-56 w-full bg-slate-800 overflow-hidden rounded-t-[24px]">
         {thumbnailUrl ? (
-          <img src={thumbnailUrl} alt={sponsor} className="object-cover w-full h-full opacity-80 group-hover:opacity-100 transition-opacity" />
+          <Image src={thumbnailUrl} alt={sponsor} width={400} height={224} className="object-cover w-full h-full opacity-80 group-hover:opacity-100 transition-opacity" />
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center">
             <span className="text-slate-500 font-mono text-xs opacity-50">MEDIA_SRC_NOT_FOUND</span>

@@ -67,6 +67,14 @@ export async function submitWithdrawal(
   uid: string, userEmail: string, amount: number,
   bank: { bankName: string; accountNumber: string; accountName: string }
 ) {
+  const profile = await getUserProfile(uid);
+  const tier = profile?.nodeTier || "Node Alpha";
+  const minWithdrawal = NODE_MIN_WITHDRAWAL[tier] || 75000;
+
+  if (amount < minWithdrawal) {
+    throw new Error(`Minimum withdrawal for your node tier is ₦${minWithdrawal.toLocaleString()}`);
+  }
+
   // deduct atomically via recordTransaction
   await recordTransaction(uid, "withdrawal", -amount, `Withdrawal request to ${bank.bankName}`);
 

@@ -62,20 +62,29 @@ export default function UpgradePage() {
     Swal.fire({ background: "#020617", color: "#f8fafc", icon: "success", title: "Copied!", timer: 1000, showConfirmButton: false, customClass: { popup: "!rounded-2xl !border !border-white/10" } });
   };
 
-  const handleSubmit = async () => {
-    if (!selected || !refCode.trim()) {
-      Swal.fire({ background: "#020617", color: "#f8fafc", icon: "warning", title: "Enter Reference Code", text: "Please enter your bank transfer reference code.", customClass: { popup: "!rounded-2xl !border !border-white/10", confirmButton: "!rounded-full !bg-teal-600" } });
-      return;
-    }
+  const handlePaystackCheckout = async () => {
+    if (!selected) return;
     setLoading(true);
     try {
-      const id = await submitPayment(user.uid, user.email || user.phoneNumber, selected.name, refCode.trim());
-      setPaymentId(id);
-      setSubmittedAt(new Date());
-      setView("receipt");
-    } catch (e) {
-      Swal.fire({ background: "#020617", color: "#f8fafc", icon: "error", title: "Submission Failed", text: "Please try again.", customClass: { popup: "!rounded-2xl !border !border-white/10", confirmButton: "!rounded-full !bg-rose-600" } });
-    } finally {
+      const amount = NODE_PRICES[selected.name];
+      const res = await fetch("/api/paystack/initialize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: user.email || user.phoneNumber || "user@adsfinance.com",
+          amount,
+          uid: user.uid,
+          nodeTier: selected.name
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to initialize payment");
+
+      // Redirect to Paystack Checkout URL
+      window.location.href = data.authorization_url;
+    } catch (e: any) {
+      Swal.fire({ background: "#020617", color: "#f8fafc", icon: "error", title: "Payment Initialization Failed", text: e.message || "Please try again.", customClass: { popup: "!rounded-2xl !border !border-white/10", confirmButton: "!rounded-full !bg-rose-600" } });
       setLoading(false);
     }
   };
@@ -176,42 +185,14 @@ export default function UpgradePage() {
                 </div>
               </div>
 
-              {/* bank details */}
-              <div className="bg-slate-900 border border-white/10 rounded-[22px] p-5 space-y-4">
-                <p className="text-sm font-bold text-slate-300">Transfer <span className="text-white">{fmt(NODE_PRICES[selected.name])}</span> to this account:</p>
-                {[
-                  { label: "Bank Name",      value: COMPANY_BANK.name },
-                  { label: "Account Name",   value: COMPANY_BANK.holder },
-                  { label: "Account Number", value: COMPANY_BANK.account, copy: true },
-                ].map(row => (
-                  <div key={row.label} className="flex items-center justify-between">
-                    <div>
-                      <p className="text-[11px] text-slate-500 uppercase tracking-wider font-bold">{row.label}</p>
-                      <p className="text-white font-bold text-sm mt-0.5 font-mono">{row.value}</p>
-                    </div>
-                    {row.copy && (
-                      <button onClick={copyAccount} className="p-2.5 rounded-xl bg-teal-500/10 border border-teal-500/20 text-teal-400 hover:bg-teal-500/20 transition-colors">
-                        <FaCopy className="w-4 h-4" />
-                      </button>
-                    )}
-                  </div>
-                ))}
+              <div className="bg-slate-900 border border-white/10 rounded-[22px] p-5 text-center space-y-4">
+                <p className="text-sm font-bold text-slate-300">You will be redirected to Paystack to complete your secure payment of <span className="text-white">{fmt(NODE_PRICES[selected.name])}</span>.</p>
+                <button disabled={loading} onClick={handlePaystackCheckout}
+                  className="w-full py-4 rounded-2xl bg-teal-500 hover:bg-teal-400 disabled:opacity-40 disabled:cursor-not-allowed text-slate-950 font-black text-sm transition-colors shadow-lg shadow-teal-500/20">
+                  {loading ? "Initializing Secure Payment…" : "Pay Securely with Paystack →"}
+                </button>
               </div>
-
-              {/* reference code */}
-              <div>
-                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">Your Transfer Reference Code</label>
-                <input value={refCode} onChange={e => setRefCode(e.target.value)}
-                  placeholder="e.g. TRF2025051700123"
-                  className="w-full bg-slate-900 border border-white/10 rounded-2xl px-4 py-4 text-white text-sm font-mono focus:outline-none focus:border-teal-500 transition-colors placeholder:text-slate-600" />
-                <p className="text-xs text-slate-600 mt-2">This is the reference/transaction ID from your bank app after making the transfer.</p>
-              </div>
-
-              <button disabled={loading || !refCode.trim()} onClick={handleSubmit}
-                className="w-full py-4 rounded-2xl bg-teal-500 hover:bg-teal-400 disabled:opacity-40 disabled:cursor-not-allowed text-slate-950 font-black text-sm transition-colors shadow-lg shadow-teal-500/20">
-                {loading ? "Submitting…" : "I Have Sent the Money →"}
-              </button>
-              <p className="text-center text-xs text-slate-600">Your node activates after admin verifies your payment (up to 24 hours).</p>
+              <p className="text-center text-xs text-slate-600">Your node activates automatically after successful payment.</p>
             </motion.div>
           )}
 
