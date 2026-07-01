@@ -92,7 +92,7 @@ export default function PremiumLandingPage() {
               className="bg-white/5 border border-white/10 rounded-full px-5 py-2 mb-8 flex items-center gap-3 glass-card"
             >
               <Activity className="w-4 h-4 text-secondary animate-pulse" />
-              <span className="text-sm font-mono text-slate-300 tracking-widest uppercase">Platform Status: <span className="text-white font-bold">Yielding</span></span>
+              <span className="text-sm font-mono text-slate-300 tracking-widest uppercase">AdsFinance</span>
             </motion.div>
 
             <motion.h1 
@@ -101,8 +101,7 @@ export default function PremiumLandingPage() {
               transition={{ duration: 0.5, delay: 0.1 }}
               className="text-6xl md:text-8xl font-black tracking-tighter leading-[1.1] text-white"
             >
-              Master Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-400">Attention.</span><br />
-              Secure The <span className="text-transparent bg-clip-text bg-gradient-to-r from-secondary to-amber-200">Yield.</span>
+              Watch. Verify. <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-400">Earn.</span>
             </motion.h1>
             
             <motion.p 
@@ -111,8 +110,25 @@ export default function PremiumLandingPage() {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="mt-8 text-xl md:text-2xl text-slate-400 max-w-xl font-light leading-relaxed text-balance"
             >
-              The institutional-grade digital engagement network. Purchase a Validator License and earn up to <span className="text-white font-bold">600% ROI</span> through verified, anti-bot advertising tasks.
+              Turn your attention into income through our secure advertising rewards platform. Complete verified ad engagement tasks for trusted brands and earn rewards in a transparent, fraud-protected ecosystem.
             </motion.p>
+
+            <motion.ul 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.25 }}
+              className="mt-6 space-y-2"
+            >
+              {[
+                "Verified Tasks",
+                "Fast Payouts",
+                "Human-Only Verification"
+              ].map((item, i) => (
+                <li key={i} className="flex items-center gap-3 text-slate-300 font-medium">
+                  <CheckCircle className="w-5 h-5 text-emerald-500" /> {item}
+                </li>
+              ))}
+            </motion.ul>
 
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
@@ -125,8 +141,8 @@ export default function PremiumLandingPage() {
                   Get Started <ChevronRight className="w-5 h-5 ml-2" />
                 </Button>
               </Link>
-              <Button variant="outline" className="w-full sm:w-auto rounded-full h-16 px-10 text-lg font-semibold border-white/20 hover:bg-white/5">
-                View Ledger Docs
+              <Button variant="outline" className="w-full sm:w-auto rounded-full h-16 px-10 text-lg font-semibold border-white/20 hover:bg-white/5" onClick={() => window.scrollTo({ top: 800, behavior: 'smooth' })}>
+                How It Works
               </Button>
             </motion.div>
           </div>
@@ -172,17 +188,18 @@ export default function PremiumLandingPage() {
       <section className="py-32 relative z-10 bg-slate-950">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-20">
-            <h2 className="text-4xl md:text-6xl font-black tracking-tighter mb-6">The Yield Pipeline</h2>
-            <p className="text-xl text-slate-400 max-w-2xl mx-auto">A deterministic, three-step protocol designed for absolute transparency and maximum capital efficiency.</p>
+            <h2 className="text-4xl md:text-6xl font-black tracking-tighter mb-6">How It Works</h2>
+            <p className="text-xl text-white font-bold mb-2">Simple. Transparent. Rewarding.</p>
+            <p className="text-lg text-slate-400 max-w-2xl mx-auto">A straightforward process designed to protect advertisers while rewarding genuine user engagement.</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-12 relative">
             <div className="hidden md:block absolute top-12 left-[15%] right-[15%] h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
             
             {[
-              { icon: Cpu, title: "1. Acquire Node", desc: "Purchase a Validator License to gain access to the secure network and define your yield multiplier." },
-              { icon: Layers, title: "2. Verify Attention", desc: "Execute high-value ad verification tasks. Our visibility API ensures zero-bot engagement." },
-              { icon: Lock, title: "3. Secure Disbursement", desc: "Initiate Friction-by-Design withdrawals. Your funds pass through a mandatory security audit before release." }
+              { icon: Cpu, title: "1. Create Your Account", desc: "Join AdsFinance and activate your account to access available advertising campaigns." },
+              { icon: Layers, title: "2. Complete Verified Tasks", desc: "Watch videos, engage with promotional content, and complete simple verification steps to prove genuine attention." },
+              { icon: Lock, title: "3. Receive Your Earnings", desc: "Once your completed tasks are verified, your earnings are added to your balance and become available for withdrawal according to your account plan." }
             ].map((step, i) => (
               <motion.div 
                 key={i}
@@ -203,6 +220,33 @@ export default function PremiumLandingPage() {
         </div>
       </section>
 
+      {/* Why Choose AdsFinance */}
+      <section className="py-32 bg-slate-900 relative">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-6xl font-black tracking-tighter mb-6">Why Choose AdsFinance</h2>
+            <p className="text-xl text-white font-bold mb-4">Built for Trust</p>
+            <p className="text-lg text-slate-400 max-w-2xl mx-auto">
+              Our platform is designed to eliminate fake engagement and ensure every advertiser pays only for real human attention.
+            </p>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            {[
+              "Human verification technology",
+              "Advanced fraud detection",
+              "Secure encrypted infrastructure",
+              "Transparent task tracking",
+              "Reliable payment processing"
+            ].map((item, i) => (
+              <div key={i} className="bg-white/5 border border-white/10 rounded-2xl p-6 text-center hover:bg-white/10 transition-colors">
+                <CheckCircle className="w-8 h-8 text-emerald-500 mx-auto mb-4" />
+                <p className="font-semibold text-slate-200">{item}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Security & Compliance Spotlight */}
       <section className="py-32 bg-black relative border-y border-white/5">
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20 mix-blend-overlay" />
@@ -210,16 +254,19 @@ export default function PremiumLandingPage() {
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div>
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-mono text-sm mb-6 uppercase tracking-wider">
-                <Shield className="w-4 h-4" /> Grade-A Security
+                <Shield className="w-4 h-4" /> Security Section
               </div>
-              <h2 className="text-4xl md:text-6xl font-black tracking-tighter mb-6">Friction-by-Design.</h2>
-              <p className="text-xl text-slate-400 mb-8 leading-relaxed text-balance">
-                We intentionally slow down high-stakes actions. Every withdrawal triggers a multi-step node security audit. It takes longer, but it ensures your yield is never compromised by automated bot-nets.
+              <h2 className="text-4xl md:text-6xl font-black tracking-tighter mb-6">Security Comes First</h2>
+              <p className="text-xl text-slate-400 mb-6 leading-relaxed text-balance">
+                Every withdrawal goes through automated and manual verification checks to protect both users and advertisers from fraudulent activity.
               </p>
-              <ul className="space-y-4">
-                {["AES-256 Transport Encryption", "Public Proof-of-Humanity Ledger", "Strict Rate-Limiting & Visibility APIs"].map((item, i) => (
-                  <li key={i} className="flex items-center gap-3 text-slate-300 font-medium">
-                    <CheckCircle className="w-5 h-5 text-emerald-500" /> {item}
+              <p className="text-lg text-slate-500 mb-8 leading-relaxed text-balance">
+                Because security matters more than speed, some withdrawals may require additional verification before processing.
+              </p>
+              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {["AES-256 Encryption", "Anti-Bot Protection", "Secure Payment Verification", "Real-Time Fraud Monitoring"].map((item, i) => (
+                  <li key={i} className="flex items-center gap-3 text-slate-300 font-medium bg-slate-900/50 p-3 rounded-xl border border-white/5">
+                    <CheckCircle className="w-5 h-5 text-emerald-500 shrink-0" /> {item}
                   </li>
                 ))}
               </ul>
