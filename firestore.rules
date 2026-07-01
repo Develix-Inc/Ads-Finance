@@ -184,8 +184,8 @@ service cloud.firestore {
       // Users can read and update their own notifications (e.g. marking read)
       allow read, update: if isOwner(uid);
 
-      // Users cannot create their own notifications (only system does)
-      allow create: if isAdmin();
+      // Users can create their own notifications (system uses this client-side)
+      allow create: if isAdmin() || isOwner(uid);
 
       // Users can delete their own notifications
       allow delete: if isOwner(uid);
