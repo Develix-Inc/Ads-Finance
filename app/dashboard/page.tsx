@@ -6,8 +6,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { auth, db } from "@/lib/firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
-import { doc, onSnapshot } from "firebase/firestore";
-import { getUserProfile, upsertUserProfile, NODE_MULTIPLIERS, NODE_MIN_WITHDRAWAL } from "@/lib/admin";
+import { doc, onSnapshot, query, collection, where, getDocs } from "firebase/firestore";
+import { getUserProfile, upsertUserProfile, NODE_MULTIPLIERS, NODE_MIN_WITHDRAWAL, adminVerifyPayment } from "@/lib/admin";
 import { listenTransactions } from "@/lib/transactions";
 import { OnboardingWizard } from "@/components/ui/OnboardingWizard";
 import { WithdrawModal } from "@/components/ui/WithdrawModal";
@@ -136,6 +136,43 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!user?.uid) return;
     return listenTransactions(user.uid, 5, setTxs);
+  }, [user?.uid]);
+
+  /* handle paystack callback verification */
+  useEffect(() => {
+    if (!user?.uid || typeof window === "undefined") return;
+    
+    const params = new URLSearchParams(window.location.search);
+    const reference = params.get("verify");
+    if (!reference) return;
+
+    async function verifyPayment() {
+      try {
+        const res = await fetch(`/api/paystack/verify?reference=${reference}`);
+        const data = await res.json();
+        if (data.success) {
+          const q = query(collection(db, "payments"), where("referenceCode", "==", reference));
+          const snap = await getDocs(q);
+          if (!snap.empty) {
+            const paymentDoc = snap.docs[0];
+            const paymentData = paymentDoc.data();
+            
+            if (paymentData.status !== "verified") {
+              await adminVerifyPayment(paymentDoc.id, paymentData.uid, paymentData.nodeTier, "system@paystack");
+              import("sweetalert2").then(Swal => {
+                Swal.default.fire({ background: "#020617", color: "#f8fafc", icon: "success", title: "Node Activated", text: "Your payment was successful and your node is active!", customClass: { popup: "!rounded-2xl !border !border-white/10", confirmButton: "!rounded-full !bg-teal-600" } });
+              });
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Verification error:", err);
+      } finally {
+        // Remove param from URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    }
+    verifyPayment();
   }, [user?.uid]);
 
   const logout = async () => { await signOut(auth); router.push("/"); };

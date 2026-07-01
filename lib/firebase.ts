@@ -1,6 +1,6 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, initializeFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "AIzaSyATf0t63qcDyMUT895MzFCpt3PMLe_Q8hE",
@@ -14,6 +14,14 @@ const firebaseConfig = {
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
 export const auth = getAuth(app);
-export const db   = getFirestore(app);
+
+// Fix GRPC hang in Next.js Server Components / API Routes
+let dbInstance;
+try {
+  dbInstance = initializeFirestore(app, { experimentalForceLongPolling: true });
+} catch (e) {
+  dbInstance = getFirestore(app);
+}
+export const db = dbInstance;
 export const googleProvider = new GoogleAuthProvider();
 export default app;

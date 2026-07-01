@@ -1,8 +1,5 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
-import { db } from "@/lib/firebase";
-import { collection, query, where, getDocs } from "firebase/firestore";
-import { adminVerifyPayment } from "@/lib/admin";
 
 export async function POST(req: Request) {
   try {
@@ -25,25 +22,11 @@ export async function POST(req: Request) {
     if (event.event === "charge.success") {
       const reference = event.data.reference;
 
-      // Find the payment document in Firebase
-      const paymentsRef = collection(db, "payments");
-      const q = query(paymentsRef, where("referenceCode", "==", reference));
-      const snapshot = await getDocs(q);
-
-      if (!snapshot.empty) {
-        const paymentDoc = snapshot.docs[0];
-        const paymentData = paymentDoc.data();
-
-        // Prevent double verification
-        if (paymentData.status !== "verified") {
-          await adminVerifyPayment(
-            paymentDoc.id,
-            paymentData.uid,
-            paymentData.nodeTier,
-            "webhook@paystack"
-          );
-        }
-      }
+      // Because calling Firebase Web SDK in Node.js hangs the server,
+      // we rely on the client redirecting to dashboard?verify=reference 
+      // to activate the node. 
+      // For now, we just acknowledge receipt to Paystack.
+      console.log(`Webhook received charge.success for reference: ${reference}`);
     }
 
     return NextResponse.json({ status: "success" });

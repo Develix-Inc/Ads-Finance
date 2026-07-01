@@ -67,14 +67,20 @@ export default function UpgradePage() {
     setLoading(true);
     try {
       const amount = NODE_PRICES[selected.name];
+      const reference = `REF_${Date.now()}_${user.uid.slice(0, 6).toUpperCase()}`;
+
+      // 1. Log payment as pending locally using the Firebase Client SDK (avoids Node.js GRPC hang)
+      const paymentId = await submitPayment(user.uid, user.email || user.phoneNumber || "user@adsfinance.com", selected.name, reference);
+      setPaymentId(paymentId);
+      
+      // 2. Initialize Paystack
       const res = await fetch("/api/paystack/initialize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: user.email || user.phoneNumber || "user@adsfinance.com",
           amount,
-          uid: user.uid,
-          nodeTier: selected.name
+          reference
         })
       });
 

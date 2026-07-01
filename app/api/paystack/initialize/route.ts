@@ -1,11 +1,10 @@
 import { NextResponse } from "next/server";
-import { submitPayment } from "@/lib/admin";
 
 export async function POST(req: Request) {
   try {
-    const { email, amount, uid, nodeTier } = await req.json();
+    const { email, amount, reference } = await req.json();
 
-    if (!email || !amount || !uid || !nodeTier) {
+    if (!email || !amount || !reference) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
@@ -14,7 +13,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Paystack secret key not configured" }, { status: 500 });
     }
 
-    // Prepare callback url
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://adsfinance.vercel.app";
     const callbackUrl = `${baseUrl}/api/paystack/callback`;
 
@@ -28,11 +26,8 @@ export async function POST(req: Request) {
       body: JSON.stringify({
         email,
         amount: amount * 100, // Paystack amount is in kobo
+        reference,
         callback_url: callbackUrl,
-        metadata: {
-          uid,
-          nodeTier,
-        },
       }),
     });
 
@@ -43,14 +38,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: data.message }, { status: 500 });
     }
 
-    const authorizationUrl = data.data.authorization_url;
-    const reference = data.data.reference;
-
-    // 2. Log payment as pending in Firebase immediately with reference code
-    // The submitPayment function also sends a notification.
-    await submitPayment(uid, email, nodeTier, reference);
-
-    return NextResponse.json({ authorization_url: authorizationUrl });
+    return NextResponse.json({ authorization_url: data.data.authorization_url });
   } catch (error: any) {
     console.error("Paystack Init Error:", error);
     return NextResponse.json({ error: error.message || "Internal Server Error" }, { status: 500 });
