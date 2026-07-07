@@ -5,7 +5,8 @@ import { FaHeadset, FaXmark, FaPaperPlane, FaUserShield } from "react-icons/fa6"
 import { motion, AnimatePresence } from "framer-motion";
 import { auth, db } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
-import { collection, addDoc, query, where, orderBy, onSnapshot, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, query, where, onSnapshot, serverTimestamp } from "firebase/firestore";
+import { usePathname } from "next/navigation";
 
 interface ChatMessage {
   id: string;
@@ -23,6 +24,7 @@ export function SupportChatWidget() {
   const [hasUnread, setHasUnread] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const pathname = usePathname();
   
   // Track auth state
   useEffect(() => {
@@ -37,11 +39,11 @@ export function SupportChatWidget() {
     if (!user) return;
     const q = query(
       collection(db, "support_messages"),
-      where("uid", "==", user.uid),
-      orderBy("createdAt", "asc")
+      where("uid", "==", user.uid)
     );
     const unsub = onSnapshot(q, snap => {
       const msgs = snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as ChatMessage));
+      msgs.sort((a, b) => (a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0));
       setMessages(msgs);
       
       // Check if latest message is from admin and chat is closed
@@ -51,6 +53,8 @@ export function SupportChatWidget() {
           setHasUnread(true);
         }
       }
+    }, (err) => {
+      console.error("Chat widget error:", err);
     });
     return unsub;
   }, [user, open]);
@@ -70,8 +74,8 @@ export function SupportChatWidget() {
     }
   }, [open]);
 
-  // Only render widget if user is logged in
-  if (!user) return null;
+  // Only render widget if user is logged in, and not on admin pages
+  if (!user || pathname?.startsWith("/admin")) return null;
 
   async function sendMessage(e: React.FormEvent) {
     e.preventDefault();
