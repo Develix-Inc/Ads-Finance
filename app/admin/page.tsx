@@ -12,10 +12,13 @@ import {
 } from "@/lib/admin";
 import { motion, AnimatePresence } from "framer-motion";
 import { SupportTab } from "@/components/admin/SupportTab";
+import { SettingsTab } from "@/components/admin/SettingsTab";
+import { LogsTab } from "@/components/admin/LogsTab";
 import {
   FaUsers, FaMoneyBillTransfer, FaArrowDown, FaGaugeHigh,
   FaCircleCheck, FaCircleXmark, FaClockRotateLeft, FaEye,
-  FaRightFromBracket, FaShieldHalved, FaBullhorn, FaX, FaArrowTrendUp, FaHeadset
+  FaRightFromBracket, FaShieldHalved, FaBullhorn, FaX, FaArrowTrendUp, FaHeadset,
+  FaGear
 } from "react-icons/fa6";
 import Swal from "sweetalert2";
 
@@ -30,7 +33,7 @@ const SWAL = {
 const fmt = (n: number) => "₦" + (n ?? 0).toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const ts  = (t: any) => t?.seconds ? new Date(t.seconds * 1000).toLocaleString() : "—";
 
-type Tab = "overview" | "users" | "payments" | "withdrawals" | "support";
+type Tab = "overview" | "users" | "payments" | "withdrawals" | "support" | "settings" | "logs";
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -176,6 +179,8 @@ export default function AdminDashboard() {
     { id: "payments",    label: "Payments",    icon: FaMoneyBillTransfer, badge: pendingPay },
     { id: "withdrawals", label: "Withdrawals", icon: FaArrowDown,         badge: pendingWit },
     { id: "support",     label: "Support",     icon: FaHeadset },
+    { id: "settings",    label: "Settings",    icon: FaGear },
+    { id: "logs",        label: "Logs",        icon: FaShieldHalved },
   ];
 
   return (
@@ -443,9 +448,13 @@ export default function AdminDashboard() {
         )}
 
         {/* SUPPORT CHATS */}
-        {tab === "support" && (
-          <SupportTab />
-        )}
+        {tab === "support" && <SupportTab />}
+
+        {/* SETTINGS */}
+        {tab === "settings" && <SettingsTab />}
+
+        {/* LOGS */}
+        {tab === "logs" && <LogsTab />}
       </div>
 
       {/* USER MODAL */}

@@ -492,7 +492,7 @@ export default function TasksPage() {
           <div className="bg-rose-500/10 border border-rose-500/20 rounded-[20px] p-6 text-center">
             <FaShield className="w-8 h-8 text-rose-400 mx-auto mb-2" />
             <p className="font-black text-white text-base">Account Suspended</p>
-            <p className="text-slate-400 text-sm mt-1">Your account has been suspended by administration. You cannot earn rewards.</p>
+            <p className="text-slate-400 text-sm mt-1">Your account has been suspended by the system. You cannot earn rewards.</p>
           </div>
         ) : profile?.nodeStatus !== 'active' ? (
           <div className="bg-amber-500/10 border border-amber-500/20 rounded-[20px] p-6 text-center">
