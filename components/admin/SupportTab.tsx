@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { FaHeadset, FaPaperPlane, FaUserShield, FaClockRotateLeft } from "react-icons/fa6";
+import { FaHeadset, FaPaperPlane, FaUserShield, FaClockRotateLeft, FaCheckDouble } from "react-icons/fa6";
 import { db } from "@/lib/firebase";
 import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, writeBatch, getDocs, where } from "firebase/firestore";
 import Swal from "sweetalert2";
@@ -83,16 +83,16 @@ export function SupportTab() {
     });
   }
 
-  async function clearChatHistory() {
+  async function handleResolve() {
     if (!activeUid) return;
     const { isConfirmed } = await Swal.fire({
-      title: "Clear Chat History?",
-      text: "This will permanently delete all messages for this user, starting a completely fresh chat.",
-      icon: "warning",
+      title: "Resolve & Reset Chat?",
+      text: "This will permanently delete this conversation and mark it as resolved.",
+      icon: "question",
       showCancelButton: true,
       confirmButtonColor: "#14b8a6",
       cancelButtonColor: "#f43f5e",
-      confirmButtonText: "Yes, clear it!",
+      confirmButtonText: "Yes, resolve it!",
       background: "#0f172a", color: "#f8fafc"
     });
     if (!isConfirmed) return;
@@ -103,16 +103,6 @@ export function SupportTab() {
     snap.docs.forEach(d => batch.delete(d.ref));
     await batch.commit();
     setActiveUid(null);
-  }
-
-  async function markResolved() {
-    if (!activeUid || !activeSession) return;
-    const q = query(collection(db, "support_messages"), where("uid", "==", activeUid), where("readByAdmin", "==", false));
-    const snap = await getDocs(q);
-    if (snap.empty) return;
-    const batch = writeBatch(db);
-    snap.docs.forEach(d => batch.update(d.ref, { readByAdmin: true }));
-    await batch.commit();
   }
 
   const ts = (sec: number) => {
@@ -179,13 +169,9 @@ export function SupportTab() {
                 <p className="text-xs text-slate-500 font-mono">UID: {activeSession.uid}</p>
               </div>
               <div className="flex gap-2">
-                <button onClick={markResolved} title="Mark as Read / Resolved"
-                  className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 text-xs font-bold transition-colors">
-                  Resolve
-                </button>
-                <button onClick={clearChatHistory} title="Delete entire chat history"
-                  className="px-3 py-1.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 hover:bg-rose-500/20 text-xs font-bold transition-colors">
-                  Clear History
+                <button onClick={handleResolve} title="Resolve and clear chat history"
+                  className="px-3 py-1.5 rounded-lg bg-teal-500/10 border border-teal-500/20 text-teal-400 hover:bg-teal-500/20 text-xs font-bold transition-colors flex items-center gap-2">
+                  <FaCheckDouble className="w-3.5 h-3.5" /> Resolve
                 </button>
               </div>
             </div>

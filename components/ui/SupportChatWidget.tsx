@@ -181,15 +181,17 @@ export function SupportChatWidget() {
         )}
       </AnimatePresence>
 
-      <button
-        onClick={() => setOpen(!open)}
-        className="w-14 h-14 bg-teal-500 text-slate-950 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(20,184,166,0.3)] hover:scale-105 transition-transform relative"
-      >
-        {open ? <FaXmark className="w-6 h-6" /> : <FaHeadset className="w-6 h-6" />}
-        {!open && hasUnread && (
-          <span className="absolute top-0 right-0 w-3.5 h-3.5 bg-rose-500 border-2 border-slate-950 rounded-full" />
-        )}
-      </button>
+      {!open && (
+        <button
+          onClick={() => setOpen(true)}
+          className="w-14 h-14 bg-teal-500 text-slate-950 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(20,184,166,0.3)] hover:scale-105 transition-transform relative mt-4"
+        >
+          <FaHeadset className="w-6 h-6" />
+          {hasUnread && (
+            <span className="absolute top-0 right-0 w-3.5 h-3.5 bg-rose-500 border-2 border-slate-950 rounded-full" />
+          )}
+        </button>
+      )}
     </div>
   );
 }

@@ -70,7 +70,7 @@ export function NotificationBell({ uid }: Props) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.96 }}
             transition={{ duration: 0.15 }}
-            className="absolute right-0 mt-2 w-[calc(100vw-2rem)] sm:w-80 max-w-[320px] bg-slate-900 border border-white/10 rounded-[20px] shadow-2xl z-[200] overflow-hidden"
+            className="fixed inset-x-4 top-20 sm:absolute sm:inset-auto sm:right-0 sm:mt-2 sm:w-80 max-w-[320px] mx-auto bg-slate-900 border border-white/10 rounded-[20px] shadow-2xl z-[200] overflow-hidden"
           >
             {/* header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
