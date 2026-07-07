@@ -307,11 +307,13 @@ export default function DashboardPage() {
                 <p className={`text-sm ${sub}`}>Welcome back</p>
                 <h2 className="text-2xl md:text-3xl font-black tracking-tight capitalize">{name}</h2>
               </div>
-              {profile?.photoURL || user?.photoURL ? (
-                <Image src={profile?.photoURL || user?.photoURL} alt={name} width={48} height={48} className="w-12 h-12 rounded-full object-cover border-2 border-teal-500/30 shadow-lg" />
-              ) : (
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-teal-600 to-slate-800 flex items-center justify-center font-black text-white text-xl shadow-lg">{avatar}</div>
-              )}
+              <Link href="/settings" className="hover:opacity-80 transition-opacity">
+                {profile?.photoURL || user?.photoURL ? (
+                  <Image src={profile?.photoURL || user?.photoURL} alt={name} width={48} height={48} className="w-12 h-12 rounded-full object-cover border-2 border-teal-500/30 shadow-lg" />
+                ) : (
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-teal-600 to-slate-800 flex items-center justify-center font-black text-white text-xl shadow-lg">{avatar}</div>
+                )}
+              </Link>
             </div>
 
             {/* WALLET CARD */}
@@ -335,7 +337,17 @@ export default function DashboardPage() {
 
                 <div className="grid grid-cols-3 gap-3 mb-5">
                   {[
-                    { label: "Withdraw",  icon: FaArrowUp,   action: () => nodeActive ? setShowWithdraw(true) : null },
+                    { label: "Withdraw",  icon: FaArrowUp,   action: () => {
+                      if (profile?.accountStatus === 'suspended') {
+                        import("sweetalert2").then(Swal => Swal.default.fire({
+                          background: "#020617", color: "#f8fafc", icon: "error", title: "Account Suspended",
+                          text: "Your account is suspended. You cannot make withdrawals.",
+                          customClass: { popup: "!rounded-2xl !border !border-white/10", confirmButton: "!rounded-full !bg-teal-600" }
+                        }));
+                      } else if (nodeActive) {
+                        setShowWithdraw(true);
+                      }
+                    } },
                     { label: "Referrals", icon: FaUsers,     action: () => router.push("/referrals") },
                     { label: "Upgrade",   icon: FaBolt,      action: () => router.push("/upgrade") },
                   ].map((a, i) => (
@@ -364,7 +376,11 @@ export default function DashboardPage() {
                 { label: "Sales Commission",  value: fmt(profile?.salesCommission ?? 0),     icon: FaArrowTrendUp, acc: "amber" },
               ].map((s, i) => (
                 <div key={i} className={`relative rounded-[22px] p-5 border ${card} shadow-sm`}>
-                  {!nodeActive && <LockedOverlay reason="Node required to earn" />}
+                  {profile?.accountStatus === 'suspended' ? (
+                    <LockedOverlay reason="Account Suspended" />
+                  ) : !nodeActive ? (
+                    <LockedOverlay reason="Node required to earn" />
+                  ) : null}
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 ${s.acc === "teal" ? "bg-teal-500/10 text-teal-400" : "bg-amber-500/10 text-amber-400"}`}>
                     <s.icon className="w-5 h-5" />
                   </div>

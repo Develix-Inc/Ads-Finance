@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { SupportChatWidget } from "@/components/ui/SupportChatWidget";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://adsfinance.vercel.app"),
@@ -38,8 +39,9 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
       </head>
-      <body className="font-sans antialiased bg-background text-foreground min-h-screen">
+      <body className="font-sans antialiased bg-background text-foreground min-h-screen relative overflow-x-hidden">
         {children}
+        <SupportChatWidget />
       </body>
     </html>
   );

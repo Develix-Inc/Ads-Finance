@@ -170,7 +170,7 @@ export function WithdrawModal({ uid, userEmail, balance, minWithdrawal = 500, wi
                     </div>
                   ))}
                 </div>
-                <p className="text-xs text-slate-500 text-center">Your withdrawal will be processed within 24 hours after admin review.</p>
+                <p className="text-xs text-slate-500 text-center">Your withdrawal will be processed within 24 hours after support review.</p>
                 <div className="flex gap-3">
                   <button onClick={() => setStep(0)} className="flex-1 py-3.5 rounded-2xl border border-white/10 text-slate-400 text-sm font-semibold hover:bg-white/5 transition-colors">← Back</button>
                   <button onClick={runInterlock}
@@ -200,7 +200,7 @@ export function WithdrawModal({ uid, userEmail, balance, minWithdrawal = 500, wi
                 <div>
                   <p className="text-white font-black text-xl">Request Received</p>
                   <p className="text-slate-400 text-sm mt-2 leading-relaxed">
-                    Your withdrawal of <strong className="text-white">₦{numAmount.toLocaleString()}</strong> has been submitted. Admin will process it within <strong className="text-white">24 hours</strong>.
+                    Your withdrawal of <strong className="text-white">₦{numAmount.toLocaleString()}</strong> has been submitted. Support will process it within <strong className="text-white">24 hours</strong>.
                   </p>
                 </div>
                 <button onClick={() => { onClose(); onSuccess?.(); }}

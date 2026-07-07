@@ -309,6 +309,17 @@ service cloud.firestore {
     }
 
     // ─────────────────────────────────────────────────────────────────────────
+    // SUPPORT MESSAGES  /support_messages/{messageId}
+    // Live chat messages between user and support
+    // ─────────────────────────────────────────────────────────────────────────
+    match /support_messages/{messageId} {
+      allow read: if isSignedIn() && (resource.data.uid == request.auth.uid || isAdmin());
+      allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid;
+      allow create: if isAdmin(); // admin can create messages to user
+      allow update, delete: if isAdmin();
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
     // DENY ALL: catch-all — any unmatched path is denied by default
     // ─────────────────────────────────────────────────────────────────────────
     // Firestore denies by default, this is just for documentation clarity.

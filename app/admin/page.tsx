@@ -8,14 +8,14 @@ import { collection, onSnapshot } from "firebase/firestore";
 import {
   adminVerifyPayment, adminRejectPayment, adminProcessWithdrawal,
   adminRejectWithdrawal, adminCreditUser, adminDebitUser,
-  upsertUserProfile, getUserProfile,
-  adminSetUserStatus, adminBroadcast,
+  upsertUserProfile, getUserProfile, adminSetUserStatus, adminBroadcast,
 } from "@/lib/admin";
 import { motion, AnimatePresence } from "framer-motion";
+import { SupportTab } from "@/components/admin/SupportTab";
 import {
   FaUsers, FaMoneyBillTransfer, FaArrowDown, FaGaugeHigh,
   FaCircleCheck, FaCircleXmark, FaClockRotateLeft, FaEye,
-  FaRightFromBracket, FaShieldHalved, FaBullhorn, FaX, FaArrowTrendUp
+  FaRightFromBracket, FaShieldHalved, FaBullhorn, FaX, FaArrowTrendUp, FaHeadset
 } from "react-icons/fa6";
 import Swal from "sweetalert2";
 
@@ -30,7 +30,7 @@ const SWAL = {
 const fmt = (n: number) => "₦" + (n ?? 0).toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const ts  = (t: any) => t?.seconds ? new Date(t.seconds * 1000).toLocaleString() : "—";
 
-type Tab = "overview" | "users" | "payments" | "withdrawals";
+type Tab = "overview" | "users" | "payments" | "withdrawals" | "support";
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -113,23 +113,27 @@ export default function AdminDashboard() {
     }
   }
 
-  async function creditUser(uid: string) {
-    const { value } = await Swal.fire({ ...SWAL, title: "Credit Amount (₦)", input: "number", inputPlaceholder: "e.g. 5000", showCancelButton: true });
-    if (value && parseFloat(value) > 0) {
-      await adminCreditUser(uid, parseFloat(value), "Admin manual credit", admin.email);
-      Swal.fire({ ...SWAL, icon: "success", title: "Credited!", timer: 1200, showConfirmButton: false });
+  async function creditUser(uid: string, value: string) {
+    if (!value || isNaN(Number(value))) return;
+    const { isConfirmed } = await Swal.fire({ ...SWAL, title: "Confirm Credit", text: `Credit ₦${value} to user?`, showCancelButton: true });
+    if (isConfirmed) {
+      await adminCreditUser(uid, parseFloat(value), "System credit", admin.email);
+      setEditBal("");
+      Swal.fire({ ...SWAL, icon: "success", title: "Credited", timer: 1200, showConfirmButton: false });
     }
   }
 
-  async function debitUser(uid: string) {
-    const { value } = await Swal.fire({ ...SWAL, title: "Debit Amount (₦)", input: "number", inputPlaceholder: "e.g. 5000", showCancelButton: true });
-    if (value && parseFloat(value) > 0) {
-      await adminDebitUser(uid, parseFloat(value), "Admin manual debit", admin.email);
-      Swal.fire({ ...SWAL, icon: "info", title: "Debited", timer: 1200, showConfirmButton: false });
+  async function debitUser(uid: string, value: string) {
+    if (!value || isNaN(Number(value))) return;
+    const { isConfirmed } = await Swal.fire({ ...SWAL, title: "Confirm Debit", text: `Debit ₦${value} from user?`, showCancelButton: true });
+    if (isConfirmed) {
+      await adminDebitUser(uid, parseFloat(value), "System debit", admin.email);
+      setEditBal("");
+      Swal.fire({ ...SWAL, icon: "success", title: "Debited", timer: 1200, showConfirmButton: false });
     }
   }
 
-  async function setStatus(uid: string, status: "active" | "suspended" | "banned") {
+  async function setStatus(uid: string, status: "active" | "suspended") {
     await adminSetUserStatus(uid, status, admin.email);
     setSelectedUser(null);
     Swal.fire({ ...SWAL, icon: "success", title: `Account ${status}`, timer: 1200, showConfirmButton: false });
@@ -171,6 +175,7 @@ export default function AdminDashboard() {
     { id: "users",       label: "Users",       icon: FaUsers,             badge: users.length },
     { id: "payments",    label: "Payments",    icon: FaMoneyBillTransfer, badge: pendingPay },
     { id: "withdrawals", label: "Withdrawals", icon: FaArrowDown,         badge: pendingWit },
+    { id: "support",     label: "Support",     icon: FaHeadset },
   ];
 
   return (
@@ -298,8 +303,8 @@ export default function AdminDashboard() {
                               className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 transition-colors">
                               <FaEye className="w-3.5 h-3.5" />
                             </button>
-                            <button onClick={() => creditUser(u.uid)}
-                              className="p-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-400 transition-colors">
+                            <button onClick={() => setSelectedUser(u)}
+                              className="p-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-400 transition-colors" title="Manage Funds">
                               <FaArrowTrendUp className="w-3.5 h-3.5" />
                             </button>
                           </div>
@@ -342,18 +347,11 @@ export default function AdminDashboard() {
                     <div className="mt-5 space-y-3">
                       <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">Wallet Actions</p>
                       <div className="grid grid-cols-2 gap-2">
-                        <button onClick={() => { creditUser(selectedUser.uid); setSelectedUser(null); }}
-                          className="py-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm font-bold hover:bg-emerald-500/20 transition-colors">
-                          Credit Wallet
-                        </button>
-                        <button onClick={() => { debitUser(selectedUser.uid); setSelectedUser(null); }}
-                          className="py-2.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-sm font-bold hover:bg-rose-500/20 transition-colors">
-                          Debit Wallet
-                        </button>
+                        {/* removed big credit/debit buttons in favor of the new modal wallet balance edit */}
                       </div>
                       <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mt-3">Account Status</p>
                       <div className="grid grid-cols-3 gap-2">
-                        {(["active", "suspended", "banned"] as const).map(s => (
+                        {(["active", "suspended"] as const).map(s => (
                           <button key={s} onClick={() => setStatus(selectedUser.uid, s)}
                             className={`py-2.5 rounded-xl text-xs font-bold capitalize transition-colors border ${
                               selectedUser.accountStatus === s
@@ -443,7 +441,91 @@ export default function AdminDashboard() {
             {withdrawals.length === 0 && <p className="text-slate-600 text-center py-10">No withdrawals yet</p>}
           </div>
         )}
+
+        {/* SUPPORT CHATS */}
+        {tab === "support" && (
+          <SupportTab />
+        )}
       </div>
+
+      {/* USER MODAL */}
+      <AnimatePresence>
+        {selectedUser && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSelectedUser(null)}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+            <motion.div initial={{ scale: 0.95, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.95, opacity: 0, y: 20 }}
+              className="relative w-full max-w-md bg-slate-900 border border-white/10 rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
+              
+              <div className="p-6 border-b border-white/10 flex items-center justify-between sticky top-0 bg-slate-900 z-10 shrink-0">
+                <div>
+                  <h3 className="font-bold text-white text-lg leading-tight">{selectedUser.displayName || "Unknown User"}</h3>
+                  <p className="text-slate-500 text-sm">{selectedUser.email}</p>
+                </div>
+                <button onClick={() => setSelectedUser(null)} className="p-2 hover:bg-white/5 rounded-full transition-colors"><FaX className="w-4 h-4 text-slate-400" /></button>
+              </div>
+
+              <div className="p-6 overflow-y-auto">
+                <div className="space-y-6">
+                  
+                  {/* Balance Edit */}
+                  <div>
+                    <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-2">Wallet Balance</p>
+                    <div className="flex gap-2">
+                      <div className="relative flex-1">
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">₦</span>
+                        <input type="number" value={editBal} onChange={e => setEditBal(e.target.value)} placeholder="0.00"
+                          className="w-full bg-slate-950 border border-white/10 rounded-xl pl-8 pr-4 py-2.5 text-white focus:border-teal-500 transition-colors focus:outline-none" />
+                      </div>
+                      <button onClick={() => creditUser(selectedUser.uid, editBal)} title="Credit"
+                        className="w-11 h-11 flex items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 transition-colors">
+                        <FaArrowTrendUp />
+                      </button>
+                      <button onClick={() => debitUser(selectedUser.uid, editBal)} title="Debit"
+                        className="w-11 h-11 flex items-center justify-center rounded-xl bg-rose-500/10 text-rose-400 border border-rose-500/20 hover:bg-rose-500/20 transition-colors">
+                        <FaArrowDown />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div>
+                    <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-2">Node Access</p>
+                    <div className="flex gap-2">
+                      <button onClick={() => adminSetUserStatus(selectedUser.uid, "active", admin.email)}
+                        className="flex-1 py-2.5 rounded-xl bg-teal-500/10 text-teal-400 border border-teal-500/20 text-xs font-bold transition-colors hover:bg-teal-500/20">
+                        Force Activate Node
+                      </button>
+                    </div>
+                    <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mt-3 mb-2">Account Status</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      {(["active", "suspended"] as const).map(s => (
+                        <button key={s} onClick={() => setStatus(selectedUser.uid, s)}
+                          className={`py-2.5 rounded-xl text-xs font-bold capitalize transition-colors border ${
+                            selectedUser.accountStatus === s
+                              ? "bg-teal-500 text-slate-950 border-transparent"
+                              : "bg-white/5 border-white/10 text-slate-400 hover:bg-white/10"}`}>
+                          {s}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Info */}
+                  <div className="bg-slate-950 rounded-2xl p-4 border border-white/5 space-y-3">
+                    <div className="flex justify-between items-center"><span className="text-slate-500 text-xs">Joined</span><span className="text-slate-300 text-xs font-mono">{ts(selectedUser.createdAt)}</span></div>
+                    <div className="flex justify-between items-center"><span className="text-slate-500 text-xs">Node</span><span className="text-slate-300 text-xs font-bold">{selectedUser.nodeTier || "None"}</span></div>
+                    <div className="flex justify-between items-center"><span className="text-slate-500 text-xs">Status</span><span className="text-slate-300 text-xs uppercase">{selectedUser.nodeStatus || "unactivated"}</span></div>
+                    <div className="flex justify-between items-center"><span className="text-slate-500 text-xs">UID</span><span className="text-slate-300 text-[10px] font-mono">{selectedUser.uid}</span></div>
+                  </div>
+
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
     </div>
   );
 }

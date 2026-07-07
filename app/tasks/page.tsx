@@ -9,7 +9,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { doc, onSnapshot } from "firebase/firestore";
 import {
   getTodayVideos, getAdRewardData, claimAdReward,
-  DAILY_AD_LIMIT, MIN_WATCH_SECS, VideoItem, AdRewardData
+  TIER_LIMITS, MIN_WATCH_SECS, VideoItem, AdRewardData
 } from "@/lib/adRewards";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -241,7 +241,7 @@ function WatchModal({ video, onClose, onClaim, alreadyDone }: WatchModalProps) {
 }
 
 // ─── Video Card ───────────────────────────────────────────────────────────────
-function VideoCard({ video, watched, onWatch, disabled }: { video: VideoItem; watched: boolean; onWatch: () => void; disabled: boolean }) {
+function VideoCard({ video, watched, onWatch, disabled, limits }: { video: VideoItem; watched: boolean; onWatch: () => void; disabled: boolean; limits: any }) {
   return (
     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
       className={`relative bg-slate-900 border rounded-[22px] overflow-hidden transition-all ${watched ? "border-teal-500/30" : "border-white/10 hover:border-white/20"}`}>
@@ -272,7 +272,7 @@ function VideoCard({ video, watched, onWatch, disabled }: { video: VideoItem; wa
         <div className="flex items-center justify-between">
           <div>
             <p className="text-[10px] text-slate-500 uppercase tracking-wider">Reward</p>
-            <p className="text-teal-400 font-black text-sm">₦40 – ₦200</p>
+            <p className="text-teal-400 font-black text-sm">₦{limits?.minReward} – ₦{limits?.maxReward}</p>
           </div>
 
           {watched ? (
@@ -318,6 +318,7 @@ export default function TasksPage() {
   const [walletBalance, setWalletBalance] = useState(0);
   const [videos,      setVideos]      = useState<VideoItem[]>([]);
   const [activeVideo, setActiveVideo] = useState<VideoItem | null>(null);
+  const [profile, setProfile] = useState<any>(null);
 
   // Real-time listener for ad rewards to ensure Today's stats update instantly
   useEffect(() => {
@@ -329,12 +330,14 @@ export default function TasksPage() {
     }, err => console.error("ad_rewards snapshot error:", err));
   }, [uid]);
 
-  // Real-time listener for user wallet balance to ensure it updates instantly in the header
+  // Real-time listener for user profile to update wallet balance and node status instantly
   useEffect(() => {
     if (!uid) return;
     return onSnapshot(doc(db, "users", uid), snap => {
       if (snap.exists()) {
-        setWalletBalance(snap.data().walletBalance ?? 0);
+        const data = snap.data();
+        setProfile(data);
+        setWalletBalance(data.walletBalance ?? 0);
       }
     }, err => console.error("users snapshot error:", err));
   }, [uid]);
@@ -346,10 +349,9 @@ export default function TasksPage() {
       try {
         const [data, todayVids] = await Promise.all([
           getAdRewardData(u.uid),
-          getTodayVideos(),          // now async — reads Firestore first, static fallback
+          getTodayVideos(),
         ]);
         setRewardData(data);
-        // CRITICAL: only set videos if we actually got some back
         if (todayVids.length > 0) {
           setVideos(todayVids);
         } else {
@@ -378,7 +380,7 @@ export default function TasksPage() {
   const handleClaim = useCallback(async (videoId: string) => {
     if (!uid) return;
     try {
-      const result = await claimAdReward(uid, videoId);
+      const result = await claimAdReward(uid, videoId, profile?.nodeTier);
 
       if (result.success) {
         // Refresh reward data
@@ -451,9 +453,13 @@ export default function TasksPage() {
     );
   }
 
+  const nodeTier    = profile?.nodeTier || "Node Alpha";
+  const limits      = TIER_LIMITS[nodeTier] || TIER_LIMITS["Node Alpha"];
+  const dailyCap    = limits.dailyCap;
+  
   const daily       = rewardData?.dailyEarnings ?? 0;
-  const limitPct    = Math.min((daily / DAILY_AD_LIMIT) * 100, 100);
-  const limitHit    = daily >= DAILY_AD_LIMIT;
+  const limitPct    = Math.min((daily / dailyCap) * 100, 100);
+  const limitHit    = daily >= dailyCap;
   const watched     = rewardData?.watchedToday ?? [];
 
   return (
@@ -482,6 +488,24 @@ export default function TasksPage() {
 
       <div className="max-w-2xl mx-auto px-4 py-5 space-y-5">
 
+        {profile?.accountStatus === 'suspended' ? (
+          <div className="bg-rose-500/10 border border-rose-500/20 rounded-[20px] p-6 text-center">
+            <FaShield className="w-8 h-8 text-rose-400 mx-auto mb-2" />
+            <p className="font-black text-white text-base">Account Suspended</p>
+            <p className="text-slate-400 text-sm mt-1">Your account has been suspended by administration. You cannot earn rewards.</p>
+          </div>
+        ) : profile?.nodeStatus !== 'active' ? (
+          <div className="bg-amber-500/10 border border-amber-500/20 rounded-[20px] p-6 text-center">
+            <FaLock className="w-8 h-8 text-amber-400 mx-auto mb-2" />
+            <p className="font-black text-white text-base">Node Not Active</p>
+            <p className="text-slate-400 text-sm mt-1">You need an active Validator Node license to watch ads and earn rewards.</p>
+            <Link href="/upgrade" className="inline-block mt-4 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-6 py-2.5 rounded-full transition-colors text-sm">
+              Upgrade Now
+            </Link>
+          </div>
+        ) : (
+          <>
+
         {/* Daily limit bar */}
         <div className="bg-slate-900 border border-white/10 rounded-[20px] p-5">
           <div className="flex items-center justify-between mb-3">
@@ -489,7 +513,7 @@ export default function TasksPage() {
               <FaBullseye className="w-4 h-4 text-teal-400" />
               <span className="font-bold text-sm">Daily Earning Progress</span>
             </div>
-            <span className="text-xs text-slate-400 font-mono">{fmt(daily)} / {fmt(DAILY_AD_LIMIT)}</span>
+            <span className="text-xs text-slate-400 font-mono">{fmt(daily)} / {fmt(dailyCap)}</span>
           </div>
           <div className="h-3 bg-slate-800 rounded-full overflow-hidden">
             <motion.div
@@ -505,7 +529,7 @@ export default function TasksPage() {
             </p>
           ) : (
             <p className="text-slate-500 text-xs mt-2">
-              {fmt(DAILY_AD_LIMIT - daily)} remaining today · Resets midnight
+              {fmt(dailyCap - daily)} remaining today · Resets midnight
             </p>
           )}
         </div>
@@ -513,9 +537,9 @@ export default function TasksPage() {
         {/* Stats */}
         <div className="grid grid-cols-3 gap-3">
           {[
-            { label: "Watched",    value: `${watched.length}/${videos.length}`,   color: "text-white" },
+            { label: "Watched",    value: `${watched.length}/${limits.maxVideos}`,   color: "text-white" },
             { label: "Earned",     value: fmt(daily),                              color: "text-teal-400" },
-            { label: "Remaining",  value: fmt(Math.max(DAILY_AD_LIMIT - daily, 0)), color: "text-amber-400" },
+            { label: "Remaining",  value: fmt(Math.max(dailyCap - daily, 0)), color: "text-amber-400" },
           ].map((s, i) => (
             <div key={i} className="bg-slate-900 border border-white/10 rounded-[18px] p-4 text-center">
               <p className={`text-lg font-black ${s.color}`}>{s.value}</p>
@@ -527,25 +551,26 @@ export default function TasksPage() {
         {/* Refresh note */}
         <div className="flex items-center gap-2 text-xs text-slate-500">
           <FaRotate className="w-3 h-3" />
-          Videos refresh daily at midnight. Watch all 7 to maximise earnings.
+          Videos refresh daily at midnight. Watch all {limits.maxVideos} to maximise earnings.
         </div>
 
         {/* Video grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {videos.map((v, i) => (
+          {videos.slice(0, limits.maxVideos).map((v, i) => (
             <motion.div key={v.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.07 }}>
               <VideoCard
                 video={v}
                 watched={watched.includes(v.id)}
                 disabled={limitHit || watched.includes(v.id)}
                 onWatch={() => setActiveVideo(v)}
+                limits={limits}
               />
             </motion.div>
           ))}
         </div>
 
         {/* Watched all — ONLY show if videos actually loaded AND all are watched */}
-        {videos.length > 0 && watched.length >= videos.length && (
+        {videos.length > 0 && watched.length >= limits.maxVideos && (
           <div className="bg-teal-500/10 border border-teal-500/20 rounded-[20px] p-6 text-center">
             <FaCircleCheck className="w-8 h-8 text-teal-400 mx-auto mb-2" />
             <p className="font-black text-white text-base">All videos watched!</p>
@@ -560,6 +585,8 @@ export default function TasksPage() {
             <p className="font-black text-white text-base">Couldn't load today's videos</p>
             <p className="text-slate-400 text-sm mt-1">Please try again later or contact support.</p>
           </div>
+        )}
+        </>
         )}
       </div>
 

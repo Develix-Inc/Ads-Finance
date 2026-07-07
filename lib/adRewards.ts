@@ -1,11 +1,15 @@
 import { db } from "./firebase";
 import { doc, getDoc, setDoc, serverTimestamp, arrayUnion } from "firebase/firestore";
 import { recordTransaction } from "./transactions";
+import { getUserProfile } from "./admin";
 
-export const DAILY_AD_LIMIT   = 3000;  // ₦3,000/day hard cap
-export const MIN_REWARD       = 40;    // ₦40 minimum per video
-export const MAX_REWARD       = 200;   // ₦200 maximum per video
-export const MIN_WATCH_SECS   = 180;   // 3 minutes active watch to unlock reward
+export const MIN_WATCH_SECS = 180;
+
+export const TIER_LIMITS: Record<string, { dailyCap: number, minReward: number, maxReward: number, maxVideos: number }> = {
+  "Node Alpha": { dailyCap: 3000, minReward: 150, maxReward: 300, maxVideos: 10 },
+  "Node Sigma": { dailyCap: 7500, minReward: 350, maxReward: 500, maxVideos: 15 },
+  "Node Omega": { dailyCap: 24000, minReward: 900, maxReward: 1200, maxVideos: 20 },
+};
 
 export interface VideoItem {
   id:          string;
@@ -58,12 +62,12 @@ export function todayStr(): string {
   return new Date(Date.now() + 3600_000).toISOString().split("T")[0]; // WAT = UTC+1
 }
 
-// ─── Static fallback rotation (15 videos/day from pool) ───────────────────────
+// ─── Static fallback rotation (25 videos/day from pool) ───────────────────────
 export function getStaticTodayVideos(): VideoItem[] {
   const dayOfYear = Math.floor((Date.now() + 3600_000) / 86_400_000); // WAT days since epoch
   const start     = (dayOfYear * 15) % VIDEO_POOL.length;
   const pool      = [...VIDEO_POOL, ...VIDEO_POOL, ...VIDEO_POOL];
-  return pool.slice(start, start + 15);
+  return pool.slice(start, start + 25);
 }
 
 // ─── Primary: read from Firestore daily_videos (filled by YouTube API cron) ──
@@ -114,22 +118,29 @@ export async function getAdRewardData(uid: string): Promise<AdRewardData> {
   return data;
 }
 
-// ─── Generate a random reward (₦40–₦200) ─────────────────────────────────────
-export function generateReward(remaining: number): number {
-  const raw = Math.floor(Math.random() * (MAX_REWARD - MIN_REWARD + 1)) + MIN_REWARD;
+// ─── Generate a random reward ─────────────────────────────────────
+export function generateReward(remaining: number, minReward: number, maxReward: number): number {
+  const raw = Math.floor(Math.random() * (maxReward - minReward + 1)) + minReward;
   return Math.min(raw, remaining); // cap to not exceed daily limit
 }
 
 // ─── Claim reward after verified watch ───────────────────────────────────────
 export async function claimAdReward(
   uid: string,
-  videoId: string
+  videoId: string,
+  nodeTier: string = "Node Alpha"
 ): Promise<{ success: boolean; reward: number; message: string }> {
+
+  const profile = await getUserProfile(uid);
+  if (profile?.accountStatus === 'suspended') {
+    return { success: false, reward: 0, message: "Your account is suspended. You cannot earn rewards." };
+  }
 
   const data  = await getAdRewardData(uid);
   const today = todayStr();
+  const limits = TIER_LIMITS[nodeTier] || TIER_LIMITS["Node Alpha"];
 
-  if (data.dailyEarnings >= DAILY_AD_LIMIT) {
+  if (data.dailyEarnings >= limits.dailyCap) {
     return { success: false, reward: 0, message: "Daily ad earning limit reached. Come back tomorrow." };
   }
 
@@ -137,8 +148,8 @@ export async function claimAdReward(
     return { success: false, reward: 0, message: "You've already earned from this video today." };
   }
 
-  const remaining = DAILY_AD_LIMIT - (data.dailyEarnings ?? 0);
-  const reward    = generateReward(remaining);
+  const remaining = limits.dailyCap - (data.dailyEarnings ?? 0);
+  const reward    = generateReward(remaining, limits.minReward, limits.maxReward);
 
   const ref = doc(db, "ad_rewards", uid);
   await setDoc(ref, {

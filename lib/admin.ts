@@ -44,6 +44,10 @@ export async function getUserProfile(uid: string) {
 
 /* ─── Payments (node upgrades) ─── */
 export async function submitPayment(uid: string, userEmail: string, nodeTier: string, refCode: string) {
+  const profile = await getUserProfile(uid);
+  if (profile?.accountStatus === 'suspended') {
+    throw new Error("Your account is suspended. You cannot make payments.");
+  }
   const amount = NODE_PRICES[nodeTier] ?? 0;
   const ref    = await addDoc(collection(db, "payments"), {
     uid, userEmail, nodeTier, amount, referenceCode: refCode,
@@ -68,6 +72,10 @@ export async function submitWithdrawal(
   bank: { bankName: string; accountNumber: string; accountName: string }
 ) {
   const profile = await getUserProfile(uid);
+  if (profile?.accountStatus === 'suspended') {
+    throw new Error("Your account is suspended. You cannot make withdrawals.");
+  }
+  
   const tier = profile?.nodeTier || "Node Alpha";
   const minWithdrawal = NODE_MIN_WITHDRAWAL[tier] || 75000;
 
@@ -86,7 +94,7 @@ export async function submitWithdrawal(
 
   await sendNotification(uid,
     "Withdrawal Request Submitted",
-    `Your withdrawal of ₦${amount.toLocaleString()} is pending admin approval.`,
+    `Your withdrawal of ₦${amount.toLocaleString()} is pending support review.`,
     "withdrawal"
   );
 
@@ -209,13 +217,13 @@ export async function adminFreezeWallet(uid: string, frozen: boolean, adminEmail
   await upsertUserProfile(uid, { walletFrozen: frozen });
   await sendNotification(uid,
     frozen ? "Wallet Frozen" : "Wallet Unfrozen",
-    frozen ? "Your wallet has been frozen by admin. Contact support." : "Your wallet has been unfrozen.",
+    frozen ? "Your wallet has been frozen by Support. Contact customer care." : "Your wallet has been unfrozen.",
     frozen ? "error" : "success"
   );
   await logAdminAction(adminEmail, frozen ? "freeze_wallet" : "unfreeze_wallet", uid);
 }
 
-export async function adminSetUserStatus(uid: string, status: "active" | "suspended" | "banned", adminEmail: string) {
+export async function adminSetUserStatus(uid: string, status: "active" | "suspended", adminEmail: string) {
   await upsertUserProfile(uid, { accountStatus: status });
   await sendNotification(uid,
     `Account ${status.charAt(0).toUpperCase() + status.slice(1)}`,
