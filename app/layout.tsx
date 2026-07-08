@@ -1,9 +1,23 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { SupportChatWidget } from "@/components/ui/SupportChatWidget";
 
+export const viewport: Viewport = {
+  themeColor: "#020617", // slate-950
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+};
+
 export const metadata: Metadata = {
   metadataBase: new URL("https://adsfinance.vercel.app"),
+  applicationName: "AdsFinance",
+  authors: [{ name: "AdsFinance Team" }],
+  generator: "Next.js",
+  keywords: ["AdsFinance", "Digital Engagement", "Earn Passive Income", "Validator Node", "Ad Rewards", "Make Money Online Nigeria", "Ad Tasks", "Financial Freedom"],
+  creator: "AdsFinance",
+  publisher: "AdsFinance",
+  robots: "index, follow",
   title: "AdsFinance | Ads. Growth. Financial Freedom.",
   description: "The institutional-grade digital engagement network. Purchase a Validator License and earn up to 600% ROI through verified ad tasks.",
   icons: {
@@ -20,10 +34,14 @@ export const metadata: Metadata = {
     type: "website",
   },
   twitter: {
-    card: "summary",
-    title: "AdsFinance",
-    description: "Earn passive income through verified ad engagement. Join AdsFinance today.",
+    card: "summary_large_image",
+    title: "AdsFinance | Ads. Growth. Financial Freedom.",
+    description: "Earn passive income through verified ad engagement. Purchase a Validator Node License and start earning today.",
     images: ["/logo-transparent.png"],
+    creator: "@adsfinance",
+  },
+  alternates: {
+    canonical: "/",
   },
 };
 
