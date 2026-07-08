@@ -118,9 +118,16 @@ export default function AdminDashboard() {
 
   async function creditUser(uid: string, value: string) {
     if (!value || isNaN(Number(value))) return;
-    const { isConfirmed } = await Swal.fire({ ...SWAL, title: "Confirm Credit", text: `Credit ₦${value} to user?`, showCancelButton: true });
+    const { value: reason, isConfirmed } = await Swal.fire({
+      ...SWAL,
+      title: "Confirm Credit",
+      text: `Credit ₦${value} to user? Enter a reason:`,
+      input: "text",
+      inputPlaceholder: "e.g., Bonus reward for activity",
+      showCancelButton: true
+    });
     if (isConfirmed) {
-      await adminCreditUser(uid, parseFloat(value), "System credit", admin.email);
+      await adminCreditUser(uid, parseFloat(value), reason || "System credit", admin.email);
       setEditBal("");
       Swal.fire({ ...SWAL, icon: "success", title: "Credited", timer: 1200, showConfirmButton: false });
     }
@@ -137,7 +144,37 @@ export default function AdminDashboard() {
   }
 
   async function setStatus(uid: string, status: "active" | "suspended") {
-    await adminSetUserStatus(uid, status, admin.email);
+    let reason = "";
+    if (status === "suspended") {
+      const { value, isConfirmed } = await Swal.fire({
+        ...SWAL,
+        title: "Suspend Account",
+        text: "Select a reason for suspension:",
+        input: "select",
+        inputOptions: {
+          "Your account is under investigation for bot task activity. Please check back after 24hrs.": "Bot Investigation (24hrs)",
+          "Your account is temporarily suspended due to suspicious activity.": "Suspicious Activity",
+          "Violation of platform Terms of Service.": "TOS Violation",
+          "custom": "Type custom reason..."
+        },
+        showCancelButton: true
+      });
+      if (!isConfirmed) return;
+      if (value === "custom") {
+        const { value: textValue, isConfirmed: textConfirmed } = await Swal.fire({
+          ...SWAL,
+          title: "Custom Reason",
+          input: "text",
+          inputPlaceholder: "Enter suspension reason...",
+          showCancelButton: true
+        });
+        if (!textConfirmed) return;
+        reason = textValue;
+      } else {
+        reason = value;
+      }
+    }
+    await adminSetUserStatus(uid, status, admin.email, reason);
     setSelectedUser(null);
     Swal.fire({ ...SWAL, icon: "success", title: `Account ${status}`, timer: 1200, showConfirmButton: false });
   }

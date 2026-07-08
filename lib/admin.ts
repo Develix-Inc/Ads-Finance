@@ -203,7 +203,12 @@ export async function adminRejectWithdrawal(withdrawalId: string, adminEmail: st
 /* wallet management */
 export async function adminCreditUser(uid: string, amount: number, reason: string, adminEmail: string) {
   await recordTransaction(uid, "admin_credit", amount, reason);
-  await sendNotification(uid, "Wallet Credited", `₦${amount.toLocaleString()} has been added to your wallet. ${reason}`, "success");
+  await sendNotification(
+    uid, 
+    "Wallet Credited", 
+    `AdsFinance has credited you with ₦${amount.toLocaleString()} as per ${reason}. Keep earning, watch more ads, you're almost there!`, 
+    "success"
+  );
   await logAdminAction(adminEmail, "credit_user", uid, { amount, reason });
 }
 
@@ -223,14 +228,26 @@ export async function adminFreezeWallet(uid: string, frozen: boolean, adminEmail
   await logAdminAction(adminEmail, frozen ? "freeze_wallet" : "unfreeze_wallet", uid);
 }
 
-export async function adminSetUserStatus(uid: string, status: "active" | "suspended", adminEmail: string) {
-  await upsertUserProfile(uid, { accountStatus: status });
+export async function adminSetUserStatus(uid: string, status: "active" | "suspended", adminEmail: string, reason?: string) {
+  const profileUpdates: any = { accountStatus: status };
+  if (status === "suspended") {
+    profileUpdates.suspensionReason = reason || "Suspended by the system. Please contact support.";
+  } else {
+    profileUpdates.suspensionReason = null; // clear it when reactivated
+  }
+  
+  await upsertUserProfile(uid, profileUpdates);
+  
+  const notifMsg = status === "active" 
+    ? "Your account has been reactivated. You can now resume your activities." 
+    : (reason || `Your account has been suspended. Please contact support.`);
+    
   await sendNotification(uid,
     `Account ${status.charAt(0).toUpperCase() + status.slice(1)}`,
-    status === "active" ? "Your account has been reactivated." : `Your account has been ${status}. Contact support.`,
+    notifMsg,
     status === "active" ? "success" : "error"
   );
-  await logAdminAction(adminEmail, `set_status_${status}`, uid);
+  await logAdminAction(adminEmail, `set_status_${status}`, uid, { reason });
 }
 
 export async function adminSetUserRole(uid: string, isAdmin: boolean) {
