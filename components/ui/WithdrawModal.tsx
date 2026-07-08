@@ -135,13 +135,13 @@ export function WithdrawModal({ uid, userEmail, balance, minWithdrawal = 500, wi
                     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-lg">₦</span>
                     <input
                       type="number" value={amount} onChange={e => setAmount(e.target.value)}
-                      min={500} max={balance} step={100}
+                      min={minWithdrawal} max={balance} step={100}
                       placeholder="0.00"
                       className="w-full bg-slate-950 border border-white/10 rounded-2xl pl-10 pr-4 py-4 text-white text-xl font-bold focus:outline-none focus:border-teal-500 transition-colors"
                     />
                   </div>
-                  <p className="text-xs text-slate-500 mt-2">Minimum withdrawal: ₦500</p>
-                  {amount && !valid && <p className="text-xs text-rose-400 mt-1">{numAmount < 500 ? "Minimum is ₦500" : "Insufficient balance"}</p>}
+                  <p className="text-xs text-slate-500 mt-2">Minimum withdrawal: ₦{minWithdrawal.toLocaleString()}</p>
+                  {amount && !valid && <p className="text-xs text-rose-400 mt-1">{numAmount < minWithdrawal ? `Minimum is ₦${minWithdrawal.toLocaleString()}` : "Insufficient balance"}</p>}
                 </div>
                 <div className="flex gap-3 pt-2">
                   <button onClick={onClose} className="flex-1 py-3.5 rounded-2xl border border-white/10 text-slate-400 text-sm font-semibold hover:bg-white/5 transition-colors">Cancel</button>

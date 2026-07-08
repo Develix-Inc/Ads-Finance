@@ -72,7 +72,7 @@ function WatchModal({ video, onClose, onClaim, alreadyDone }: WatchModalProps) {
       if (!containerRef.current) return;
       playerRef.current = new window.YT.Player(containerRef.current, {
         videoId: video.id,
-        playerVars: { autoplay: 0, rel: 0, modestbranding: 1, iv_load_policy: 3 },
+        playerVars: { autoplay: 0, rel: 0, modestbranding: 1, iv_load_policy: 3, controls: 0, disablekb: 1 },
         events: {
           onStateChange: (e: any) => {
             if (e.data === window.YT.PlayerState.PLAYING) {
@@ -84,7 +84,6 @@ function WatchModal({ video, onClose, onClaim, alreadyDone }: WatchModalProps) {
             } else if (e.data === window.YT.PlayerState.ENDED) {
               setPlayerState("ended");
               stopTimer();
-              setCanClaim(true);
             }
           },
         },

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { getUserProfile } from "@/lib/admin";
-import { adminGetWithdrawals, NODE_MIN_WITHDRAWAL } from "@/lib/admin";
+import { adminGetWithdrawals, NODE_MIN_WITHDRAWAL, getSettings } from "@/lib/admin";
 import { WithdrawModal } from "@/components/ui/WithdrawModal";
 import { AnimatePresence, motion } from "framer-motion";
 import { FaArrowLeft, FaArrowUp, FaCircleCheck, FaClock, FaCircleXmark, FaWallet } from "react-icons/fa6";
@@ -26,6 +26,7 @@ export default function WithdrawalsPage() {
   const [history, setHistory]     = useState<any[]>([]);
   const [loading, setLoading]     = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [minWLimits, setMinWLimits] = useState<any>(null);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async u => {
@@ -36,6 +37,9 @@ export default function WithdrawalsPage() {
       // get only this user's withdrawals
       const all = await adminGetWithdrawals();
       setHistory(all.filter((w: any) => w.uid === u.uid));
+      // fetch dynamic limits
+      const stgs = await getSettings();
+      if (stgs?.minWithdrawal) setMinWLimits(stgs.minWithdrawal);
       setLoading(false);
     });
     return unsub;
@@ -43,7 +47,8 @@ export default function WithdrawalsPage() {
 
   const nodeActive  = profile?.nodeStatus === "active";
   const nodeTier    = profile?.nodeTier ?? "Node Alpha";
-  const minW        = (NODE_MIN_WITHDRAWAL as Record<string, number>)[nodeTier] ?? 75000;
+  const activeLimits= minWLimits || NODE_MIN_WITHDRAWAL;
+  const minW        = (activeLimits as Record<string, number>)[nodeTier] ?? 75000;
   const balance     = profile?.walletBalance ?? 0;
   const canWithdraw = nodeActive && balance >= minW;
 
