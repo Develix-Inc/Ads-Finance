@@ -152,14 +152,21 @@ export default function UpgradePage() {
             <motion.div key="select" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }}>
               <p className="text-slate-600 text-sm text-center mb-8 font-medium">Select a Premium Plan to increase your task limits and earning potential.</p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                {TIERS.map(t => (
-                  <motion.button key={t.name} whileTap={{ scale: 0.98 }}
-                    onClick={() => { setSelected(t); setView("pay"); }}
-                    className={`relative text-left rounded-[24px] border ${t.border} bg-white p-6 hover:shadow-2xl transition-all shadow-lg ${t.glow} group`}
+                {TIERS.map(t => {
+                  const isCurrent = profile?.nodeTier === t.name && profile?.nodeStatus === "active";
+                  return (
+                  <motion.button key={t.name} whileTap={{ scale: isCurrent ? 1 : 0.98 }}
+                    onClick={() => { if (!isCurrent) { setSelected(t); setView("pay"); } }}
+                    className={`relative text-left rounded-[24px] border ${t.border} bg-white p-6 hover:shadow-2xl transition-all shadow-lg ${t.glow} group ${isCurrent ? "cursor-default opacity-90 ring-2 ring-emerald-500 ring-offset-2" : ""}`}
                   >
-                    {t.popular && (
+                    {t.popular && !isCurrent && (
                       <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-[10px] font-bold uppercase tracking-wider px-4 py-1 rounded-full shadow-sm">
                         Most Popular
+                      </div>
+                    )}
+                    {isCurrent && (
+                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald-500 text-white text-[10px] font-bold uppercase tracking-wider px-4 py-1 rounded-full shadow-sm flex items-center gap-1">
+                        <CheckCircle2 className="w-3 h-3" /> Active Plan
                       </div>
                     )}
                     <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${t.grad} border ${t.border} flex items-center justify-center mb-5`}>
@@ -173,15 +180,19 @@ export default function UpgradePage() {
                     <ul className="space-y-3">
                       {t.features.map((f, i) => (
                         <li key={i} className="flex items-start gap-2.5 text-sm text-slate-600 font-medium">
-                          <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" /> {f}
+                          <CheckCircle2 className={`w-4 h-4 shrink-0 mt-0.5 ${isCurrent ? "text-emerald-500" : "text-emerald-500"}`} /> {f}
                         </li>
                       ))}
                     </ul>
-                    <div className={`mt-6 w-full py-3 rounded-xl bg-slate-900 text-white font-bold text-sm text-center group-hover:bg-primary group-hover:text-primary-foreground transition-colors shadow-sm`}>
-                      Select {t.name} <ChevronRight className="inline w-4 h-4" />
+                    <div className={`mt-6 w-full py-3 rounded-xl font-bold text-sm text-center transition-colors shadow-sm ${
+                      isCurrent 
+                        ? "bg-emerald-50 text-emerald-600 border border-emerald-200" 
+                        : "bg-slate-900 text-white group-hover:bg-primary group-hover:text-primary-foreground"
+                    }`}>
+                      {isCurrent ? "Current Plan" : `Select ${t.name}`} {!isCurrent && <ChevronRight className="inline w-4 h-4" />}
                     </div>
                   </motion.button>
-                ))}
+                )})}
               </div>
             </motion.div>
           )}
