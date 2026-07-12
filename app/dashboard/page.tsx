@@ -15,51 +15,53 @@ import { NotificationBell } from "@/components/ui/NotificationBell";
 import { ComplianceBadge } from "@/components/ui/ComplianceBadge";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  FaGaugeHigh, FaBullseye, FaClockRotateLeft, FaUsers,
-  FaGear, FaRightFromBracket, FaMoon, FaSun,
-  FaWallet, FaArrowUp, FaBolt, FaChevronRight, FaLock,
-  FaShieldHalved, FaCircleCheck, FaClock, FaArrowTrendUp,
-  FaCircleXmark, FaMoneyBillTransfer
-} from "react-icons/fa6";
+  Gauge, Target, History, Users,
+  Settings, LogOut, Moon, Sun,
+  Wallet, ArrowUpRight, Zap, ChevronRight, Lock,
+  ShieldCheck, CheckCircle2, Clock, TrendingUp,
+  XCircle, ArrowRightLeft, LayoutDashboard, PlaySquare, Banknote, Sparkles
+} from "lucide-react";
+import { FaHand } from "react-icons/fa6";
 
 /* ── helpers ── */
 const fmt = (n: number) => "₦" + (n ?? 0).toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const ts  = (t: any) => t?.seconds ? new Date(t.seconds * 1000).toLocaleDateString("en-NG", { month: "short", day: "numeric" }) : "";
 
-const NODE_STYLE: Record<string, { grad: string; ring: string }> = {
-  "Node Alpha": { grad: "from-teal-600 to-teal-900",     ring: "border-teal-500/40" },
-  "Node Sigma": { grad: "from-amber-500 to-orange-800",  ring: "border-amber-500/40" },
-  "Node Omega": { grad: "from-violet-600 to-purple-900", ring: "border-violet-500/40" },
+const PLAN_STYLE: Record<string, { grad: string; ring: string }> = {
+  "Alpha Plan": { grad: "from-slate-100 to-slate-200",     ring: "border-slate-200" },
+  "Sigma Plan": { grad: "from-primary/10 to-primary/5",  ring: "border-primary/30" },
+  "Omega Plan": { grad: "from-amber-100 to-amber-50", ring: "border-amber-400" },
+  "Starter Plan": { grad: "from-slate-50 to-slate-100", ring: "border-slate-200" },
 };
 
 const TX_ICON: Record<string, any> = {
-  deposit: FaWallet, withdrawal: FaArrowUp, task_reward: FaCircleCheck,
-  referral_bonus: FaUsers, node_purchase: FaShieldHalved,
-  admin_credit: FaArrowTrendUp, admin_debit: FaCircleXmark, refund: FaMoneyBillTransfer,
+  deposit: Wallet, withdrawal: ArrowUpRight, task_reward: CheckCircle2,
+  referral_bonus: Users, node_purchase: ShieldCheck,
+  admin_credit: TrendingUp, admin_debit: XCircle, refund: ArrowRightLeft,
 };
 
 const TX_COLOR: Record<string, string> = {
-  deposit: "text-emerald-400", withdrawal: "text-rose-400", task_reward: "text-teal-400",
-  referral_bonus: "text-blue-400", node_purchase: "text-violet-400",
-  admin_credit: "text-emerald-400", admin_debit: "text-rose-400", refund: "text-amber-400",
+  deposit: "text-emerald-500", withdrawal: "text-rose-500", task_reward: "text-primary",
+  referral_bonus: "text-blue-500", node_purchase: "text-violet-500",
+  admin_credit: "text-emerald-500", admin_debit: "text-rose-500", refund: "text-amber-500",
 };
 
 const NAV = [
-  { href: "/dashboard",    icon: FaGaugeHigh,      label: "Dashboard" },
-  { href: "/tasks",        icon: FaBullseye,        label: "Task Feed" },
-  { href: "/withdrawals",  icon: FaClockRotateLeft, label: "Withdrawals" },
-  { href: "/referrals",    icon: FaUsers,           label: "Referrals" },
-  { href: "/upgrade",      icon: FaBolt,            label: "Upgrade" },
-  { href: "/settings",     icon: FaGear,            label: "Settings" },
+  { href: "/dashboard",    icon: LayoutDashboard,      label: "Dashboard" },
+  { href: "/tasks",        icon: PlaySquare,        label: "Task Feed" },
+  { href: "/withdrawals",  icon: Banknote, label: "Withdrawals" },
+  { href: "/referrals",    icon: Users,           label: "Referrals" },
+  { href: "/upgrade",      icon: Sparkles,            label: "Upgrade" },
+  { href: "/settings",     icon: Settings,            label: "Settings" },
 ];
 
 function LockedOverlay({ reason }: { reason: string }) {
   return (
-    <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm rounded-[22px] z-10 flex flex-col items-center justify-center gap-2 p-6">
-      <FaLock className="w-5 h-5 text-slate-500" />
-      <p className="text-slate-400 text-xs font-semibold text-center">{reason}</p>
-      <Link href="/upgrade" className="bg-teal-500 text-slate-950 font-black text-xs px-4 py-2 rounded-full hover:bg-teal-400 transition-colors">
-        Activate Node
+    <div className="absolute inset-0 bg-white/80 backdrop-blur-sm rounded-2xl z-10 flex flex-col items-center justify-center gap-2 p-6 border border-slate-200">
+      <Lock className="w-5 h-5 text-slate-400" />
+      <p className="text-slate-600 text-xs font-semibold text-center">{reason}</p>
+      <Link href="/upgrade" className="bg-primary text-primary-foreground font-bold text-xs px-4 py-2 rounded-xl hover:bg-primary/90 transition-colors shadow-sm">
+        Upgrade Plan
       </Link>
     </div>
   );
@@ -120,7 +122,7 @@ export default function DashboardPage() {
     return unsub;
   }, [router]);
 
-  /* real-time balance from Firestore (NO fake ticker) */
+  /* real-time balance from Firestore */
   useEffect(() => {
     if (!user?.uid) return;
     const unsub = onSnapshot(doc(db, "users", user.uid), snap => {
@@ -160,7 +162,7 @@ export default function DashboardPage() {
             if (paymentData.status !== "verified") {
               await adminVerifyPayment(paymentDoc.id, paymentData.uid, paymentData.nodeTier, "system@paystack");
               import("sweetalert2").then(Swal => {
-                Swal.default.fire({ background: "#020617", color: "#f8fafc", icon: "success", title: "Node Activated", text: "Your payment was successful and your node is active!", customClass: { popup: "!rounded-2xl !border !border-white/10", confirmButton: "!rounded-full !bg-teal-600" } });
+                Swal.default.fire({ background: "#ffffff", color: "#0f172a", icon: "success", title: "Plan Activated", text: "Your payment was successful and your premium plan is active!", customClass: { popup: "!rounded-2xl !border !border-slate-200", confirmButton: "!rounded-full !bg-primary" } });
               });
             }
           }
@@ -168,7 +170,6 @@ export default function DashboardPage() {
       } catch (err) {
         console.error("Verification error:", err);
       } finally {
-        // Remove param from URL
         window.history.replaceState({}, document.title, window.location.pathname);
       }
     }
@@ -178,27 +179,58 @@ export default function DashboardPage() {
   const logout = async () => { await signOut(auth); router.push("/"); };
 
   if (loading) return (
-    <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center gap-3">
-      <div className="w-10 h-10 rounded-full border-4 border-teal-500 border-t-transparent animate-spin" />
-      <p className="text-slate-500 text-xs font-mono tracking-widest uppercase">Initializing Node…</p>
+    <div className="min-h-screen bg-background flex">
+      <aside className="hidden md:flex w-64 shrink-0 flex-col border-r border-slate-200 bg-white sticky top-0 h-screen p-6 space-y-6">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-8 h-8 rounded bg-slate-200 animate-pulse" />
+          <div className="space-y-2">
+            <div className="w-24 h-4 bg-slate-200 rounded animate-pulse" />
+            <div className="w-16 h-2 bg-slate-200 rounded animate-pulse" />
+          </div>
+        </div>
+        {[1,2,3,4,5,6].map(i => (
+          <div key={i} className="w-full h-10 bg-slate-100 rounded-xl animate-pulse" />
+        ))}
+      </aside>
+      <main className="flex-1 min-w-0 flex flex-col h-screen overflow-hidden">
+        <header className="h-[73px] border-b border-slate-200 bg-white px-4 md:px-8 py-4 flex items-center justify-between">
+          <div className="space-y-2">
+            <div className="w-32 h-5 bg-slate-200 rounded animate-pulse" />
+            <div className="w-48 h-3 bg-slate-200 rounded animate-pulse" />
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="w-24 h-8 bg-slate-200 rounded-full animate-pulse" />
+            <div className="w-8 h-8 bg-slate-200 rounded-full animate-pulse" />
+          </div>
+        </header>
+        <div className="p-4 md:px-8 py-6 w-full space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+            <div className="col-span-1 lg:col-span-2 h-[260px] rounded-3xl bg-white border border-slate-200 shadow-sm animate-pulse p-6">
+              <div className="w-32 h-4 bg-slate-200 rounded mb-4" />
+              <div className="w-64 h-12 bg-slate-200 rounded mb-6" />
+            </div>
+            <div className="h-[260px] rounded-3xl bg-slate-50 border border-slate-200 shadow-sm animate-pulse p-6" />
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="col-span-1 lg:col-span-2 h-[400px] rounded-3xl bg-white border border-slate-200 shadow-sm animate-pulse" />
+            <div className="h-[400px] rounded-3xl bg-white border border-slate-200 shadow-sm animate-pulse" />
+          </div>
+        </div>
+      </main>
     </div>
   );
 
-  const name       = profile?.displayName || user?.displayName || user?.email?.split("@")[0] || user?.phoneNumber || "Validator";
+  const name       = profile?.displayName || user?.displayName || user?.email?.split("@")[0] || user?.phoneNumber || "User";
   const avatar     = name[0].toUpperCase();
   const nodeActive = profile?.nodeStatus === "active";
   const nodePending= profile?.nodeStatus === "pending";
-  const nodeTier   = profile?.nodeTier ?? "Node Alpha";
-  const nodeStyle  = NODE_STYLE[nodeTier] ?? NODE_STYLE["Node Alpha"];
-  const mult       = (NODE_MULTIPLIERS as Record<string, number>)[nodeTier] ?? 4;
-  const minWithdraw= (NODE_MIN_WITHDRAWAL as Record<string, number>)[nodeTier] ?? 75000;
-
-  const bg   = "bg-slate-950 text-slate-200";
-  const card = "bg-slate-900 border-white/10";
-  const sub  = "text-slate-500";
+  const nodeTier   = profile?.nodeTier ?? "Starter Plan";
+  const planStyle  = PLAN_STYLE[nodeTier] ?? PLAN_STYLE["Starter Plan"];
+  const mult       = (NODE_MULTIPLIERS as Record<string, number>)[nodeTier] ?? 1;
+  const minWithdraw= (NODE_MIN_WITHDRAWAL as Record<string, number>)[nodeTier] ?? 50000;
 
   return (
-    <div className={`min-h-screen ${bg} flex transition-colors duration-300`}>
+    <div className={`min-h-screen bg-background text-slate-900 flex transition-colors duration-300`}>
 
       {showOnboarding && user && (
         <OnboardingWizard uid={user.uid} userEmail={user.email || user.phoneNumber || ""} onComplete={() => setShowOnboarding(false)} />
@@ -217,13 +249,13 @@ export default function DashboardPage() {
       </AnimatePresence>
 
       {/* ── SIDEBAR (md+) ── */}
-      <aside className={`hidden md:flex w-64 shrink-0 flex-col border-r border-white/10 bg-slate-900/60 sticky top-0 h-screen`}>
-        <div className={`p-6 border-b border-white/10`}>
+      <aside className={`hidden md:flex w-64 shrink-0 flex-col border-r border-slate-200 bg-white sticky top-0 h-screen`}>
+        <div className={`p-6 border-b border-slate-100`}>
           <div className="flex items-center gap-3">
-            <Image src="/logo-transparent.png" alt="AdsFinance" width={36} height={36} className="w-9 h-9 object-contain" onError={e => { (e.target as any).style.display = "none"; }} />
+            <Image src="/logo.png" alt="AdsFinance" width={32} height={32} className="w-8 h-8 object-contain" onError={e => { (e.target as any).style.display = "none"; }} />
             <div>
-              <p className="font-black text-base tracking-tight leading-none">AdsFinance</p>
-              <p className={`text-[9px] font-mono tracking-widest uppercase mt-0.5 ${sub}`}>Node Dashboard</p>
+              <p className="font-black text-base tracking-tight text-slate-900 leading-none">AdsFinance</p>
+              <p className={`text-[9px] font-bold tracking-widest uppercase mt-0.5 text-slate-400`}>User Dashboard</p>
             </div>
           </div>
         </div>
@@ -233,9 +265,9 @@ export default function DashboardPage() {
             const active = item.href === "/dashboard";
             return (
               <Link key={item.label} href={item.href}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all text-sm
-                  ${active ? "bg-teal-500/10 text-teal-400 border border-teal-500/20"
-                           : "text-slate-400 hover:bg-white/5 hover:text-white"}`}>
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl font-semibold transition-all text-sm
+                  ${active ? "bg-primary/10 text-primary"
+                           : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"}`}>
                 <item.icon className="w-4 h-4 shrink-0" />
                 {item.label}
               </Link>
@@ -243,255 +275,248 @@ export default function DashboardPage() {
           })}
         </nav>
 
-        <div className={`p-4 border-t border-white/10 space-y-3`}>
-          <div className="flex items-center gap-3 px-2">
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-teal-600 to-slate-800 flex items-center justify-center font-black text-white text-sm shrink-0">{avatar}</div>
+        <div className={`p-4 border-t border-slate-100 space-y-3`}>
+          <Link href="/settings" className="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-slate-50 transition-colors group cursor-pointer">
+            <div className="w-9 h-9 rounded-full bg-slate-900 group-hover:bg-primary flex items-center justify-center font-bold text-white text-sm shrink-0 transition-colors shadow-sm">{avatar}</div>
             <div className="min-w-0">
-              <p className="text-sm font-semibold truncate capitalize">{name}</p>
-              <p className={`text-[11px] truncate ${sub}`}>{user?.email || user?.phoneNumber}</p>
+              <p className="text-sm font-bold text-slate-900 truncate capitalize">{name}</p>
+              <p className={`text-xs text-slate-500 truncate`}>{user.email || user.phoneNumber}</p>
             </div>
-          </div>
-          <button onClick={logout}
-            className="flex items-center gap-2 w-full px-4 py-2.5 rounded-xl text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-all text-sm font-medium">
-            <FaRightFromBracket className="w-4 h-4" /> Secure Logout
+          </Link>
+          <button onClick={logout} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-rose-500 hover:bg-rose-50 transition-colors`}>
+            <LogOut className="w-4 h-4 shrink-0" />
+            Sign Out
           </button>
         </div>
       </aside>
 
-      {/* ── MAIN ── */}
-      <main className="flex-1 min-w-0 flex flex-col">
-        {/* topbar */}
-        <header className={`sticky top-0 z-40 border-b border-white/10 bg-slate-950/80 backdrop-blur-xl px-4 md:px-8 py-4 flex items-center justify-between`}>
+      {/* ── MAIN CONTENT ── */}
+      <main className="flex-1 min-w-0 flex flex-col h-screen overflow-y-auto relative">
+        <header className={`sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200 px-4 md:px-8 py-4 flex items-center justify-between`}>
           <div className="flex items-center gap-3 md:hidden">
-            <Image src="/logo-transparent.png" alt="AdsFinance" width={32} height={32} className="w-8 h-8 object-contain" onError={e => { (e.target as any).style.display = "none"; }} />
-            <span className="font-black text-base tracking-tight">AdsFinance</span>
+            <div className="relative w-8 h-8 flex items-center justify-center shrink-0">
+              <Image src="/logo.png" alt="AdsFinance Logo" width={32} height={32} className="w-full h-full object-contain"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = 'none';
+                  (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center"><span class="text-white font-bold text-xs">AF</span></div>';
+                }}
+              />
+            </div>
+            <div className="flex flex-col">
+              <h1 className="text-sm font-black text-slate-900 tracking-tight flex items-center gap-1.5">
+                Hello {name} <FaHand className="w-3.5 h-3.5 text-amber-500 animate-pulse" />
+              </h1>
+              <p className="text-[9px] text-slate-500 font-medium">Have you watched any ads today?</p>
+            </div>
           </div>
-          <h1 className="hidden md:block text-xl font-black tracking-tight">My Dashboard</h1>
-
-          <div className="flex items-center gap-2">
-            {nodePending && (
-              <span className="hidden sm:flex items-center gap-1.5 text-xs font-mono text-amber-400 bg-amber-400/10 px-3 py-1.5 rounded-full border border-amber-400/20">
-                <FaClock className="w-3 h-3 animate-pulse" /> Node Pending
-              </span>
-            )}
-            {nodeActive && (
-              <span className="hidden sm:flex items-center gap-1.5 text-xs font-mono text-teal-400 bg-teal-400/10 px-3 py-1.5 rounded-full border border-teal-400/20">
-                <span className="w-1.5 h-1.5 bg-teal-400 rounded-full animate-pulse" /> Online
-              </span>
-            )}
+          <div className="hidden md:flex flex-col">
+            <h1 className="text-lg font-black text-slate-900 tracking-tight flex items-center gap-2">
+              Hello {name} <FaHand className="w-4 h-4 text-amber-500 animate-pulse" />
+            </h1>
+            <p className="text-xs text-slate-500 font-medium mt-0.5">Have you watched any ads today?</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <Link href="/upgrade" className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-200 transition-colors">
+              <Zap className="w-3.5 h-3.5 text-primary" /> Upgrade Plan
+            </Link>
             {user?.uid && <NotificationBell uid={user.uid} />}
-            <button onClick={logout} className="md:hidden p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400">
-              <FaRightFromBracket className="w-4 h-4" />
-            </button>
+            <Link href="/settings" className="md:hidden w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center font-bold text-white text-xs hover:scale-105 transition-transform shadow-sm">
+              {avatar}
+            </Link>
           </div>
         </header>
 
-        {/* body */}
-        <div className="flex-1 overflow-y-auto">
-          <div className="max-w-5xl mx-auto px-4 md:px-8 py-6 space-y-5 pb-28 md:pb-10">
+        <div className="p-4 md:px-8 py-6 max-w-7xl mx-auto w-full space-y-6">
 
-            {/* pending banner */}
-            {nodePending && (
-              <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl px-5 py-4 flex items-center gap-3">
-                <FaClock className="w-5 h-5 text-amber-400 shrink-0" />
-                <div>
-                  <p className="text-amber-300 font-bold text-sm">Payment Verification Pending</p>
-                  <p className="text-amber-500/80 text-xs mt-0.5">Your node will be activated within 24 hours once our team confirms your transfer.</p>
+          {/* ── ALERTS ── */}
+          {profile?.accountStatus === 'suspended' && (
+            <div className="bg-rose-50 border border-rose-200 text-rose-700 p-4 rounded-2xl flex items-start gap-3 shadow-sm">
+              <XCircle className="w-5 h-5 shrink-0 mt-0.5" />
+              <div>
+                <p className="font-bold text-sm">Account Suspended</p>
+                <p className="text-xs mt-1 leading-relaxed">
+                  {profile.suspensionReason || "Your account has been suspended due to policy violations. All withdrawals are frozen."}
+                </p>
+                <p className="text-xs mt-2 font-semibold">Please contact support for resolution.</p>
+              </div>
+            </div>
+          )}
+
+          {nodePending && (
+            <div className="bg-amber-50 border border-amber-200 text-amber-800 p-4 rounded-2xl flex items-start gap-3 shadow-sm">
+              <Clock className="w-5 h-5 shrink-0 mt-0.5 animate-pulse" />
+              <div>
+                <p className="font-bold text-sm">Plan Activation Pending</p>
+                <p className="text-xs mt-1">Your payment for <strong>{nodeTier}</strong> is currently being reviewed. This process takes up to 24 hours.</p>
+              </div>
+            </div>
+          )}
+
+          {/* ── TOP METRICS ── */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+            
+            {/* Balance Card */}
+            <div className={`col-span-1 lg:col-span-2 rounded-3xl p-6 md:p-8 bg-white border border-slate-200 shadow-sm flex flex-col justify-between relative overflow-hidden group`}>
+              <div className="absolute top-0 right-0 p-6 opacity-10">
+                <Wallet className="w-32 h-32 text-primary group-hover:scale-110 transition-transform duration-700" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-sm font-bold text-slate-500 uppercase tracking-wider">Available Balance</span>
+                </div>
+                <h2 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tighter">{fmt(balance)}</h2>
+                <div className="flex items-center gap-4 mt-4">
+                  <div className="flex items-center gap-1 text-emerald-500 text-sm font-bold bg-emerald-50 px-2 py-1 rounded">
+                    <TrendingUp className="w-4 h-4" /> +{fmt(profile?.dailyTaskEarnings || 0)} today
+                  </div>
                 </div>
               </div>
-            )}
-
-            {/* welcome */}
-            <div className="flex items-center justify-between">
-              <div>
-                <p className={`text-sm ${sub}`}>Welcome back</p>
-                <h2 className="text-2xl md:text-3xl font-black tracking-tight capitalize">{name}</h2>
+              <div className="mt-8 flex gap-3 relative z-10">
+                <button onClick={() => {
+                  if (!nodeActive) {
+                    import("sweetalert2").then(Swal => Swal.default.fire({ background: "#ffffff", color: "#0f172a", icon: "warning", title: "Activation Required", text: "You must activate a Premium Plan to withdraw.", customClass: { popup: "!rounded-2xl !border !border-slate-200", confirmButton: "!rounded-full !bg-primary" } }));
+                    return;
+                  }
+                  setShowWithdraw(true);
+                }}
+                  className="flex-1 py-3.5 rounded-xl bg-slate-900 text-white hover:bg-slate-800 font-bold text-sm transition-all shadow-md">
+                  Withdraw Funds
+                </button>
+                <Link href="/tasks" className="flex-1 py-3.5 rounded-xl bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 font-bold text-sm text-center transition-all">
+                  Complete Tasks
+                </Link>
               </div>
-              <Link href="/settings" className="hover:opacity-80 transition-opacity">
-                {profile?.photoURL || user?.photoURL ? (
-                  <Image src={profile?.photoURL || user?.photoURL} alt={name} width={48} height={48} className="w-12 h-12 rounded-full object-cover border-2 border-teal-500/30 shadow-lg" />
-                ) : (
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-teal-600 to-slate-800 flex items-center justify-center font-black text-white text-xl shadow-lg">{avatar}</div>
-                )}
+            </div>
+
+            {/* Current Plan Card */}
+            <div className={`rounded-3xl p-6 md:p-8 bg-gradient-to-br ${planStyle.grad} border ${planStyle.ring} shadow-sm relative overflow-hidden flex flex-col`}>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">Current Plan</span>
+                <ShieldCheck className="w-5 h-5 text-slate-700" />
+              </div>
+              <h3 className="text-2xl font-black text-slate-900 mb-1">{nodeTier}</h3>
+              <p className="text-sm text-slate-600 font-medium mb-6">
+                Status: <span className={nodeActive ? "text-primary font-bold" : nodePending ? "text-amber-600 font-bold" : "text-slate-500 font-bold"}>
+                  {nodeActive ? "Active" : nodePending ? "Pending" : "Inactive"}
+                </span>
+              </p>
+              
+              <div className="mt-auto space-y-3 relative z-10">
+                <div className="flex justify-between items-center text-sm border-b border-slate-200/50 pb-2">
+                  <span className="text-slate-600 font-medium">Task Limits</span>
+                  <span className="text-slate-900 font-bold">Standard</span>
+                </div>
+                <div className="flex justify-between items-center text-sm border-b border-slate-200/50 pb-2">
+                  <span className="text-slate-600 font-medium">Min Withdrawal</span>
+                  <span className="text-slate-900 font-bold">{fmt(minWithdraw)}</span>
+                </div>
+              </div>
+              <Link href="/upgrade" className="mt-6 w-full py-3 rounded-xl bg-white border border-slate-200 text-slate-900 hover:bg-slate-50 font-bold text-sm text-center transition-all shadow-sm">
+                Upgrade Plan
               </Link>
             </div>
-
-            {/* WALLET CARD */}
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-              className="relative rounded-[28px] bg-gradient-to-br from-[#081022] via-[#0d1f3a] to-[#081022] border border-white/10 p-6 md:p-8 overflow-hidden shadow-2xl">
-              <div className="absolute -top-20 -right-20 w-72 h-72 bg-teal-600/6 rounded-full blur-3xl pointer-events-none" />
-              <div className="relative">
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="p-2 bg-white/8 rounded-xl border border-white/10">
-                    <FaWallet className="w-4 h-4 text-teal-400" />
-                  </div>
-                  <span className="text-slate-400 text-sm font-medium">Wallet Balance</span>
-                  <div className="ml-auto flex items-center gap-1.5 bg-teal-500/10 border border-teal-500/20 px-2.5 py-1 rounded-full">
-                    <span className="w-1.5 h-1.5 bg-teal-400 rounded-full" />
-                    <span className="text-[10px] text-teal-400 font-bold uppercase tracking-wider">Real-time</span>
-                  </div>
-                </div>
-
-                <p className="text-4xl md:text-5xl font-black tracking-tight text-white mb-1">{fmt(balance)}</p>
-                <p className="text-slate-500 text-xs font-mono mb-6">≈ ${(balance / 1600).toFixed(4)} USD</p>
-
-                <div className="grid grid-cols-3 gap-3 mb-5">
-                  {[
-                    { label: "Withdraw",  icon: FaArrowUp,   action: () => {
-                      if (profile?.accountStatus === 'suspended') {
-                        import("sweetalert2").then(Swal => Swal.default.fire({
-                          background: "#020617", color: "#f8fafc", icon: "error", title: "Account Suspended",
-                          text: "Your account is suspended. You cannot make withdrawals.",
-                          customClass: { popup: "!rounded-2xl !border !border-white/10", confirmButton: "!rounded-full !bg-teal-600" }
-                        }));
-                      } else if (nodeActive) {
-                        setShowWithdraw(true);
-                      }
-                    } },
-                    { label: "Referrals", icon: FaUsers,     action: () => router.push("/referrals") },
-                    { label: "Upgrade",   icon: FaBolt,      action: () => router.push("/upgrade") },
-                  ].map((a, i) => (
-                    <button key={i} onClick={a.action}
-                      className="flex flex-col items-center gap-2 group py-1">
-                      <div className="w-12 h-12 rounded-2xl bg-white/8 border border-white/10 flex items-center justify-center group-hover:bg-white/15 group-active:scale-95 transition-all">
-                        <a.icon className="w-4 h-4 text-white" />
-                      </div>
-                      <span className="text-xs text-slate-400 font-medium">{a.label}</span>
-                    </button>
-                  ))}
-                </div>
-
-                {nodeActive && (
-                  <p className="text-center text-xs text-slate-600 font-mono">
-                    Min withdrawal: {fmt(minWithdraw)} · Node: {nodeTier}
-                  </p>
-                )}
-              </div>
-            </motion.div>
-
-            {/* STATS */}
-            <div className="grid grid-cols-2 gap-3">
-              {[
-                { label: "Daily Task Yield",  value: fmt(profile?.dailyTaskEarnings ?? 0),  icon: FaBullseye,    acc: "teal" },
-                { label: "Sales Commission",  value: fmt(profile?.salesCommission ?? 0),     icon: FaArrowTrendUp, acc: "amber" },
-              ].map((s, i) => (
-                <div key={i} className={`relative rounded-[22px] p-5 border ${card} shadow-sm`}>
-                  {profile?.accountStatus === 'suspended' ? (
-                    <LockedOverlay reason="Account Suspended" />
-                  ) : !nodeActive ? (
-                    <LockedOverlay reason="Node required to earn" />
-                  ) : null}
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 ${s.acc === "teal" ? "bg-teal-500/10 text-teal-400" : "bg-amber-500/10 text-amber-400"}`}>
-                    <s.icon className="w-5 h-5" />
-                  </div>
-                  <p className={`text-xs font-medium mb-0.5 ${sub}`}>{s.label}</p>
-                  <p className="text-xl font-black">{s.value}</p>
-                </div>
-              ))}
-            </div>
-
-            {/* NODE LICENSE */}
-            {nodeActive && (
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-bold text-base">Active Node License</h3>
-                  <Link href="/upgrade" className="text-xs text-teal-400 font-semibold flex items-center gap-1 hover:text-teal-300 transition-colors">
-                    Upgrade <FaChevronRight className="w-3 h-3" />
-                  </Link>
-                </div>
-                <div className={`relative rounded-[22px] bg-gradient-to-r ${nodeStyle.grad} p-6 shadow-xl border ${nodeStyle.ring}`}>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="w-14 h-14 rounded-2xl bg-black/20 border border-white/20 flex items-center justify-center">
-                        <FaShieldHalved className="w-7 h-7 text-white" />
-                      </div>
-                      <div>
-                        <p className="text-white/60 text-xs uppercase tracking-wider mb-0.5">Validator License</p>
-                        <p className="text-white font-black text-xl">{nodeTier}</p>
-                        <p className="text-white/60 text-xs mt-0.5">Multiplier: <span className="text-white font-black">{mult}.0×</span> · Min Withdrawal: <span className="text-white font-bold">{fmt(minWithdraw)}</span></p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-[10px] text-white/50 uppercase tracking-wider block mb-1">Status</span>
-                      <div className="flex items-center gap-1.5 justify-end">
-                        <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
-                        <span className="text-white font-black text-sm">ACTIVE</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* NO NODE CTA */}
-            {!nodeActive && !nodePending && (
-              <div className={`rounded-[22px] border ${card} p-6 text-center`}>
-                <FaShieldHalved className="w-10 h-10 text-teal-500/30 mx-auto mb-3" />
-                <p className="font-bold text-base mb-1">No Active Node</p>
-                <p className={`text-sm ${sub} mb-5`}>Purchase a Validator Node License to unlock tasks, earnings, and withdrawals.</p>
-                <Link href="/upgrade" className="inline-block bg-teal-500 hover:bg-teal-400 text-slate-950 font-black px-8 py-3 rounded-2xl text-sm transition-colors">
-                  Initialize My Node
-                </Link>
-              </div>
-            )}
-
-            {/* RECENT TRANSACTIONS (real from Firestore) */}
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-bold text-base">Recent Transactions</h3>
-                <Link href="/withdrawals" className={`text-xs text-teal-400 font-semibold flex items-center gap-1 hover:text-teal-300 transition-colors`}>
-                  History <FaChevronRight className="w-3 h-3" />
-                </Link>
-              </div>
-              <div className={`rounded-[22px] border ${card} overflow-hidden divide-y divide-white/5`}>
-                {transactions.length === 0 ? (
-                  <div className="py-10 text-center">
-                    <FaWallet className={`w-8 h-8 ${sub} mx-auto mb-2`} />
-                    <p className={`text-sm ${sub}`}>No transactions yet</p>
-                  </div>
-                ) : transactions.map((tx, i) => {
-                  const Icon  = TX_ICON[tx.type] ?? FaWallet;
-                  const color = TX_COLOR[tx.type] ?? "text-slate-400";
-                  const pos   = tx.amount > 0;
-                  return (
-                    <motion.div key={tx.id || i} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                      className="flex items-center gap-4 px-5 py-4">
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${pos ? "bg-emerald-500/10" : "bg-rose-500/10"}`}>
-                        <Icon className={`w-4 h-4 ${color}`} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold truncate">{tx.description}</p>
-                        <p className={`text-xs ${sub} mt-0.5`}>{tx.type?.replace("_", " ")} · {ts(tx.createdAt)}</p>
-                      </div>
-                      <span className={`text-sm font-black shrink-0 ${pos ? "text-emerald-400" : "text-rose-400"}`}>
-                        {pos ? "+" : ""}{fmt(tx.amount)}
-                      </span>
-                    </motion.div>
-                  );
-                })}
-              </div>
-            </div>
-
-            <ComplianceBadge />
           </div>
-        </div>
-      </main>
 
-      {/* MOBILE BOTTOM NAV */}
-      <nav className={`md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-slate-950/98 backdrop-blur-xl safe-area-bottom`}>
-        <div className="grid grid-cols-5 h-16">
-          {NAV.slice(0, 5).map((item, i) => {
-            const active = item.href === "/dashboard";
-            return (
-              <Link key={i} href={item.href}
-                className={`flex flex-col items-center justify-center gap-1 transition-all active:scale-95 ${active ? "text-teal-400" : "text-slate-500 hover:text-slate-300"}`}>
-                <item.icon className="w-[18px] h-[18px]" />
-                <span className="text-[9px] font-bold uppercase tracking-wide leading-none">{item.label.split(" ")[0]}</span>
+          {/* ── RECENT ACTIVITY ── */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className={`col-span-1 lg:col-span-2 rounded-3xl p-6 bg-white border border-slate-200 shadow-sm relative min-h-[300px]`}>
+              {!nodeActive && <LockedOverlay reason="Activate a premium plan to unlock full transaction history." />}
+              
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-bold text-slate-900">Recent Activity</h3>
+                <Link href="/withdrawals" className="text-xs text-primary hover:text-primary/80 font-semibold flex items-center gap-1">
+                  View all <ChevronRight className="w-3 h-3" />
+                </Link>
+              </div>
+
+              {transactions.length === 0 ? (
+                <div className="py-12 text-center flex flex-col items-center justify-center">
+                  <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center mb-3 border border-slate-100">
+                    <History className="w-5 h-5 text-slate-300" />
+                  </div>
+                  <p className="text-slate-500 font-medium text-sm">No recent transactions.</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {transactions.map(tx => {
+                    const Icon = TX_ICON[tx.type] || Target;
+                    const cColor = TX_COLOR[tx.type] || "text-slate-400";
+                    const isPos = ["deposit","task_reward","referral_bonus","admin_credit"].includes(tx.type);
+                    return (
+                      <div key={tx.id} className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 border border-slate-100 hover:border-slate-200 transition-colors">
+                        <div className="flex items-center gap-4">
+                          <div className={`w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center border border-slate-100 ${cColor}`}>
+                            <Icon className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-bold text-slate-900 capitalize">{tx.type.replace("_", " ")}</p>
+                            <p className="text-xs text-slate-500 font-medium">{ts(tx.createdAt)}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className={`text-sm font-black ${isPos ? "text-emerald-500" : "text-slate-900"}`}>
+                            {isPos ? "+" : ""}{fmt(tx.amount)}
+                          </p>
+                          <p className={`text-[10px] font-bold uppercase tracking-wider ${tx.status === "completed" ? "text-primary" : tx.status === "failed" ? "text-rose-500" : "text-amber-500"}`}>
+                            {tx.status}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Referral Snippet */}
+            <div className={`rounded-3xl p-6 bg-white border border-slate-200 shadow-sm relative`}>
+              {!nodeActive && <LockedOverlay reason="Activate a premium plan to unlock the referral program." />}
+              
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <Users className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900 leading-none">Refer & Earn</h3>
+                  <p className="text-xs text-slate-500 mt-1">Earn 10% on direct referrals</p>
+                </div>
+              </div>
+
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 text-center mb-6">
+                <p className="text-xs text-slate-500 font-medium mb-1 uppercase tracking-widest">Your Code</p>
+                <p className="text-2xl font-black text-slate-900 tracking-widest font-mono select-all">
+                  {profile?.referralCode || "------"}
+                </p>
+              </div>
+
+              <div className="flex justify-between items-center text-sm border-t border-slate-100 pt-4 mb-6">
+                <span className="text-slate-500 font-medium">Total Earned</span>
+                <span className="text-emerald-500 font-bold">{fmt(profile?.salesCommission || 0)}</span>
+              </div>
+
+              <Link href="/referrals" className="block w-full py-3.5 rounded-xl bg-slate-900 text-white font-bold text-sm text-center hover:bg-slate-800 transition-colors shadow-sm">
+                View Network
               </Link>
-            );
-          })}
+            </div>
+          </div>
+
         </div>
-      </nav>
+
+        {/* ── MOBILE NAV (bottom) ── */}
+        <nav className="md:hidden sticky bottom-0 z-40 bg-white/90 backdrop-blur-xl border-t border-slate-200 pb-safe">
+          <div className="flex items-center justify-around p-2">
+            {NAV.slice(0, 5).map(item => {
+              const active = item.href === "/dashboard";
+              return (
+                <Link key={item.label} href={item.href} className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-colors ${active ? "text-primary" : "text-slate-400"}`}>
+                  <item.icon className="w-5 h-5" />
+                  <span className="text-[10px] font-bold tracking-wide">{item.label.split(" ")[0]}</span>
+                </Link>
+              );
+            })}
+          </div>
+        </nav>
+      </main>
     </div>
   );
 }

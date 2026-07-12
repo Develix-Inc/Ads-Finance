@@ -15,19 +15,19 @@ import { SupportTab } from "@/components/admin/SupportTab";
 import { SettingsTab } from "@/components/admin/SettingsTab";
 import { LogsTab } from "@/components/admin/LogsTab";
 import {
-  FaUsers, FaMoneyBillTransfer, FaArrowDown, FaGaugeHigh,
-  FaCircleCheck, FaCircleXmark, FaClockRotateLeft, FaEye,
-  FaRightFromBracket, FaShieldHalved, FaBullhorn, FaX, FaArrowTrendUp, FaHeadset,
-  FaGear
-} from "react-icons/fa6";
+  Users, BadgeDollarSign, ArrowDown, LayoutDashboard,
+  CheckCircle2, XCircle, Clock, Eye,
+  LogOut, ShieldHalf, Megaphone, X, TrendingUp, Headset,
+  Settings
+} from "lucide-react";
 import Swal from "sweetalert2";
 
 const ADMIN_EMAILS = ["info.vendrainc@gmail.com", "admin@adsfinance.com"];
 
 const SWAL = {
-  background: "#020617", color: "#f8fafc",
-  confirmButtonColor: "#14b8a6",
-  customClass: { popup: "!rounded-2xl !border !border-white/10", confirmButton: "!rounded-full", cancelButton: "!rounded-full" }
+  background: "#ffffff", color: "#0f172a",
+  confirmButtonColor: "#0f172a",
+  customClass: { popup: "!rounded-2xl !border !border-slate-200 !shadow-xl", confirmButton: "!rounded-xl px-6 py-2", cancelButton: "!rounded-xl px-6 py-2" }
 };
 
 const fmt = (n: number) => "₦" + (n ?? 0).toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -47,7 +47,6 @@ export default function AdminDashboard() {
   const [editBal, setEditBal]         = useState("");
   const unsubRefs                     = useRef<(() => void)[]>([]);
 
-  /* ── Real-time listeners (no orderBy = no composite index needed) ── */
   function startListeners() {
     const u1 = onSnapshot(collection(db, "users"), snap => {
       const sorted = snap.docs
@@ -95,7 +94,7 @@ export default function AdminDashboard() {
 
   async function verifyPayment(p: any) {
     await adminVerifyPayment(p.id, p.uid, p.nodeTier, admin.email);
-    Swal.fire({ ...SWAL, icon: "success", title: "Node Activated", timer: 1500, showConfirmButton: false });
+    Swal.fire({ ...SWAL, icon: "success", title: "Plan Activated", timer: 1500, showConfirmButton: false });
   }
 
   async function rejectPayment(p: any) {
@@ -199,8 +198,8 @@ export default function AdminDashboard() {
   }
 
   if (loading) return (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center gap-3">
-      <div className="w-10 h-10 border-4 border-teal-500 border-t-transparent rounded-full animate-spin" />
+    <div className="min-h-screen bg-background flex items-center justify-center gap-3">
+      <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
       <p className="text-slate-500 text-xs font-mono">Loading admin panel…</p>
     </div>
   );
@@ -211,82 +210,82 @@ export default function AdminDashboard() {
   const activeNodes = users.filter(u => u.nodeStatus === "active").length;
 
   const TABS: { id: Tab; label: string; icon: any; badge?: number }[] = [
-    { id: "overview",    label: "Overview",    icon: FaGaugeHigh },
-    { id: "users",       label: "Users",       icon: FaUsers,             badge: users.length },
-    { id: "payments",    label: "Payments",    icon: FaMoneyBillTransfer, badge: pendingPay },
-    { id: "withdrawals", label: "Withdrawals", icon: FaArrowDown,         badge: pendingWit },
-    { id: "support",     label: "Support",     icon: FaHeadset },
-    { id: "settings",    label: "Settings",    icon: FaGear },
-    { id: "logs",        label: "Logs",        icon: FaShieldHalved },
+    { id: "overview",    label: "Overview",    icon: LayoutDashboard },
+    { id: "users",       label: "Users",       icon: Users,             badge: users.length },
+    { id: "payments",    label: "Payments",    icon: BadgeDollarSign, badge: pendingPay },
+    { id: "withdrawals", label: "Withdrawals", icon: ArrowDown,         badge: pendingWit },
+    { id: "support",     label: "Support",     icon: Headset },
+    { id: "settings",    label: "Settings",    icon: Settings },
+    { id: "logs",        label: "Logs",        icon: ShieldHalf },
   ];
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-200">
+    <div className="min-h-screen bg-background text-slate-900 pb-10">
       {/* header */}
-      <header className="border-b border-white/10 px-6 py-4 flex items-center justify-between bg-slate-900/60 sticky top-0 z-40 backdrop-blur-xl">
-        <div className="flex items-center gap-3">
-          <Image src="/logo-transparent.png" alt="" width={32} height={32} className="w-8 h-8 object-contain" onError={e => { (e.target as any).style.display = "none"; }} />
+      <header className="border-b border-slate-200 px-6 py-4 flex items-center justify-between bg-white/80 sticky top-0 z-40 backdrop-blur-xl">
+        <div className="flex items-center gap-4">
+          <Image src="/logo.png" alt="" width={32} height={32} className="w-8 h-8 object-contain" onError={e => { (e.target as any).style.display = "none"; }} />
           <div>
-            <p className="font-black text-white text-base leading-none">AdsFinance</p>
-            <p className="text-[10px] text-teal-400 font-mono tracking-widest uppercase">Admin Panel</p>
+            <p className="font-black text-slate-900 text-base leading-none">AdsFinance</p>
+            <p className="text-[10px] text-primary font-bold tracking-widest uppercase mt-0.5">Admin Control Panel</p>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5 text-xs text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-full border border-emerald-500/20 font-mono">
-            <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" /> Live
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1.5 text-xs text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200 font-bold">
+            <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" /> Live
           </div>
           <button onClick={broadcast}
-            className="flex items-center gap-2 px-3 py-2 rounded-xl bg-teal-500/10 border border-teal-500/20 text-teal-400 hover:bg-teal-500/20 transition-colors text-xs font-semibold">
-            <FaBullhorn className="w-3.5 h-3.5" /> Broadcast
+            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 hover:bg-slate-200 transition-colors text-xs font-bold">
+            <Megaphone className="w-3.5 h-3.5" /> Broadcast
           </button>
-          <span className="text-xs text-slate-500 hidden sm:block">{admin?.email}</span>
+          <span className="text-xs font-medium text-slate-500 hidden sm:block">{admin?.email}</span>
           <button onClick={() => { auth.signOut(); router.push("/"); }}
-            className="p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 hover:bg-rose-500/20 transition-colors">
-            <FaRightFromBracket className="w-4 h-4" />
+            className="p-2 rounded-xl bg-rose-50 border border-rose-200 text-rose-500 hover:bg-rose-100 transition-colors">
+            <LogOut className="w-4 h-4" />
           </button>
         </div>
       </header>
 
       {/* tabs */}
-      <div className="border-b border-white/10 bg-slate-900/30 px-6">
-        <div className="flex gap-1 overflow-x-auto">
+      <div className="border-b border-slate-200 bg-white px-6">
+        <div className="flex gap-2 overflow-x-auto">
           {TABS.map(t => (
             <button key={t.id} onClick={() => setTab(t.id)}
-              className={`flex items-center gap-2 px-4 py-3.5 text-sm font-semibold border-b-2 whitespace-nowrap transition-all ${tab === t.id ? "border-teal-500 text-teal-400" : "border-transparent text-slate-500 hover:text-slate-300"}`}>
+              className={`flex items-center gap-2 px-4 py-3.5 text-sm font-bold border-b-2 whitespace-nowrap transition-all ${tab === t.id ? "border-primary text-primary" : "border-transparent text-slate-500 hover:text-slate-900"}`}>
               <t.icon className="w-4 h-4" />
               {t.label}
-              {(t.badge ?? 0) > 0 && <span className="bg-teal-500 text-slate-950 text-[10px] font-black px-1.5 py-0.5 rounded-full">{t.badge}</span>}
+              {(t.badge ?? 0) > 0 && <span className="bg-primary text-primary-foreground text-[10px] font-black px-1.5 py-0.5 rounded-full">{t.badge}</span>}
             </button>
           ))}
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-8">
 
         {/* OVERVIEW */}
         {tab === "overview" && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { label: "Total Users",          value: users.length,  color: "text-teal-400" },
-              { label: "Active Nodes",          value: activeNodes,   color: "text-violet-400" },
-              { label: "Pending Payments",      value: pendingPay,    color: "text-amber-400" },
-              { label: "Pending Withdrawals",   value: pendingWit,    color: "text-rose-400" },
+              { label: "Total Users",          value: users.length,  color: "text-slate-900" },
+              { label: "Active Plans",          value: activeNodes,   color: "text-primary" },
+              { label: "Pending Payments",      value: pendingPay,    color: "text-amber-500" },
+              { label: "Pending Withdrawals",   value: pendingWit,    color: "text-rose-500" },
             ].map((s, i) => (
-              <div key={i} className="bg-slate-900 border border-white/10 rounded-[20px] p-6">
-                <p className="text-slate-400 text-xs font-medium mb-2">{s.label}</p>
-                <p className={`text-4xl font-black ${s.color}`}>{s.value}</p>
+              <div key={i} className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+                <p className="text-slate-500 text-xs font-bold mb-2 uppercase tracking-wider">{s.label}</p>
+                <p className={`text-3xl font-black ${s.color}`}>{s.value}</p>
               </div>
             ))}
-            <div className="col-span-2 bg-slate-900 border border-white/10 rounded-[20px] p-6">
-              <p className="text-slate-400 text-xs font-medium mb-2">Total Platform Balance</p>
-              <p className="text-3xl font-black text-white">{fmt(totalBal)}</p>
+            <div className="col-span-2 bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+              <p className="text-slate-500 text-xs font-bold mb-2 uppercase tracking-wider">Total Platform Balance</p>
+              <p className="text-3xl font-black text-slate-900">{fmt(totalBal)}</p>
             </div>
-            <div className="col-span-2 bg-slate-900 border border-white/10 rounded-[20px] p-6">
-              <p className="text-slate-400 text-xs font-medium mb-2">Recent Payments</p>
+            <div className="col-span-2 bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+              <p className="text-slate-500 text-xs font-bold mb-3 uppercase tracking-wider">Recent Payments</p>
               {payments.slice(0, 3).map((p, i) => (
-                <div key={i} className="flex justify-between py-1.5 border-b border-white/5 text-sm">
-                  <span className="text-slate-400 truncate max-w-[200px]">{p.userEmail}</span>
-                  <span className={`font-bold ${p.status === "verified" ? "text-emerald-400" : p.status === "pending" ? "text-amber-400" : "text-rose-400"}`}>{p.status}</span>
+                <div key={i} className="flex justify-between py-2 border-b border-slate-100 text-sm last:border-0">
+                  <span className="text-slate-600 font-medium truncate max-w-[200px]">{p.userEmail}</span>
+                  <span className={`font-bold text-xs px-2 py-0.5 rounded-full ${p.status === "verified" ? "bg-emerald-50 text-emerald-600 border border-emerald-200" : p.status === "pending" ? "bg-amber-50 text-amber-600 border border-amber-200" : "bg-rose-50 text-rose-600 border border-rose-200"}`}>{p.status}</span>
                 </div>
               ))}
             </div>
@@ -295,59 +294,59 @@ export default function AdminDashboard() {
 
         {/* USERS */}
         {tab === "users" && (
-          <div className="space-y-3">
-            <p className="text-slate-400 text-sm">{users.length} registered users · Real-time</p>
-            <div className="bg-slate-900 border border-white/10 rounded-[20px] overflow-hidden">
+          <div className="space-y-4">
+            <p className="text-slate-500 text-sm font-bold">{users.length} registered users · Real-time</p>
+            <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-white/10 text-slate-500 text-xs uppercase tracking-wider">
+                    <tr className="border-b border-slate-200 bg-slate-50 text-slate-500 text-xs font-bold uppercase tracking-wider">
                       <th className="text-left px-5 py-4">User</th>
-                      <th className="text-left px-5 py-4">Node</th>
+                      <th className="text-left px-5 py-4">Plan Tier</th>
                       <th className="text-left px-5 py-4">Balance</th>
                       <th className="text-left px-5 py-4">Bank Details</th>
                       <th className="text-left px-5 py-4">Status</th>
                       <th className="px-5 py-4 text-center">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-white/5">
+                  <tbody className="divide-y divide-slate-100">
                     {users.map((u, i) => (
-                      <tr key={i} className="hover:bg-white/3 transition-colors">
+                      <tr key={i} className="hover:bg-slate-50 transition-colors">
                         <td className="px-5 py-4">
-                          <p className="font-semibold text-white truncate max-w-[180px]">{u.email || u.phone || u.uid?.slice(0, 8)}</p>
-                          <p className="text-slate-500 text-xs mt-0.5 capitalize">{u.accountStatus ?? "active"}</p>
+                          <p className="font-bold text-slate-900 truncate max-w-[180px]">{u.email || u.phone || u.uid?.slice(0, 8)}</p>
+                          <p className="text-slate-500 text-xs mt-0.5 capitalize font-medium">{u.accountStatus ?? "active"}</p>
                         </td>
                         <td className="px-5 py-4">
-                          <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${u.nodeTier ? "bg-teal-500/10 text-teal-400" : "bg-slate-700 text-slate-400"}`}>
+                          <span className={`text-xs font-bold px-2.5 py-1 rounded-full border ${u.nodeTier ? "bg-primary/10 text-primary border-primary/20" : "bg-slate-100 text-slate-500 border-slate-200"}`}>
                             {u.nodeTier || "None"}
                           </span>
                         </td>
-                        <td className="px-5 py-4 font-bold text-white">{fmt(u.walletBalance ?? 0)}</td>
+                        <td className="px-5 py-4 font-black text-slate-900">{fmt(u.walletBalance ?? 0)}</td>
                         <td className="px-5 py-4">
-                          <p className="text-xs text-slate-300 truncate max-w-[150px] font-semibold">{u.bankName || "No Bank"}</p>
-                          <p className="text-xs text-slate-500 font-mono mt-0.5">{u.accountNumber || "—"}</p>
+                          <p className="text-xs text-slate-700 truncate max-w-[150px] font-bold">{u.bankName || "No Bank"}</p>
+                          <p className="text-xs text-slate-500 font-mono mt-0.5 font-medium">{u.accountNumber || "—"}</p>
                         </td>
                         <td className="px-5 py-4">
-                          <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
-                            u.nodeStatus === "active"  ? "bg-emerald-500/10 text-emerald-400" :
-                            u.nodeStatus === "pending" ? "bg-amber-500/10 text-amber-400" :
-                            "bg-slate-700/50 text-slate-500"}`}>
+                          <span className={`text-[10px] uppercase tracking-wider font-bold px-2.5 py-1 rounded-full border ${
+                            u.nodeStatus === "active"  ? "bg-emerald-50 text-emerald-600 border-emerald-200" :
+                            u.nodeStatus === "pending" ? "bg-amber-50 text-amber-600 border-amber-200" :
+                            "bg-slate-100 text-slate-500 border-slate-200"}`}>
                             {u.nodeStatus || "none"}
                           </span>
                         </td>
                         <td className="px-5 py-4">
                           <div className="flex items-center justify-center gap-2">
                             <button onClick={() => setStatus(u.uid, u.accountStatus === "suspended" ? "active" : "suspended")}
-                              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors border ${u.accountStatus === "suspended" ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20" : "bg-rose-500/10 border-rose-500/20 text-rose-400 hover:bg-rose-500/20"}`}>
+                              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors border shadow-sm ${u.accountStatus === "suspended" ? "bg-emerald-50 border-emerald-200 text-emerald-600 hover:bg-emerald-100" : "bg-rose-50 border-rose-200 text-rose-600 hover:bg-rose-100"}`}>
                               {u.accountStatus === "suspended" ? "Unsuspend" : "Suspend"}
                             </button>
                             <button onClick={() => setSelectedUser(u)}
-                              className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 transition-colors">
-                              <FaEye className="w-3.5 h-3.5" />
+                              className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-600 transition-colors shadow-sm">
+                              <Eye className="w-4 h-4" />
                             </button>
                             <button onClick={() => setSelectedUser(u)}
-                              className="p-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-400 transition-colors" title="Manage Funds">
-                              <FaArrowTrendUp className="w-3.5 h-3.5" />
+                              className="p-1.5 rounded-xl bg-primary/10 hover:bg-primary/20 border border-primary/20 text-primary transition-colors shadow-sm" title="Manage Funds">
+                              <TrendingUp className="w-4 h-4" />
                             </button>
                           </div>
                         </td>
@@ -362,43 +361,60 @@ export default function AdminDashboard() {
             <AnimatePresence>
               {selectedUser && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                  className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
+                  className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4"
                   onClick={() => setSelectedUser(null)}>
                   <motion.div initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 30, opacity: 0 }}
-                    className="w-full max-w-md bg-slate-900 border border-white/10 rounded-[24px] p-7 shadow-2xl"
+                    className="w-full max-w-md bg-white border border-slate-200 rounded-3xl p-7 shadow-2xl"
                     onClick={e => e.stopPropagation()}>
                     <div className="flex items-center justify-between mb-6">
-                      <h3 className="font-black text-white text-lg">User Details</h3>
-                      <button onClick={() => setSelectedUser(null)} className="text-slate-500 hover:text-white"><FaX className="w-4 h-4" /></button>
+                      <h3 className="font-black text-slate-900 text-lg">User Details</h3>
+                      <button onClick={() => setSelectedUser(null)} className="text-slate-400 hover:text-slate-600 bg-slate-100 p-2 rounded-full"><X className="w-4 h-4" /></button>
                     </div>
+                    <div className="space-y-1">
                     {[
                       { k: "Email",           v: selectedUser.email },
-                      { k: "Node Tier",       v: selectedUser.nodeTier || "None" },
-                      { k: "Node Status",     v: selectedUser.nodeStatus || "none" },
+                      { k: "Plan Tier",       v: selectedUser.nodeTier || "None" },
+                      { k: "Plan Status",     v: selectedUser.nodeStatus || "none" },
                       { k: "Balance",         v: fmt(selectedUser.walletBalance ?? 0) },
                       { k: "Bank",            v: selectedUser.bankName || "—" },
                       { k: "Account",         v: selectedUser.accountNumber || "—" },
                       { k: "Referral Code",   v: selectedUser.referralCode || "—" },
                       { k: "Account Status",  v: selectedUser.accountStatus || "active" },
                     ].map(r => (
-                      <div key={r.k} className="flex justify-between py-2 border-b border-white/5">
-                        <span className="text-slate-500 text-sm">{r.k}</span>
-                        <span className="text-white text-sm font-semibold capitalize">{r.v}</span>
+                      <div key={r.k} className="flex justify-between py-2 border-b border-slate-100">
+                        <span className="text-slate-500 font-medium text-sm">{r.k}</span>
+                        <span className="text-slate-900 text-sm font-bold capitalize">{r.v}</span>
                       </div>
                     ))}
-                    <div className="mt-5 space-y-3">
-                      <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">Wallet Actions</p>
-                      <div className="grid grid-cols-2 gap-2">
-                        {/* removed big credit/debit buttons in favor of the new modal wallet balance edit */}
+                    </div>
+                    <div className="mt-6 space-y-4">
+                      <div>
+                        <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-2">Wallet Actions</p>
+                        <div className="flex gap-2">
+                          <div className="relative flex-1">
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">₦</span>
+                            <input type="number" value={editBal} onChange={e => setEditBal(e.target.value)} placeholder="0.00"
+                              className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-8 pr-4 py-2.5 text-slate-900 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all focus:outline-none font-bold" />
+                          </div>
+                          <button onClick={() => creditUser(selectedUser.uid, editBal)} title="Credit"
+                            className="w-11 h-11 flex items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100 transition-colors shadow-sm">
+                            <TrendingUp className="w-4 h-4" />
+                          </button>
+                          <button onClick={() => debitUser(selectedUser.uid, editBal)} title="Debit"
+                            className="w-11 h-11 flex items-center justify-center rounded-xl bg-rose-50 text-rose-600 border border-rose-200 hover:bg-rose-100 transition-colors shadow-sm">
+                            <ArrowDown className="w-4 h-4" />
+                          </button>
+                        </div>
                       </div>
-                      <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mt-3">Account Status</p>
+
+                      <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mt-4 mb-2">Account Status</p>
                       <div className="grid grid-cols-3 gap-2">
                         {(["active", "suspended"] as const).map(s => (
                           <button key={s} onClick={() => setStatus(selectedUser.uid, s)}
-                            className={`py-2.5 rounded-xl text-xs font-bold capitalize transition-colors border ${
+                            className={`py-2.5 rounded-xl text-xs font-bold capitalize transition-colors border shadow-sm ${
                               selectedUser.accountStatus === s
-                                ? "bg-teal-500 text-slate-950 border-transparent"
-                                : "bg-white/5 border-white/10 text-slate-400 hover:bg-white/10"}`}>
+                                ? "bg-slate-900 text-white border-transparent"
+                                : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"}`}>
                             {s}
                           </button>
                         ))}
@@ -413,74 +429,74 @@ export default function AdminDashboard() {
 
         {/* PAYMENTS */}
         {tab === "payments" && (
-          <div className="space-y-3">
-            <p className="text-slate-400 text-sm">{pendingPay} pending · {payments.length} total · Real-time</p>
+          <div className="space-y-4">
+            <p className="text-slate-500 font-bold text-sm">{pendingPay} pending · {payments.length} total · Real-time</p>
             {payments.map((p, i) => (
-              <div key={i} className="bg-slate-900 border border-white/10 rounded-[20px] p-5">
+              <div key={i} className="bg-white border border-slate-200 shadow-sm rounded-2xl p-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${p.status === "pending" ? "bg-amber-500/10 text-amber-400" : p.status === "verified" ? "bg-emerald-500/10 text-emerald-400" : "bg-rose-500/10 text-rose-400"}`}>
+                    <div className="flex items-center gap-3 mb-1">
+                      <span className={`text-[10px] uppercase tracking-wider font-bold px-2.5 py-1 rounded-full border ${p.status === "pending" ? "bg-amber-50 text-amber-600 border-amber-200" : p.status === "verified" ? "bg-emerald-50 text-emerald-600 border-emerald-200" : "bg-rose-50 text-rose-600 border-rose-200"}`}>
                         {p.status}
                       </span>
-                      <span className="text-white font-black">{p.nodeTier}</span>
-                      <span className="text-slate-400 font-bold">{fmt(p.amount)}</span>
+                      <span className="text-slate-900 font-black text-lg">{p.nodeTier}</span>
+                      <span className="text-primary font-bold bg-primary/10 px-2 py-0.5 rounded-lg text-sm">{fmt(p.amount)}</span>
                     </div>
-                    <p className="text-slate-400 text-xs">{p.userEmail}</p>
-                    <p className="text-slate-600 text-xs font-mono mt-0.5">Ref: {p.referenceCode} · {ts(p.submittedAt)}</p>
+                    <p className="text-slate-500 font-medium text-sm mt-1">{p.userEmail}</p>
+                    <p className="text-slate-400 text-xs font-mono font-medium mt-1">Ref: {p.referenceCode} · {ts(p.submittedAt)}</p>
                   </div>
                   {p.status === "pending" && (
                     <div className="flex gap-2 shrink-0">
                       <button onClick={() => verifyPayment(p)}
-                        className="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20 text-sm font-bold transition-colors">
-                        <FaCircleCheck className="w-4 h-4" /> Verify
+                        className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-600 hover:bg-emerald-100 text-sm font-bold transition-colors shadow-sm">
+                        <CheckCircle2 className="w-4 h-4" /> Verify
                       </button>
                       <button onClick={() => rejectPayment(p)}
-                        className="flex items-center gap-2 px-4 py-2 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 hover:bg-rose-500/20 text-sm font-bold transition-colors">
-                        <FaCircleXmark className="w-4 h-4" /> Reject
+                        className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-600 hover:bg-rose-100 text-sm font-bold transition-colors shadow-sm">
+                        <XCircle className="w-4 h-4" /> Reject
                       </button>
                     </div>
                   )}
                 </div>
               </div>
             ))}
-            {payments.length === 0 && <p className="text-slate-600 text-center py-10">No payments yet</p>}
+            {payments.length === 0 && <p className="text-slate-500 font-bold text-center py-10 bg-white border border-slate-200 rounded-2xl">No payments yet</p>}
           </div>
         )}
 
         {/* WITHDRAWALS */}
         {tab === "withdrawals" && (
-          <div className="space-y-3">
-            <p className="text-slate-400 text-sm">{pendingWit} pending · {withdrawals.length} total · Real-time</p>
+          <div className="space-y-4">
+            <p className="text-slate-500 font-bold text-sm">{pendingWit} pending · {withdrawals.length} total · Real-time</p>
             {withdrawals.map((w, i) => (
-              <div key={i} className="bg-slate-900 border border-white/10 rounded-[20px] p-5">
+              <div key={i} className="bg-white border border-slate-200 shadow-sm rounded-2xl p-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${w.status === "pending" ? "bg-amber-500/10 text-amber-400" : w.status === "processed" ? "bg-emerald-500/10 text-emerald-400" : "bg-rose-500/10 text-rose-400"}`}>
+                    <div className="flex items-center gap-3 mb-1">
+                      <span className={`text-[10px] uppercase tracking-wider font-bold px-2.5 py-1 rounded-full border ${w.status === "pending" ? "bg-amber-50 text-amber-600 border-amber-200" : w.status === "processed" ? "bg-emerald-50 text-emerald-600 border-emerald-200" : "bg-rose-50 text-rose-600 border-rose-200"}`}>
                         {w.status}
                       </span>
-                      <span className="text-white font-black">{fmt(w.amount)}</span>
+                      <span className="text-slate-900 font-black text-lg">{fmt(w.amount)}</span>
                     </div>
-                    <p className="text-slate-300 text-sm">{w.accountName} · {w.bankName} · <span className="font-mono">{w.accountNumber}</span></p>
-                    <p className="text-slate-500 text-xs mt-0.5">{w.userEmail} · {ts(w.requestedAt)}</p>
+                    <p className="text-slate-700 font-bold text-sm mt-1">{w.accountName} · {w.bankName} · <span className="font-mono bg-slate-100 px-1 py-0.5 rounded">{w.accountNumber}</span></p>
+                    <p className="text-slate-500 text-xs font-medium mt-1">{w.userEmail} · {ts(w.requestedAt)}</p>
                   </div>
                   {w.status === "pending" && (
                     <div className="flex gap-2 shrink-0">
                       <button onClick={() => processWithdrawal(w)}
-                        className="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20 text-sm font-bold transition-colors">
-                        <FaCircleCheck className="w-4 h-4" /> Processed
+                        className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-600 hover:bg-emerald-100 text-sm font-bold transition-colors shadow-sm">
+                        <CheckCircle2 className="w-4 h-4" /> Processed
                       </button>
                       <button onClick={() => rejectWithdrawal(w)}
-                        className="flex items-center gap-2 px-4 py-2 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 hover:bg-rose-500/20 text-sm font-bold transition-colors">
-                        <FaCircleXmark className="w-4 h-4" /> Reject
+                        className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-600 hover:bg-rose-100 text-sm font-bold transition-colors shadow-sm">
+                        <XCircle className="w-4 h-4" /> Reject
                       </button>
                     </div>
                   )}
                 </div>
               </div>
             ))}
-            {withdrawals.length === 0 && <p className="text-slate-600 text-center py-10">No withdrawals yet</p>}
+            {withdrawals.length === 0 && <p className="text-slate-500 font-bold text-center py-10 bg-white border border-slate-200 rounded-2xl">No withdrawals yet</p>}
           </div>
         )}
 
@@ -493,85 +509,6 @@ export default function AdminDashboard() {
         {/* LOGS */}
         {tab === "logs" && <LogsTab />}
       </div>
-
-      {/* USER MODAL */}
-      <AnimatePresence>
-        {selectedUser && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSelectedUser(null)}
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-            <motion.div initial={{ scale: 0.95, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.95, opacity: 0, y: 20 }}
-              className="relative w-full max-w-md bg-slate-900 border border-white/10 rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
-              
-              <div className="p-6 border-b border-white/10 flex items-center justify-between sticky top-0 bg-slate-900 z-10 shrink-0">
-                <div>
-                  <h3 className="font-bold text-white text-lg leading-tight">{selectedUser.displayName || "Unknown User"}</h3>
-                  <p className="text-slate-500 text-sm">{selectedUser.email}</p>
-                </div>
-                <button onClick={() => setSelectedUser(null)} className="p-2 hover:bg-white/5 rounded-full transition-colors"><FaX className="w-4 h-4 text-slate-400" /></button>
-              </div>
-
-              <div className="p-6 overflow-y-auto">
-                <div className="space-y-6">
-                  
-                  {/* Balance Edit */}
-                  <div>
-                    <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-2">Wallet Balance</p>
-                    <div className="flex gap-2">
-                      <div className="relative flex-1">
-                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">₦</span>
-                        <input type="number" value={editBal} onChange={e => setEditBal(e.target.value)} placeholder="0.00"
-                          className="w-full bg-slate-950 border border-white/10 rounded-xl pl-8 pr-4 py-2.5 text-white focus:border-teal-500 transition-colors focus:outline-none" />
-                      </div>
-                      <button onClick={() => creditUser(selectedUser.uid, editBal)} title="Credit"
-                        className="w-11 h-11 flex items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 transition-colors">
-                        <FaArrowTrendUp />
-                      </button>
-                      <button onClick={() => debitUser(selectedUser.uid, editBal)} title="Debit"
-                        className="w-11 h-11 flex items-center justify-center rounded-xl bg-rose-500/10 text-rose-400 border border-rose-500/20 hover:bg-rose-500/20 transition-colors">
-                        <FaArrowDown />
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Actions */}
-                  <div>
-                    <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-2">Node Access</p>
-                    <div className="flex gap-2">
-                      <button onClick={() => adminSetUserStatus(selectedUser.uid, "active", admin.email)}
-                        className="flex-1 py-2.5 rounded-xl bg-teal-500/10 text-teal-400 border border-teal-500/20 text-xs font-bold transition-colors hover:bg-teal-500/20">
-                        Force Activate Node
-                      </button>
-                    </div>
-                    <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mt-3 mb-2">Account Status</p>
-                    <div className="grid grid-cols-2 gap-2">
-                      {(["active", "suspended"] as const).map(s => (
-                        <button key={s} onClick={() => setStatus(selectedUser.uid, s)}
-                          className={`py-2.5 rounded-xl text-xs font-bold capitalize transition-colors border ${
-                            selectedUser.accountStatus === s
-                              ? "bg-teal-500 text-slate-950 border-transparent"
-                              : "bg-white/5 border-white/10 text-slate-400 hover:bg-white/10"}`}>
-                          {s}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Info */}
-                  <div className="bg-slate-950 rounded-2xl p-4 border border-white/5 space-y-3">
-                    <div className="flex justify-between items-center"><span className="text-slate-500 text-xs">Joined</span><span className="text-slate-300 text-xs font-mono">{ts(selectedUser.createdAt)}</span></div>
-                    <div className="flex justify-between items-center"><span className="text-slate-500 text-xs">Node</span><span className="text-slate-300 text-xs font-bold">{selectedUser.nodeTier || "None"}</span></div>
-                    <div className="flex justify-between items-center"><span className="text-slate-500 text-xs">Status</span><span className="text-slate-300 text-xs uppercase">{selectedUser.nodeStatus || "unactivated"}</span></div>
-                    <div className="flex justify-between items-center"><span className="text-slate-500 text-xs">UID</span><span className="text-slate-300 text-[10px] font-mono">{selectedUser.uid}</span></div>
-                  </div>
-
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
     </div>
   );
 }

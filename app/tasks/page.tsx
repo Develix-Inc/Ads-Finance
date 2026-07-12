@@ -13,9 +13,9 @@ import {
 } from "@/lib/adRewards";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  FaArrowLeft, FaPlay, FaCircleCheck, FaLock, FaClock, FaShield,
-  FaBullseye, FaWallet, FaRotate, FaEye, FaTriangleExclamation
-} from "react-icons/fa6";
+  ArrowLeft, Play, CheckCircle2, Lock, Clock, ShieldCheck,
+  Target, Wallet, RefreshCw, Eye, AlertTriangle, ShieldAlert
+} from "lucide-react";
 import Swal from "sweetalert2";
 
 declare global {
@@ -25,19 +25,19 @@ declare global {
   }
 }
 
-const SWAL_DARK = {
-  background: "#020617", color: "#f8fafc",
-  customClass: { popup: "!rounded-2xl !border !border-white/10", confirmButton: "!rounded-full !bg-teal-500 !text-slate-950 !font-black" }
+const SWAL_LIGHT = {
+  background: "#ffffff", color: "#0f172a",
+  customClass: { popup: "!rounded-2xl !border !border-slate-200 !shadow-xl", confirmButton: "!rounded-xl !bg-primary !text-primary-foreground !font-bold px-6 py-2" }
 };
 
 const CATEGORY_COLOR: Record<string, string> = {
-  Finance: "bg-emerald-500/15 text-emerald-400 border-emerald-500/20",
-  Technology: "bg-blue-500/15 text-blue-400 border-blue-500/20",
-  AI: "bg-violet-500/15 text-violet-400 border-violet-500/20",
-  Motivation: "bg-amber-500/15 text-amber-400 border-amber-500/20",
-  Business: "bg-teal-500/15 text-teal-400 border-teal-500/20",
-  Entrepreneurship: "bg-orange-500/15 text-orange-400 border-orange-500/20",
-  Productivity: "bg-rose-500/15 text-rose-400 border-rose-500/20",
+  Finance: "bg-emerald-50 text-emerald-600 border-emerald-200",
+  Technology: "bg-blue-50 text-blue-600 border-blue-200",
+  AI: "bg-violet-50 text-violet-600 border-violet-200",
+  Motivation: "bg-amber-50 text-amber-600 border-amber-200",
+  Business: "bg-teal-50 text-teal-600 border-teal-200",
+  Entrepreneurship: "bg-orange-50 text-orange-600 border-orange-200",
+  Productivity: "bg-rose-50 text-rose-600 border-rose-200",
 };
 
 const fmt = (n: number) => "₦" + n.toLocaleString("en-NG", { minimumFractionDigits: 0 });
@@ -66,7 +66,6 @@ function WatchModal({ video, onClose, onClaim, alreadyDone }: WatchModalProps) {
 
   const MIN = MIN_WATCH_SECS;
 
-  // ── Load YouTube IFrame API once ────────────────────────────────────────────
   useEffect(() => {
     const init = () => {
       if (!containerRef.current) return;
@@ -103,10 +102,8 @@ function WatchModal({ video, onClose, onClaim, alreadyDone }: WatchModalProps) {
       }
     }
     return () => { stopTimer(); playerRef.current?.destroy?.(); };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ── Tab-switch detection ─────────────────────────────────────────────────────
   useEffect(() => {
     const onVisibility = () => {
       if (document.hidden) {
@@ -155,84 +152,78 @@ function WatchModal({ video, onClose, onClaim, alreadyDone }: WatchModalProps) {
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm flex flex-col"
+      className="fixed inset-0 z-[100] bg-slate-900/90 backdrop-blur-sm flex flex-col"
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
 
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 bg-slate-950 border-b border-white/10 shrink-0">
+      <div className="flex items-center justify-between px-4 py-3 bg-white border-b border-slate-200 shrink-0">
         <div className="flex items-center gap-3">
-          <button onClick={onClose} className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition-colors">
-            <FaArrowLeft className="w-4 h-4 text-slate-400" />
+          <button onClick={onClose} className="p-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-colors">
+            <ArrowLeft className="w-4 h-4 text-slate-500" />
           </button>
           <div>
-            <p className="text-white font-bold text-sm leading-tight truncate max-w-[200px] sm:max-w-none">{video.title}</p>
-            <p className="text-slate-500 text-xs">{video.channelName}</p>
+            <p className="text-slate-900 font-bold text-sm leading-tight truncate max-w-[200px] sm:max-w-none">{video.title}</p>
+            <p className="text-slate-500 text-xs font-medium">{video.channelName}</p>
           </div>
         </div>
-        <span className={`text-xs font-bold px-2.5 py-1 rounded-full border ${CATEGORY_COLOR[video.category] ?? "bg-slate-700 text-slate-400"}`}>
+        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${CATEGORY_COLOR[video.category] ?? "bg-slate-100 text-slate-500 border-slate-200"}`}>
           {video.category}
         </span>
       </div>
 
-      {/* Player */}
-      <div className="flex-1 flex flex-col items-center justify-start bg-black overflow-hidden">
-        <div className="w-full max-w-3xl aspect-video">
+      <div className="flex-1 flex flex-col items-center justify-start bg-slate-900 overflow-hidden">
+        <div className="w-full max-w-3xl aspect-video bg-black">
           <div ref={containerRef} className="w-full h-full" />
         </div>
 
-        {/* Tab warning */}
         <AnimatePresence>
           {tabWarning && (
             <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-              className="flex items-center gap-2 bg-amber-500/20 border border-amber-500/30 text-amber-300 text-xs font-semibold px-4 py-2 rounded-xl mt-3">
-              <FaTriangleExclamation className="w-3.5 h-3.5" />
-              Timer paused — tab was switched. Return to this tab to continue.
+              className="flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-700 text-xs font-semibold px-4 py-3 rounded-xl mt-4 shadow-lg">
+              <AlertTriangle className="w-4 h-4" />
+              Security Check: Timer paused because tab was switched. Return here to continue.
             </motion.div>
           )}
         </AnimatePresence>
       </div>
 
-      {/* Progress & Claim */}
-      <div className="shrink-0 bg-slate-950 border-t border-white/10 px-4 py-4 space-y-3">
-        {/* Progress bar */}
+      <div className="shrink-0 bg-white border-t border-slate-200 px-4 py-4 space-y-4 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
         <div>
-          <div className="flex justify-between text-xs mb-1.5">
-            <span className="text-slate-400 font-medium flex items-center gap-1.5">
-              <FaClock className="w-3 h-3" />
-              {canClaim ? "Reward unlocked!" : `Watch ${Math.floor(remaining / 60)}:${String(remaining % 60).padStart(2, "0")} more`}
+          <div className="flex justify-between text-xs mb-2">
+            <span className="text-slate-600 font-bold flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5" />
+              {canClaim ? "Reward Unlocked!" : `Watch ${Math.floor(remaining / 60)}:${String(remaining % 60).padStart(2, "0")} more to unlock`}
             </span>
-            <span className="text-slate-500">{Math.round(progress)}%</span>
+            <span className="text-slate-900 font-bold">{Math.round(progress)}%</span>
           </div>
-          <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
-            <motion.div className="h-full bg-teal-500 rounded-full" animate={{ width: `${progress}%` }} transition={{ duration: 0.5 }} />
+          <div className="h-2.5 bg-slate-100 rounded-full overflow-hidden shadow-inner">
+            <motion.div className="h-full bg-primary rounded-full" animate={{ width: `${progress}%` }} transition={{ duration: 0.5 }} />
           </div>
         </div>
 
-        {/* Claim button */}
         <motion.button
           onClick={handleClaim}
           disabled={!canClaim || claiming || alreadyDone}
           animate={canClaim ? { scale: [1, 1.02, 1] } : {}}
           transition={{ repeat: Infinity, duration: 2 }}
-          className={`w-full py-4 rounded-2xl font-black text-base transition-all flex items-center justify-center gap-2 ${
+          className={`w-full py-4 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-sm ${
             canClaim && !alreadyDone
-              ? "bg-teal-500 hover:bg-teal-400 text-slate-950 shadow-lg shadow-teal-500/25"
-              : "bg-slate-800 text-slate-500 cursor-not-allowed"
+              ? "bg-primary hover:bg-primary/90 text-primary-foreground shadow-primary/25"
+              : "bg-slate-100 text-slate-400 cursor-not-allowed"
           }`}>
           {claiming ? (
-            <><div className="w-5 h-5 border-3 border-slate-950 border-t-transparent rounded-full animate-spin" /> Processing…</>
+            <><div className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" /> Processing…</>
           ) : alreadyDone ? (
-            <><FaCircleCheck className="w-5 h-5" /> Already Claimed Today</>
+            <><CheckCircle2 className="w-4 h-4" /> Already Claimed Today</>
           ) : canClaim ? (
-            <><FaWallet className="w-5 h-5" /> Claim Reward</>
+            <><Wallet className="w-4 h-4" /> Claim Reward</>
           ) : (
-            <><FaEye className="w-5 h-5" /> Keep Watching to Unlock</>
+            <><Eye className="w-4 h-4" /> Keep Watching to Unlock</>
           )}
         </motion.button>
 
-        <p className="text-center text-xs text-slate-600">
-          <FaShield className="inline w-3 h-3 mr-1" />
-          Tab switching pauses the timer. Do not refresh the page.
+        <p className="text-center text-xs text-slate-500 font-medium">
+          <ShieldCheck className="inline w-3.5 h-3.5 mr-1 text-emerald-500" />
+          Anti-Fraud Active: Tab switching automatically pauses verification.
         </p>
       </div>
     </motion.div>
@@ -243,47 +234,45 @@ function WatchModal({ video, onClose, onClaim, alreadyDone }: WatchModalProps) {
 function VideoCard({ video, watched, onWatch, disabled, limits }: { video: VideoItem; watched: boolean; onWatch: () => void; disabled: boolean; limits: any }) {
   return (
     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-      className={`relative bg-slate-900 border rounded-[22px] overflow-hidden transition-all ${watched ? "border-teal-500/30" : "border-white/10 hover:border-white/20"}`}>
-      {/* Thumbnail */}
-      <div className="relative aspect-video bg-slate-800 overflow-hidden">
+      className={`relative bg-white border rounded-2xl overflow-hidden transition-all shadow-sm ${watched ? "border-primary/30" : "border-slate-200 hover:border-slate-300 hover:shadow-md"}`}>
+      
+      <div className="relative aspect-video bg-slate-100 overflow-hidden">
         <Image src={video.thumbnail} alt={video.title} width={640} height={360} className="w-full h-full object-cover"
           onError={e => { (e.target as any).src = "https://i.ytimg.com/vi/default/mqdefault.jpg"; }} />
-        {/* Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent" />
+        
         {watched && (
-          <div className="absolute inset-0 bg-slate-950/50 flex items-center justify-center">
-            <div className="w-12 h-12 rounded-full bg-teal-500 flex items-center justify-center shadow-lg">
-              <FaCircleCheck className="w-6 h-6 text-slate-950" />
+          <div className="absolute inset-0 bg-white/70 backdrop-blur-sm flex items-center justify-center">
+            <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center shadow-lg">
+              <CheckCircle2 className="w-6 h-6 text-primary-foreground" />
             </div>
           </div>
         )}
-        {/* Category badge */}
-        <span className={`absolute top-3 left-3 text-[10px] font-bold px-2 py-0.5 rounded-full border ${CATEGORY_COLOR[video.category] ?? "bg-slate-700 text-slate-400"}`}>
+        <span className={`absolute top-3 left-3 text-[10px] font-bold px-2 py-0.5 rounded-full border bg-white ${CATEGORY_COLOR[video.category] ?? "text-slate-500 border-slate-200"}`}>
           {video.category}
         </span>
       </div>
 
-      {/* Card body */}
       <div className="p-4">
-        <p className="text-white font-bold text-sm leading-snug mb-1 line-clamp-2">{video.title}</p>
-        <p className="text-slate-500 text-xs mb-4">{video.channelName}</p>
+        <p className="text-slate-900 font-bold text-sm leading-snug mb-1 line-clamp-2">{video.title}</p>
+        <p className="text-slate-500 font-medium text-xs mb-4">{video.channelName}</p>
 
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-[10px] text-slate-500 uppercase tracking-wider">Reward</p>
-            <p className="text-teal-400 font-black text-sm">₦{limits?.minReward} – ₦{limits?.maxReward}</p>
+            <p className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Reward</p>
+            <p className="text-slate-900 font-black text-sm">₦{limits?.minReward} – ₦{limits?.maxReward}</p>
           </div>
 
           {watched ? (
-            <span className="flex items-center gap-1.5 text-xs text-teal-400 font-bold">
-              <FaCircleCheck className="w-3.5 h-3.5" /> Earned
+            <span className="flex items-center gap-1.5 text-xs text-primary font-bold bg-primary/10 px-3 py-1.5 rounded-lg">
+              <CheckCircle2 className="w-3.5 h-3.5" /> Earned
             </span>
           ) : (
             <button onClick={onWatch} disabled={disabled}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-black transition-all active:scale-95 ${
-                disabled ? "bg-slate-700 text-slate-500 cursor-not-allowed" : "bg-teal-500 hover:bg-teal-400 text-slate-950 shadow-md"
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all active:scale-95 ${
+                disabled ? "bg-slate-100 text-slate-400 cursor-not-allowed" : "bg-primary hover:bg-primary/90 text-primary-foreground shadow-md shadow-primary/20"
               }`}>
-              <FaPlay className="w-3 h-3" /> Watch
+              <Play className="w-3.5 h-3.5" /> Watch Task
             </button>
           )}
         </div>
@@ -295,12 +284,12 @@ function VideoCard({ video, watched, onWatch, disabled, limits }: { video: Video
 // ─── Skeleton Card ────────────────────────────────────────────────────────────
 function SkeletonCard() {
   return (
-    <div className="bg-slate-900 border border-white/10 rounded-[22px] overflow-hidden animate-pulse">
-      <div className="aspect-video bg-slate-800" />
-      <div className="p-4 space-y-2">
-        <div className="h-4 bg-slate-800 rounded-lg w-3/4" />
-        <div className="h-3 bg-slate-800 rounded-lg w-1/2" />
-        <div className="h-9 bg-slate-800 rounded-xl mt-4 w-24 ml-auto" />
+    <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden animate-pulse shadow-sm">
+      <div className="aspect-video bg-slate-100" />
+      <div className="p-4 space-y-3">
+        <div className="h-4 bg-slate-100 rounded-lg w-3/4" />
+        <div className="h-3 bg-slate-100 rounded-lg w-1/2" />
+        <div className="h-9 bg-slate-100 rounded-xl mt-4 w-28 ml-auto" />
       </div>
     </div>
   );
@@ -319,7 +308,6 @@ export default function TasksPage() {
   const [activeVideo, setActiveVideo] = useState<VideoItem | null>(null);
   const [profile, setProfile] = useState<any>(null);
 
-  // Real-time listener for ad rewards to ensure Today's stats update instantly
   useEffect(() => {
     if (!uid) return;
     return onSnapshot(doc(db, "ad_rewards", uid), snap => {
@@ -329,7 +317,6 @@ export default function TasksPage() {
     }, err => console.error("ad_rewards snapshot error:", err));
   }, [uid]);
 
-  // Real-time listener for user profile to update wallet balance and node status instantly
   useEffect(() => {
     if (!uid) return;
     return onSnapshot(doc(db, "users", uid), snap => {
@@ -366,7 +353,6 @@ export default function TasksPage() {
     return unsub;
   }, [router]);
 
-  // Load YouTube API script once on page mount
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (!document.querySelector('script[src*="youtube.com/iframe_api"]')) {
@@ -382,26 +368,23 @@ export default function TasksPage() {
       const result = await claimAdReward(uid, videoId, profile?.nodeTier);
 
       if (result.success) {
-        // Refresh reward data
         const fresh = await getAdRewardData(uid);
         setRewardData(fresh);
         setActiveVideo(null);
 
         setTimeout(() => {
           Swal.fire({
-            background: "#0f172a",
-            color: "#f8fafc",
+            ...SWAL_LIGHT,
             icon: "success",
-            title: "Congratulations!",
+            title: "Task Verified",
             html: `
               <div style="font-family: inherit; text-align: center;">
-                <p style="color: #94a3b8; font-size: 14px; margin-bottom: 8px;">You successfully watched the ad and earned</p>
-                <p style="color: #14b8a6; font-size: 2.25rem; font-weight: 900; margin: 12px 0;">₦${result.reward.toLocaleString()}</p>
-                <p style="color: #64748b; font-size: 12px;">Credited to your main dashboard wallet instantly.</p>
+                <p style="color: #64748b; font-size: 14px; margin-bottom: 8px;">You successfully completed the verification task and earned</p>
+                <p style="color: #0f172a; font-size: 2.25rem; font-weight: 900; margin: 12px 0;">₦${result.reward.toLocaleString()}</p>
+                <p style="color: #94a3b8; font-size: 12px;">Funds have been credited to your dashboard wallet.</p>
               </div>
             `,
             confirmButtonText: "Return to Dashboard",
-            confirmButtonColor: "#0d9488",
             timer: 5000,
             timerProgressBar: true,
           }).then(r => {
@@ -412,12 +395,10 @@ export default function TasksPage() {
         setActiveVideo(null);
         setTimeout(() => {
           Swal.fire({
-            background: "#0f172a",
-            color: "#f8fafc",
+            ...SWAL_LIGHT,
             icon: "info",
             title: "Heads up",
             text: result.message,
-            confirmButtonColor: "#0d9488",
           });
         }, 150);
       }
@@ -426,25 +407,23 @@ export default function TasksPage() {
       setActiveVideo(null);
       setTimeout(() => {
         Swal.fire({
-          background: "#0f172a",
-          color: "#f8fafc",
+          ...SWAL_LIGHT,
           icon: "error",
-          title: "Claim Failed",
-          text: "Something went wrong while processing your reward. Please try again.",
-          confirmButtonColor: "#e11d48",
+          title: "Verification Failed",
+          text: "Something went wrong while processing your task. Please try again.",
         });
       }, 150);
     }
-  }, [uid, router]);
+  }, [uid, router, profile]);
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 text-white pb-10">
-        <div className="max-w-2xl mx-auto px-4 py-6 space-y-3">
-          <div className="h-8 bg-slate-800 rounded-xl w-48 animate-pulse" />
-          <div className="h-4 bg-slate-800 rounded-xl w-64 animate-pulse" />
-          <div className="h-16 bg-slate-900 rounded-2xl animate-pulse mt-4" />
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
+      <div className="min-h-screen bg-background text-slate-900 pb-10">
+        <div className="max-w-3xl mx-auto px-4 md:px-8 py-8 space-y-4">
+          <div className="h-8 bg-slate-200 rounded-xl w-48 animate-pulse" />
+          <div className="h-4 bg-slate-100 rounded-xl w-64 animate-pulse" />
+          <div className="h-20 bg-white border border-slate-200 shadow-sm rounded-2xl animate-pulse mt-6" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
             {[...Array(4)].map((_, i) => <SkeletonCard key={i} />)}
           </div>
         </div>
@@ -452,8 +431,8 @@ export default function TasksPage() {
     );
   }
 
-  const nodeTier    = profile?.nodeTier || "Node Alpha";
-  const limits      = TIER_LIMITS[nodeTier] || TIER_LIMITS["Node Alpha"];
+  const nodeTier    = profile?.nodeTier || "Starter Plan";
+  const limits      = TIER_LIMITS[nodeTier] || TIER_LIMITS["Starter Plan"];
   const dailyCap    = limits.dailyCap;
   
   const daily       = rewardData?.dailyEarnings ?? 0;
@@ -462,99 +441,104 @@ export default function TasksPage() {
   const watched     = rewardData?.watchedToday ?? [];
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white pb-24 md:pb-10">
-      {/* Header */}
-      <header className="sticky top-0 z-40 border-b border-white/10 bg-slate-950/90 backdrop-blur-xl px-4 py-3 flex items-center gap-4">
-        <Link href="/dashboard" className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition-colors">
-          <FaArrowLeft className="w-4 h-4 text-slate-400" />
-        </Link>
-        <div className="flex-1 min-w-0">
-          <h1 className="text-base font-black text-white tracking-tight">Ad Feed</h1>
-          <p className="text-xs text-slate-500">Watch videos · Earn daily rewards</p>
-        </div>
-        <div className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-2xl px-4 py-2">
-          <div className="text-right">
-            <p className="text-[9px] text-slate-500 uppercase font-bold tracking-wider leading-none">Today</p>
-            <p className="text-teal-400 font-black text-xs mt-0.5">{fmt(daily)}</p>
+    <div className="min-h-screen bg-background text-slate-900 pb-24 md:pb-10">
+      <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/80 backdrop-blur-xl px-4 md:px-8 py-4 flex items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <Link href="/dashboard" className="p-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-colors">
+            <ArrowLeft className="w-4 h-4 text-slate-600" />
+          </Link>
+          <div className="flex-1 min-w-0">
+            <h1 className="text-lg font-black text-slate-900 tracking-tight">Task Feed</h1>
+            <p className="text-xs text-slate-500 font-medium">Verified Ads & Engagement</p>
           </div>
-          <div className="h-4 w-[1px] bg-white/15" />
+        </div>
+        
+        <div className="hidden sm:flex items-center gap-4 bg-slate-50 border border-slate-200 rounded-2xl px-5 py-2 shadow-sm">
           <div className="text-right">
-            <p className="text-[9px] text-slate-500 uppercase font-bold tracking-wider leading-none">Wallet</p>
-            <p className="text-white font-black text-xs mt-0.5">{fmt(walletBalance)}</p>
+            <p className="text-[10px] text-slate-500 uppercase font-bold tracking-wider leading-none">Today</p>
+            <p className="text-primary font-black text-sm mt-0.5">{fmt(daily)}</p>
+          </div>
+          <div className="h-6 w-[1px] bg-slate-200" />
+          <div className="text-right">
+            <p className="text-[10px] text-slate-500 uppercase font-bold tracking-wider leading-none">Wallet</p>
+            <p className="text-slate-900 font-black text-sm mt-0.5">{fmt(walletBalance)}</p>
           </div>
         </div>
       </header>
 
-      <div className="max-w-2xl mx-auto px-4 py-5 space-y-5">
+      <div className="max-w-4xl mx-auto px-4 md:px-8 py-8 space-y-6">
 
         {profile?.accountStatus === 'suspended' ? (
-          <div className="bg-rose-500/10 border border-rose-500/20 rounded-[20px] p-6 text-center">
-            <FaShield className="w-8 h-8 text-rose-400 mx-auto mb-2" />
-            <p className="font-black text-white text-base">Account Suspended</p>
-            <p className="text-slate-400 text-sm mt-1">Your account has been suspended by the system. You cannot earn rewards.</p>
+          <div className="bg-rose-50 border border-rose-200 rounded-2xl p-8 text-center shadow-sm">
+            <ShieldAlert className="w-10 h-10 text-rose-500 mx-auto mb-3" />
+            <p className="font-black text-rose-900 text-lg">Account Suspended</p>
+            <p className="text-rose-700 text-sm mt-2 font-medium">Your account has been suspended by the system due to policy violations. You cannot earn rewards.</p>
           </div>
         ) : profile?.nodeStatus !== 'active' ? (
-          <div className="bg-amber-500/10 border border-amber-500/20 rounded-[20px] p-6 text-center">
-            <FaLock className="w-8 h-8 text-amber-400 mx-auto mb-2" />
-            <p className="font-black text-white text-base">Node Not Active</p>
-            <p className="text-slate-400 text-sm mt-1">You need an active Validator Node license to watch ads and earn rewards.</p>
-            <Link href="/upgrade" className="inline-block mt-4 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-6 py-2.5 rounded-full transition-colors text-sm">
-              Upgrade Now
+          <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center shadow-sm relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-8 opacity-5">
+              <Lock className="w-32 h-32" />
+            </div>
+            <Lock className="w-10 h-10 text-slate-400 mx-auto mb-3 relative z-10" />
+            <p className="font-black text-slate-900 text-lg relative z-10">Premium Plan Required</p>
+            <p className="text-slate-500 text-sm mt-2 font-medium relative z-10">You need an active membership plan to access verified tasks and earn rewards.</p>
+            <Link href="/upgrade" className="inline-block mt-6 bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-8 py-3 rounded-xl transition-colors text-sm shadow-md relative z-10">
+              Upgrade Account
             </Link>
           </div>
         ) : (
           <>
-
         {/* Daily limit bar */}
-        <div className="bg-slate-900 border border-white/10 rounded-[20px] p-5">
-          <div className="flex items-center justify-between mb-3">
+        <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <FaBullseye className="w-4 h-4 text-teal-400" />
-              <span className="font-bold text-sm">Daily Earning Progress</span>
+              <Target className="w-5 h-5 text-primary" />
+              <span className="font-bold text-slate-900">Daily Earning Progress</span>
             </div>
-            <span className="text-xs text-slate-400 font-mono">{fmt(daily)} / {fmt(dailyCap)}</span>
+            <span className="text-sm text-slate-500 font-bold">{fmt(daily)} / {fmt(dailyCap)}</span>
           </div>
-          <div className="h-3 bg-slate-800 rounded-full overflow-hidden">
+          <div className="h-3 bg-slate-100 rounded-full overflow-hidden shadow-inner">
             <motion.div
-              className={`h-full rounded-full ${limitHit ? "bg-rose-500" : "bg-teal-500"}`}
+              className={`h-full rounded-full ${limitHit ? "bg-rose-500" : "bg-primary"}`}
               initial={{ width: 0 }}
               animate={{ width: `${limitPct}%` }}
               transition={{ duration: 0.8, ease: "easeOut" }}
             />
           </div>
           {limitHit ? (
-            <p className="text-rose-400 text-xs font-semibold mt-2 flex items-center gap-1.5">
-              <FaLock className="w-3 h-3" /> Daily limit reached. Come back tomorrow.
+            <p className="text-rose-600 text-xs font-bold mt-3 flex items-center gap-1.5">
+              <Lock className="w-4 h-4" /> Daily limit reached. New tasks unlock tomorrow.
             </p>
           ) : (
-            <p className="text-slate-500 text-xs mt-2">
-              {fmt(dailyCap - daily)} remaining today · Resets midnight
+            <p className="text-slate-500 font-medium text-xs mt-3 flex items-center gap-1.5">
+              <Clock className="w-4 h-4 text-slate-400" />
+              {fmt(dailyCap - daily)} remaining today · Resets at midnight
             </p>
           )}
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 gap-4">
           {[
-            { label: "Watched",    value: `${watched.length}/${limits.maxVideos}`,   color: "text-white" },
-            { label: "Earned",     value: fmt(daily),                              color: "text-teal-400" },
-            { label: "Remaining",  value: fmt(Math.max(dailyCap - daily, 0)), color: "text-amber-400" },
+            { label: "Watched",    value: `${watched.length}/${limits.maxVideos}`,   color: "text-slate-900" },
+            { label: "Earned",     value: fmt(daily),                              color: "text-primary" },
+            { label: "Remaining",  value: fmt(Math.max(dailyCap - daily, 0)), color: "text-amber-500" },
           ].map((s, i) => (
-            <div key={i} className="bg-slate-900 border border-white/10 rounded-[18px] p-4 text-center">
-              <p className={`text-lg font-black ${s.color}`}>{s.value}</p>
-              <p className="text-slate-500 text-[10px] uppercase tracking-wider mt-0.5">{s.label}</p>
+            <div key={i} className="bg-white border border-slate-200 rounded-2xl p-5 text-center shadow-sm">
+              <p className={`text-xl font-black ${s.color}`}>{s.value}</p>
+              <p className="text-slate-400 font-bold text-[10px] uppercase tracking-wider mt-1">{s.label}</p>
             </div>
           ))}
         </div>
 
         {/* Refresh note */}
-        <div className="flex items-center gap-2 text-xs text-slate-500">
-          <FaRotate className="w-3 h-3" />
-          Videos refresh daily at midnight. Watch all {limits.maxVideos} to maximise earnings.
+        <div className="flex items-center gap-2 text-xs font-medium text-slate-500 bg-slate-50 border border-slate-100 p-3 rounded-xl">
+          <RefreshCw className="w-4 h-4" />
+          Verified tasks refresh daily. Complete all {limits.maxVideos} available tasks to maximize your earning potential.
         </div>
 
         {/* Video grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {videos.slice(0, limits.maxVideos).map((v, i) => (
             <motion.div key={v.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.07 }}>
               <VideoCard
@@ -568,28 +552,27 @@ export default function TasksPage() {
           ))}
         </div>
 
-        {/* Watched all — ONLY show if videos actually loaded AND all are watched */}
+        {/* Watched all */}
         {videos.length > 0 && watched.length >= limits.maxVideos && (
-          <div className="bg-teal-500/10 border border-teal-500/20 rounded-[20px] p-6 text-center">
-            <FaCircleCheck className="w-8 h-8 text-teal-400 mx-auto mb-2" />
-            <p className="font-black text-white text-base">All videos watched!</p>
-            <p className="text-slate-400 text-sm mt-1">New videos available tomorrow. Check back at midnight.</p>
+          <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-8 text-center shadow-sm">
+            <CheckCircle2 className="w-10 h-10 text-emerald-500 mx-auto mb-3" />
+            <p className="font-black text-emerald-900 text-lg">All Tasks Completed!</p>
+            <p className="text-emerald-700 font-medium text-sm mt-1">Excellent work. New verified tasks will be available tomorrow.</p>
           </div>
         )}
 
         {/* Error loading videos */}
         {loadError && (
-          <div className="bg-rose-500/10 border border-rose-500/20 rounded-[20px] p-6 text-center">
-            <FaTriangleExclamation className="w-8 h-8 text-rose-400 mx-auto mb-2" />
-            <p className="font-black text-white text-base">Couldn't load today's videos</p>
-            <p className="text-slate-400 text-sm mt-1">Please try again later or contact support.</p>
+          <div className="bg-rose-50 border border-rose-200 rounded-2xl p-8 text-center shadow-sm">
+            <AlertTriangle className="w-10 h-10 text-rose-500 mx-auto mb-3" />
+            <p className="font-black text-rose-900 text-lg">Unable to load tasks</p>
+            <p className="text-rose-700 font-medium text-sm mt-1">Please try again later or contact support if the issue persists.</p>
           </div>
         )}
         </>
         )}
       </div>
 
-      {/* Watch Modal */}
       <AnimatePresence>
         {activeVideo && (
           <WatchModal

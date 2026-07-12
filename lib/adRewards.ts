@@ -6,9 +6,10 @@ import { getUserProfile } from "./admin";
 export const MIN_WATCH_SECS = 180;
 
 export const TIER_LIMITS: Record<string, { dailyCap: number, minReward: number, maxReward: number, maxVideos: number }> = {
-  "Node Alpha": { dailyCap: 3000, minReward: 150, maxReward: 300, maxVideos: 10 },
-  "Node Sigma": { dailyCap: 7500, minReward: 350, maxReward: 500, maxVideos: 15 },
-  "Node Omega": { dailyCap: 24000, minReward: 900, maxReward: 1200, maxVideos: 20 },
+  "Starter Plan": { dailyCap: 500, minReward: 30, maxReward: 50, maxVideos: 10 },
+  "Alpha Plan": { dailyCap: 3000, minReward: 150, maxReward: 300, maxVideos: 10 },
+  "Sigma Plan": { dailyCap: 7500, minReward: 350, maxReward: 500, maxVideos: 15 },
+  "Omega Plan": { dailyCap: 24000, minReward: 900, maxReward: 1200, maxVideos: 20 },
 };
 
 export interface VideoItem {

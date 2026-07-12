@@ -15,21 +15,24 @@ export const COMPANY_BANK = {
 };
 
 export const NODE_PRICES: Record<string, number> = {
-  "Node Alpha": 17000,
-  "Node Sigma": 45000,
-  "Node Omega": 120000,
+  "Starter Plan": 0,
+  "Alpha Plan": 17000,
+  "Sigma Plan": 45000,
+  "Omega Plan": 120000,
 };
 
 export const NODE_MIN_WITHDRAWAL: Record<string, number> = {
-  "Node Alpha": 75000,
-  "Node Sigma": 200000,
-  "Node Omega": 500000,
+  "Starter Plan": 50000,
+  "Alpha Plan": 75000,
+  "Sigma Plan": 200000,
+  "Omega Plan": 500000,
 };
 
 export const NODE_MULTIPLIERS: Record<string, number> = {
-  "Node Alpha": 4,
-  "Node Sigma": 5,
-  "Node Omega": 6,
+  "Starter Plan": 1,
+  "Alpha Plan": 4,
+  "Sigma Plan": 5,
+  "Omega Plan": 6,
 };
 
 /* ─── User profile ─── */

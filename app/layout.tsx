@@ -3,7 +3,7 @@ import "./globals.css";
 import { SupportChatWidget } from "@/components/ui/SupportChatWidget";
 
 export const viewport: Viewport = {
-  themeColor: "#020617", // slate-950
+  themeColor: "#F2F5FB",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -51,7 +51,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />

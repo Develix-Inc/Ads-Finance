@@ -5,11 +5,11 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
-import { COMPANY_BANK, NODE_PRICES, NODE_MULTIPLIERS, NODE_MIN_WITHDRAWAL, submitPayment, getUserProfile, upsertUserProfile } from "@/lib/admin";
+import { COMPANY_BANK, NODE_PRICES, NODE_MIN_WITHDRAWAL, submitPayment, getUserProfile, upsertUserProfile } from "@/lib/admin";
 import {
-  FaShieldHalved, FaBolt, FaStar, FaCircleCheck, FaArrowLeft,
-  FaCopy, FaClock, FaReceipt, FaChevronRight
-} from "react-icons/fa6";
+  ShieldCheck, Zap, Star, CheckCircle2, ArrowLeft,
+  Clock, Receipt, ChevronRight
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Swal from "sweetalert2";
 
@@ -17,19 +17,22 @@ const fmt = (n: number) => "₦" + n.toLocaleString("en-NG");
 
 const TIERS = [
   {
-    name: "Node Alpha", icon: FaShieldHalved,
-    grad: "from-teal-600 to-teal-900", border: "border-teal-500/30", glow: "shadow-teal-500/10",
-    features: ["Standard Ad Verification", "Referral Commission", "24h Withdrawal Processing"],
+    name: "Alpha Plan", icon: ShieldCheck,
+    grad: "from-slate-100 to-slate-200", border: "border-slate-200", glow: "shadow-slate-200/50",
+    textColor: "text-slate-900", iconColor: "text-slate-700",
+    features: ["Standard Task Limits", "Referral Commission", "24h Withdrawal SLA"],
   },
   {
-    name: "Node Sigma", icon: FaBolt, popular: true,
-    grad: "from-amber-500 to-orange-800", border: "border-amber-500/30", glow: "shadow-amber-500/10",
-    features: ["High-Yield Video Ads", "Priority Referral Commission", "6h Withdrawal Processing", "Priority Support"],
+    name: "Sigma Plan", icon: Zap, popular: true,
+    grad: "from-primary/10 to-primary/5", border: "border-primary", glow: "shadow-primary/20",
+    textColor: "text-slate-900", iconColor: "text-primary",
+    features: ["Expanded Task Pool", "Priority Referral Rate", "6h Withdrawal SLA", "Priority Support"],
   },
   {
-    name: "Node Omega", icon: FaStar,
-    grad: "from-violet-600 to-purple-900", border: "border-violet-500/30", glow: "shadow-violet-500/10",
-    features: ["Institutional Merchant Tasks", "Maximum Referral Rate", "Instant Withdrawals", "Dedicated Manager"],
+    name: "Omega Plan", icon: Star,
+    grad: "from-amber-100 to-amber-50", border: "border-amber-400", glow: "shadow-amber-400/20",
+    textColor: "text-slate-900", iconColor: "text-amber-500",
+    features: ["Institutional Tasks", "Maximum Referral Rate", "Instant Withdrawals", "Dedicated Manager"],
   },
 ];
 
@@ -75,11 +78,6 @@ export default function UpgradePage() {
     return unsub;
   }, [router]);
 
-  const copyAccount = () => {
-    navigator.clipboard.writeText(COMPANY_BANK.account);
-    Swal.fire({ background: "#020617", color: "#f8fafc", icon: "success", title: "Copied!", timer: 1000, showConfirmButton: false, customClass: { popup: "!rounded-2xl !border !border-white/10" } });
-  };
-
   const handlePaystackCheckout = async () => {
     if (!selected) return;
     setLoading(true);
@@ -108,29 +106,29 @@ export default function UpgradePage() {
       // Redirect to Paystack Checkout URL
       window.location.href = data.authorization_url;
     } catch (e: any) {
-      Swal.fire({ background: "#020617", color: "#f8fafc", icon: "error", title: "Payment Initialization Failed", text: e.message || "Please try again.", customClass: { popup: "!rounded-2xl !border !border-white/10", confirmButton: "!rounded-full !bg-rose-600" } });
+      Swal.fire({ background: "#ffffff", color: "#0f172a", icon: "error", title: "Payment Initialization Failed", text: e.message || "Please try again.", customClass: { popup: "!rounded-2xl !border !border-slate-200", confirmButton: "!rounded-full !bg-rose-600" } });
       setLoading(false);
     }
   };
 
   if (!user) return (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-      <div className="w-10 h-10 border-4 border-teal-500 border-t-transparent rounded-full animate-spin" />
+    <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-200 pb-16">
+    <div className="min-h-screen bg-background text-slate-900 pb-16">
       {/* header */}
-      <header className="sticky top-0 z-40 border-b border-white/10 bg-slate-950/80 backdrop-blur-xl px-5 py-4 flex items-center gap-4">
-        <Link href="/dashboard" className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition-colors">
-          <FaArrowLeft className="w-4 h-4" />
+      <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/80 backdrop-blur-xl px-5 py-4 flex items-center gap-4">
+        <Link href="/dashboard" className="p-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-colors">
+          <ArrowLeft className="w-4 h-4 text-slate-600" />
         </Link>
         <div>
-          <h1 className="text-lg font-black text-white tracking-tight">Validator Node</h1>
-          <p className="text-xs text-slate-500 font-mono">
-            {view === "select" && "Choose your license tier"}
-            {view === "pay" && "Make transfer & submit proof"}
+          <h1 className="text-lg font-black text-slate-900 tracking-tight">Upgrade Plan</h1>
+          <p className="text-xs text-slate-500 font-medium">
+            {view === "select" && "Choose your membership tier"}
+            {view === "pay" && "Complete secure checkout"}
             {view === "receipt" && "Payment receipt"}
             {view === "pending" && "Verification in progress"}
           </p>
@@ -139,7 +137,7 @@ export default function UpgradePage() {
         {(view === "select" || view === "pay") && (
           <div className="ml-auto flex items-center gap-1.5">
             {["select","pay"].map((v,i) => (
-              <div key={v} className={`h-1.5 rounded-full transition-all ${view === v ? "w-8 bg-teal-500" : i < ["select","pay"].indexOf(view) ? "w-4 bg-teal-700" : "w-4 bg-slate-700"}`} />
+              <div key={v} className={`h-1.5 rounded-full transition-all ${view === v ? "w-8 bg-primary" : i < ["select","pay"].indexOf(view) ? "w-4 bg-primary/40" : "w-4 bg-slate-200"}`} />
             ))}
           </div>
         )}
@@ -152,37 +150,35 @@ export default function UpgradePage() {
           {/* ── SELECT TIER ── */}
           {view === "select" && (
             <motion.div key="select" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }}>
-              <p className="text-slate-400 text-sm text-center mb-8">Select a Validator Node License to begin earning on AdsFinance.</p>
+              <p className="text-slate-600 text-sm text-center mb-8 font-medium">Select a Premium Plan to increase your task limits and earning potential.</p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                 {TIERS.map(t => (
                   <motion.button key={t.name} whileTap={{ scale: 0.98 }}
                     onClick={() => { setSelected(t); setView("pay"); }}
-                    className={`relative text-left rounded-[24px] border ${t.border} bg-slate-900 p-6 hover:border-opacity-60 transition-all shadow-xl ${t.glow} group`}
+                    className={`relative text-left rounded-[24px] border ${t.border} bg-white p-6 hover:shadow-2xl transition-all shadow-lg ${t.glow} group`}
                   >
                     {t.popular && (
-                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-500 text-slate-950 text-[10px] font-black uppercase tracking-wider px-4 py-1 rounded-full">
+                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-[10px] font-bold uppercase tracking-wider px-4 py-1 rounded-full shadow-sm">
                         Most Popular
                       </div>
                     )}
-                    <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${t.grad} flex items-center justify-center mb-5 shadow-lg`}>
-                      <t.icon className="w-6 h-6 text-white" />
+                    <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${t.grad} border ${t.border} flex items-center justify-center mb-5`}>
+                      <t.icon className={`w-6 h-6 ${t.iconColor}`} />
                     </div>
-                    <p className="text-white font-black text-xl mb-1">{t.name}</p>
-                    <p className="text-3xl font-black text-white mb-1">{fmt(NODE_PRICES[t.name])}</p>
-                    <div className="flex gap-3 mb-4">
-                      <span className="text-xs text-slate-500 font-mono">{NODE_MULTIPLIERS[t.name]}× multiplier</span>
-                      <span className="text-xs text-slate-600">·</span>
-                      <span className="text-xs text-slate-500 font-mono">Min withdraw {fmt(NODE_MIN_WITHDRAWAL[t.name])}</span>
+                    <p className={`font-bold text-xl mb-1 ${t.textColor}`}>{t.name}</p>
+                    <p className="text-3xl font-black text-slate-900 mb-1">{fmt(NODE_PRICES[t.name])}</p>
+                    <div className="flex gap-2 mb-4">
+                      <span className="text-xs text-slate-500 font-semibold bg-slate-50 px-2 py-0.5 rounded border border-slate-100">Premium Access</span>
                     </div>
-                    <ul className="space-y-2">
+                    <ul className="space-y-3">
                       {t.features.map((f, i) => (
-                        <li key={i} className="flex items-start gap-2.5 text-sm text-slate-300">
-                          <FaCircleCheck className="w-3.5 h-3.5 text-teal-400 shrink-0 mt-0.5" /> {f}
+                        <li key={i} className="flex items-start gap-2.5 text-sm text-slate-600 font-medium">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" /> {f}
                         </li>
                       ))}
                     </ul>
-                    <div className={`mt-5 w-full py-3 rounded-2xl bg-gradient-to-r ${t.grad} text-white font-black text-sm text-center group-hover:opacity-90 transition-opacity`}>
-                      Select {t.name} <FaChevronRight className="inline w-3 h-3" />
+                    <div className={`mt-6 w-full py-3 rounded-xl bg-slate-900 text-white font-bold text-sm text-center group-hover:bg-primary group-hover:text-primary-foreground transition-colors shadow-sm`}>
+                      Select {t.name} <ChevronRight className="inline w-4 h-4" />
                     </div>
                   </motion.button>
                 ))}
@@ -193,73 +189,70 @@ export default function UpgradePage() {
           {/* ── PAYMENT DETAILS ── */}
           {view === "pay" && selected && (
             <motion.div key="pay" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} className="max-w-lg mx-auto space-y-5">
-              <button onClick={() => setView("select")} className="flex items-center gap-2 text-slate-400 hover:text-white text-sm font-semibold transition-colors">
-                <FaArrowLeft className="w-3.5 h-3.5" /> Change tier
+              <button onClick={() => setView("select")} className="flex items-center gap-2 text-slate-500 hover:text-slate-900 text-sm font-semibold transition-colors">
+                <ArrowLeft className="w-4 h-4" /> Change plan
               </button>
 
               {/* selected summary */}
-              <div className={`rounded-[22px] bg-gradient-to-br ${selected.grad} p-5 text-white`}>
-                <p className="text-white/60 text-xs font-mono uppercase tracking-wider mb-1">Selected Node</p>
+              <div className={`rounded-2xl bg-gradient-to-br ${selected.grad} border ${selected.border} p-6 shadow-sm`}>
+                <p className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Selected Plan</p>
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-black text-2xl">{selected.name}</p>
-                    <p className="text-white/70 text-sm mt-0.5">{NODE_MULTIPLIERS[selected.name]}× ROI · Min withdraw {fmt(NODE_MIN_WITHDRAWAL[selected.name])}</p>
+                    <p className={`font-black text-2xl ${selected.textColor}`}>{selected.name}</p>
                   </div>
-                  <p className="text-3xl font-black">{fmt(NODE_PRICES[selected.name])}</p>
+                  <p className="text-3xl font-black text-slate-900">{fmt(NODE_PRICES[selected.name])}</p>
                 </div>
               </div>
 
-              <div className="bg-slate-900 border border-white/10 rounded-[22px] p-5 text-center space-y-4">
-                <p className="text-sm font-bold text-slate-300">You will be redirected to Paystack to complete your secure payment of <span className="text-white">{fmt(NODE_PRICES[selected.name])}</span>.</p>
+              <div className="bg-white border border-slate-200 shadow-sm rounded-2xl p-6 text-center space-y-4">
+                <p className="text-sm font-medium text-slate-600">You will be redirected to Paystack to complete your secure payment of <span className="text-slate-900 font-bold">{fmt(NODE_PRICES[selected.name])}</span>.</p>
                 <button disabled={loading} onClick={handlePaystackCheckout}
-                  className="w-full py-4 rounded-2xl bg-teal-500 hover:bg-teal-400 disabled:opacity-40 disabled:cursor-not-allowed text-slate-950 font-black text-sm transition-colors shadow-lg shadow-teal-500/20">
+                  className="w-full py-4 rounded-xl bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-primary-foreground font-bold text-sm transition-colors shadow-md">
                   {loading ? "Initializing Secure Payment…" : "Pay Securely with Paystack →"}
                 </button>
               </div>
-              <p className="text-center text-xs text-slate-600">Your node activates automatically after successful payment.</p>
+              <p className="text-center text-xs text-slate-500 font-medium">Your plan activates automatically after successful payment.</p>
             </motion.div>
           )}
 
           {/* ── RECEIPT ── */}
           {view === "receipt" && selected && (
             <motion.div key="receipt" initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} className="max-w-md mx-auto">
-              <div className="bg-slate-900 border border-white/10 rounded-[28px] overflow-hidden shadow-2xl">
+              <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-xl">
                 {/* receipt header */}
-                <div className={`bg-gradient-to-br ${selected.grad} p-8 text-center`}>
-                  <div className="w-16 h-16 rounded-full bg-white/20 border-2 border-white/30 flex items-center justify-center mx-auto mb-4">
-                    <FaReceipt className="w-8 h-8 text-white" />
+                <div className={`bg-gradient-to-br ${selected.grad} border-b ${selected.border} p-8 text-center`}>
+                  <div className="w-16 h-16 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center mx-auto mb-4">
+                    <Receipt className="w-8 h-8 text-slate-700" />
                   </div>
-                  <h2 className="text-2xl font-black text-white mb-1">Payment Submitted</h2>
-                  <p className="text-white/70 text-sm">Your transfer has been logged for review</p>
+                  <h2 className="text-2xl font-black text-slate-900 mb-1">Payment Submitted</h2>
+                  <p className="text-slate-600 text-sm font-medium">Your transfer has been logged for review</p>
                 </div>
 
                 {/* receipt body */}
                 <div className="p-6 space-y-4">
                   {[
-                    { label: "Node Tier",       value: selected.name },
+                    { label: "Plan Tier",       value: selected.name },
                     { label: "Amount Paid",      value: fmt(NODE_PRICES[selected.name]) },
-                    { label: "Reference Code",   value: refCode, mono: true },
                     { label: "Payment ID",       value: paymentId.slice(0, 16).toUpperCase(), mono: true },
-                    { label: "Submitted At",     value: submittedAt?.toLocaleString("en-NG") ?? "" },
                     { label: "Expected Activation", value: "Within 24 hours" },
                   ].map(r => (
-                    <div key={r.label} className="flex justify-between items-start py-2 border-b border-white/5">
-                      <span className="text-slate-500 text-sm">{r.label}</span>
-                      <span className={`text-white text-sm font-bold text-right ml-4 ${r.mono ? "font-mono" : ""}`}>{r.value}</span>
+                    <div key={r.label} className="flex justify-between items-start py-2 border-b border-slate-100 last:border-0">
+                      <span className="text-slate-500 text-sm font-medium">{r.label}</span>
+                      <span className={`text-slate-900 text-sm font-bold text-right ml-4 ${r.mono ? "font-mono" : ""}`}>{r.value}</span>
                     </div>
                   ))}
 
-                  <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 flex items-start gap-3 mt-2">
-                    <FaClock className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                    <p className="text-amber-300 text-xs leading-relaxed">
-                      Your payment is being reviewed. You will receive a notification once your node is activated (minimum 24 hours). Do not make another payment.
+                  <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3 mt-4">
+                    <Clock className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+                    <p className="text-amber-700 text-xs font-medium leading-relaxed">
+                      Your payment is being reviewed. You will receive a notification once your plan is activated (minimum 24 hours). Do not make another payment.
                     </p>
                   </div>
                 </div>
 
                 <div className="px-6 pb-6">
                   <Link href="/dashboard"
-                    className="block w-full text-center py-3.5 rounded-2xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-black text-sm transition-colors">
+                    className="block w-full text-center py-3.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm transition-colors shadow-sm">
                     Return to Dashboard
                   </Link>
                 </div>
@@ -269,15 +262,15 @@ export default function UpgradePage() {
 
           {/* ── PENDING ── */}
           {view === "pending" && (
-            <motion.div key="pending" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-md mx-auto text-center py-10">
-              <div className="w-20 h-20 rounded-full bg-amber-500/10 border-2 border-amber-500/30 flex items-center justify-center mx-auto mb-6">
-                <FaClock className="w-10 h-10 text-amber-400 animate-pulse" />
+            <motion.div key="pending" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-md mx-auto text-center py-12 bg-white rounded-3xl border border-slate-200 shadow-xl px-8 mt-10">
+              <div className="w-20 h-20 rounded-full bg-amber-50 border-2 border-amber-200 flex items-center justify-center mx-auto mb-6">
+                <Clock className="w-10 h-10 text-amber-500 animate-pulse" />
               </div>
-              <h2 className="text-2xl font-black text-white mb-3">Payment Under Review</h2>
-              <p className="text-slate-400 text-sm leading-relaxed mb-8 max-w-sm mx-auto">
-                Your node payment is being verified by our team. You will receive a notification once your node is activated. This typically takes up to 24 hours.
+              <h2 className="text-2xl font-black text-slate-900 mb-3">Payment Under Review</h2>
+              <p className="text-slate-500 text-sm font-medium leading-relaxed mb-8">
+                Your subscription payment is being verified by our team. You will receive a notification once your plan is activated. This typically takes up to 24 hours.
               </p>
-              <Link href="/dashboard" className="inline-block bg-teal-500 hover:bg-teal-400 text-slate-950 font-black px-10 py-3.5 rounded-full transition-colors text-sm">
+              <Link href="/dashboard" className="inline-block bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-10 py-3.5 rounded-xl transition-colors text-sm shadow-md">
                 Return to Dashboard
               </Link>
             </motion.div>
