@@ -113,7 +113,8 @@ export async function GET(req: NextRequest) {
 
     const videos: VideoItem[] = results
       .filter(r => r.status === "fulfilled" && r.value)
-      .map(r => (r as PromiseFulfilledResult<VideoItem>).value!);
+      .map(r => (r as PromiseFulfilledResult<VideoItem>).value!)
+      .sort(() => Math.random() - 0.5);
 
     if (videos.length < 5) {
       // Insufficient YouTube results — log and return error (static pool will be used by clients)

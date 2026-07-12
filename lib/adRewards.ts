@@ -68,7 +68,8 @@ export function getStaticTodayVideos(): VideoItem[] {
   const dayOfYear = Math.floor((Date.now() + 3600_000) / 86_400_000); // WAT days since epoch
   const start     = (dayOfYear * 15) % VIDEO_POOL.length;
   const pool      = [...VIDEO_POOL, ...VIDEO_POOL, ...VIDEO_POOL];
-  return pool.slice(start, start + 25);
+  // Slice to get today's set, then shuffle so categories are mixed
+  return pool.slice(start, start + 25).sort(() => Math.random() - 0.5);
 }
 
 // ─── Primary: read from Firestore daily_videos (filled by YouTube API cron) ──
