@@ -326,7 +326,7 @@ export default function DashboardPage() {
           </div>
         </header>
 
-        <div className="p-4 md:px-8 py-6 max-w-7xl mx-auto w-full space-y-6">
+        <div className="p-4 md:px-8 py-6 max-w-7xl mx-auto w-full space-y-6 pb-24 md:pb-6">
 
           {/* ── ALERTS ── */}
           {profile?.accountStatus === 'suspended' && (
@@ -503,7 +503,7 @@ export default function DashboardPage() {
         </div>
 
         {/* ── MOBILE NAV (bottom) ── */}
-        <nav className="md:hidden sticky bottom-0 z-40 bg-white/90 backdrop-blur-xl border-t border-slate-200 pb-safe">
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-xl border-t border-slate-200 pb-safe">
           <div className="flex items-center justify-around p-2">
             {NAV.slice(0, 5).map(item => {
               const active = item.href === "/dashboard";
