@@ -130,7 +130,8 @@ export default function TasksPage() {
   const bonusAvailable = CHECKIN_REWARDS[nodeTier] || 50;
   const allTasksCompleted = completedCount >= maxVideos;
 
-  const filteredVideos = videos.slice(0, maxVideos).filter(v => {
+  const displayLimit = maxVideos === 0 ? 5 : maxVideos;
+  const filteredVideos = videos.slice(0, displayLimit).filter(v => {
     if (activeTab === "YouTube Videos") return v.category !== "Internal";
     if (activeTab === "Completed") return watched.includes(v.id);
     return true;
@@ -206,9 +207,7 @@ export default function TasksPage() {
             <div className={styles.trustTitle}>Fair & Transparent</div>
             <div className={styles.trustDesc}>Watch full videos (3 mins) to earn. No skips. No hidden fees.</div>
           </div>
-          <Link href="#" className={styles.trustLink} style={{ textDecoration: 'none' }}>
-            Learn more <ChevronRight size={16} />
-          </Link>
+          <button onClick={() => Swal.fire({ title: "Fair & Transparent", text: "To earn your daily reward, you must watch the full 3-minute video. Skipping or exiting early will cancel your earnings for that task. We have no hidden fees or deductions on your earnings.", icon: "info", confirmButtonColor: "#1765DC" })} className={styles.trustLink} style={{ textDecoration: "none", background: "none", border: "none", cursor: "pointer", outline: "none" }}>Learn more <ChevronRight size={16} /></button>
         </section>
 
         {/* Tabs & Filter */}

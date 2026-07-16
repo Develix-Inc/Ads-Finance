@@ -77,7 +77,7 @@ export async function submitWithdrawal(
   }
   
   const tier = profile?.nodeTier || "Alpha Plan";
-  const minWithdrawal = NODE_MIN_WITHDRAWAL[tier] || 75000;
+  const minWithdrawal = NODE_MIN_WITHDRAWAL[tier] || 85000;
 
   if (amount < minWithdrawal) {
     throw new Error(`Minimum withdrawal for your node tier is ₦${minWithdrawal.toLocaleString()}`);

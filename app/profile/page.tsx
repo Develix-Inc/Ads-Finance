@@ -77,7 +77,7 @@ export default function ProfilePage() {
   const totalWithdrawn = withdrawals.reduce((s, w) => w.status === "processed" ? s + (w.amount ?? 0) : s, 0);
   
   const activeLimits = minWLimits || NODE_MIN_WITHDRAWAL;
-  const minW = (activeLimits as Record<string, number>)[nodeTier] ?? 75000;
+  const minW = (activeLimits as Record<string, number>)[nodeTier] ?? 85000;
   const taskLimit = TIER_LIMITS[nodeTier]?.maxVideos ?? 5;
 
   return (

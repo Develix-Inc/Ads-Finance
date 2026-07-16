@@ -392,7 +392,7 @@ export default function DashboardPage() {
           <Users className={styles.navIcon} />
           <span className={styles.navLabel}>Referrals</span>
         </Link>
-        <Link href="/settings" className={styles.navItem}>
+        <Link href="/profile" className={styles.navItem}>
           <UserIcon className={styles.navIcon} />
           <span className={styles.navLabel}>Profile</span>
         </Link>
