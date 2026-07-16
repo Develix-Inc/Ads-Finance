@@ -85,8 +85,6 @@ export default function ReferralsPage() {
 
     useEffect(() => {
     if (!loading && profile) {
-      // Allow onboarding to finish on dashboard
-      if (typeof showOnboarding !== 'undefined' && showOnboarding) return;
       
       if (!profile.nodeTier || profile.nodeTier === "none") {
         router.push("/upgrade");
