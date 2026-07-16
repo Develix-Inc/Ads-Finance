@@ -1,5 +1,6 @@
 "use client";
 
+import { PageLoader } from "@/components/ui/PageLoader";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -126,7 +127,7 @@ export default function SettingsPage() {
     notifications: { label: "Notifications" },
   };
 
-  if (!user) return <div className={styles.container} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Loading...</div>;
+  if (!user) return <PageLoader />;
 
   return (
     <div className={styles.container}>

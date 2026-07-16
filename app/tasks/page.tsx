@@ -2,6 +2,7 @@
 
 import { NotificationBell } from "@/components/ui/NotificationBell";
 
+import { PageLoader } from "@/components/ui/PageLoader";
 import React, { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -123,7 +124,7 @@ export default function TasksPage() {
     }
   }, [loading, profile, router]);
 
-  if (loading) return <div className={styles.container} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Loading tasks...</div>;
+  if (loading) return <PageLoader />;
 
   const name = profile?.displayName || user?.displayName || user?.email?.split("@")[0] || "User";
   const avatar = name[0].toUpperCase();

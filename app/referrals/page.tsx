@@ -4,6 +4,7 @@ import { NotificationBell } from "@/components/ui/NotificationBell";
 
 import Image from "next/image";
 
+import { PageLoader } from "@/components/ui/PageLoader";
 import React, { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -92,7 +93,7 @@ export default function ReferralsPage() {
     }
   }, [loading, profile, router]);
 
-  if (loading) return <div className={styles.container} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}></div>;
+  if (loading) return <PageLoader />;
 
   const name = profile?.displayName || user?.displayName || user?.email?.split("@")[0] || "User";
   const avatar = name[0].toUpperCase();

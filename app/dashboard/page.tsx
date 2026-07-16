@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 
+import { PageLoader } from "@/components/ui/PageLoader";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -128,7 +129,7 @@ export default function DashboardPage() {
     }
   }, [loading, profile, router]);
 
-  if (loading) return <div className={styles.container} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}></div>;
+  if (loading) return <PageLoader />;
 
   const name = profile?.displayName || user?.displayName || user?.email?.split("@")[0] || "User";
   const avatar = name[0].toUpperCase();
