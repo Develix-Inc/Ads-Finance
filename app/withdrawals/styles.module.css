@@ -1,0 +1,613 @@
+.container {
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: #FAFAFA;
+  min-height: 100vh;
+  padding-bottom: 80px;
+  color: #1A1A1A;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: white;
+}
+
+.logoArea {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logoIcon {
+  color: #1765DC;
+  font-size: 24px;
+  font-weight: 900;
+  font-style: italic;
+  display: flex;
+  align-items: center;
+}
+
+.logoText {
+  font-weight: 800;
+  font-size: 18px;
+  color: #0A1128;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.bellWrapper {
+  position: relative;
+}
+
+.bellIcon {
+  width: 24px;
+  height: 24px;
+  color: #4A5568;
+}
+
+.bellBadge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #1765DC;
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid white;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #0B258F;
+  color: white;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.content {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Page Header */
+.pageHeader {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.backBtn {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: white;
+  border: 1px solid #E2E8F0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #4A5568;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.pageTitle {
+  font-size: 20px;
+  font-weight: 800;
+  color: #0A1128;
+  margin-bottom: 2px;
+}
+
+.pageSubtitle {
+  font-size: 12px;
+  color: #718096;
+  font-weight: 500;
+}
+
+/* Available Balance Card */
+.balanceCard {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+  border: 1px solid #F1F5F9;
+}
+
+.balanceLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.balanceLabel {
+  font-size: 13px;
+  font-weight: 700;
+  color: #4A5568;
+}
+
+.balanceAmount {
+  font-size: 36px;
+  font-weight: 900;
+  color: #0A1128;
+  letter-spacing: -1px;
+}
+
+.minWithdrawBadge {
+  background: #ECFDF5;
+  color: #059669;
+  border: 1px solid #D1FAE5;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: max-content;
+}
+
+.withdrawBtnBox {
+  background: #F8FAFC;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 140px;
+  cursor: not-allowed;
+  transition: all 0.2s ease;
+}
+
+.withdrawBtnBox.active {
+  background: #1765DC;
+  cursor: pointer;
+}
+
+.withdrawBtnTitle {
+  font-size: 13px;
+  font-weight: 800;
+  color: #64748B;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.withdrawBtnBox.active .withdrawBtnTitle {
+  color: white;
+}
+
+.withdrawBtnSub {
+  font-size: 11px;
+  color: #94A3B8;
+  font-weight: 500;
+}
+
+.withdrawBtnBox.active .withdrawBtnSub {
+  color: #BFDBFE;
+}
+
+/* Progress Card */
+.progressCard {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+  border: 1px solid #F1F5F9;
+  position: relative;
+  overflow: hidden;
+}
+
+.progressLeft {
+  flex: 1;
+  z-index: 2;
+  padding-right: 80px;
+}
+
+.progressTitle {
+  font-size: 13px;
+  font-weight: 800;
+  color: #0A1128;
+  margin-bottom: 12px;
+}
+
+.progressFraction {
+  font-size: 15px;
+  font-weight: 800;
+  color: #0A1128;
+  margin-bottom: 8px;
+}
+
+.progressBarContainer {
+  height: 6px;
+  background: #F1F5F9;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.progressBarFill {
+  height: 100%;
+  background: #059669;
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.progressFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.progressPercent {
+  color: #059669;
+}
+
+.progressRemaining {
+  color: #718096;
+}
+
+.progressWalletGraphic {
+  position: absolute;
+  right: 20px;
+  bottom: 10px;
+  width: 80px;
+  height: 80px;
+  z-index: 1;
+  opacity: 0.9;
+}
+
+/* Stats Row */
+.statsCard {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+  border: 1px solid #F1F5F9;
+}
+
+.statItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+}
+
+.statItem:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 10%;
+  height: 80%;
+  width: 1px;
+  background: #F1F5F9;
+}
+
+.statIconWrap {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.statIconWrap.orange { background: #FFFBEB; color: #D97706; }
+.statIconWrap.green { background: #ECFDF5; color: #059669; }
+.statIconWrap.blue { background: #EFF6FF; color: #3B82F6; }
+
+.statValue {
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.statValue.orange { color: #D97706; }
+.statValue.green { color: #059669; }
+.statValue.blue { color: #1765DC; }
+
+.statLabel {
+  font-size: 11px;
+  color: #718096;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+/* Trust Banner */
+.trustBanner {
+  background: #F4F8FF;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid #E5EFFF;
+}
+
+.shieldWrap {
+  width: 40px;
+  height: 40px;
+  background: #1765DC;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.trustContent {
+  flex: 1;
+}
+
+.trustTitle {
+  font-size: 13px;
+  font-weight: 800;
+  color: #0A1128;
+  margin-bottom: 2px;
+}
+
+.trustDesc {
+  font-size: 11px;
+  color: #4A5568;
+}
+
+/* History Section */
+.historyHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.historyTitle {
+  font-size: 15px;
+  font-weight: 800;
+  color: #0A1128;
+}
+
+.viewAll {
+  font-size: 12px;
+  font-weight: 700;
+  color: #1765DC;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.historyList {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+  border: 1px solid #F1F5F9;
+  overflow: hidden;
+}
+
+.historyItem {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  border-bottom: 1px solid #F1F5F9;
+}
+
+.historyItem:last-child {
+  border-bottom: none;
+}
+
+.bankLogo {
+  width: 48px;
+  height: 48px;
+  background: #D90000;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 900;
+  font-size: 14px;
+  letter-spacing: 1px;
+}
+
+.historyInfo {
+  flex: 1;
+}
+
+.historyAmountRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.historyAmount {
+  font-size: 16px;
+  font-weight: 900;
+  color: #0A1128;
+}
+
+.statusBadge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.statusBadge.processed {
+  background: #ECFDF5;
+  color: #059669;
+}
+
+.statusBadge.pending {
+  background: #FFFBEB;
+  color: #D97706;
+}
+
+.historyDetails {
+  font-size: 12px;
+  color: #4A5568;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.historyFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  color: #94A3B8;
+}
+
+.historyRef {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Empty State */
+.emptyState {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+  border: 1px solid #F1F5F9;
+}
+
+.emptyIcon {
+  width: 80px;
+  height: 80px;
+  background: #ECFDF5;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1765DC;
+  position: relative;
+}
+
+.emptyContent {
+  flex: 1;
+}
+
+.emptyTitle {
+  font-size: 15px;
+  font-weight: 800;
+  color: #0A1128;
+  margin-bottom: 8px;
+}
+
+.emptyDesc {
+  font-size: 12px;
+  color: #718096;
+  line-height: 1.5;
+}
+
+/* Bottom Nav */
+.bottomNav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  border-top: 1px solid #F1F5F9;
+  display: flex;
+  justify-content: space-around;
+  padding: 12px 0;
+  z-index: 50;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.navItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: #718096;
+  text-decoration: none;
+}
+
+.navItem.active {
+  color: #1765DC;
+}
+
+.navIcon {
+  width: 24px;
+  height: 24px;
+}
+
+.navLabel {
+  font-size: 10px;
+  font-weight: 600;
+}
+
+/* Responsive tweaks */
+@media (max-width: 480px) {
+  .content {
+    padding: 16px 12px;
+  }
+  .balanceCard {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+    padding: 20px;
+  }
+  .withdrawBtnBox {
+    width: 100%;
+  }
+  .progressLeft {
+    padding-right: 0;
+  }
+  .progressWalletGraphic {
+    opacity: 0.1;
+  }
+  .statsCard {
+    padding: 16px 8px;
+  }
+  .statValue {
+    font-size: 14px;
+  }
+  .emptyState {
+    flex-direction: column;
+    text-align: center;
+    padding: 24px;
+  }
+}

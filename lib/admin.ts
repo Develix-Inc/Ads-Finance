@@ -15,21 +15,18 @@ export const COMPANY_BANK = {
 };
 
 export const NODE_PRICES: Record<string, number> = {
-  "Starter Plan": 0,
   "Alpha Plan": 17000,
   "Sigma Plan": 45000,
   "Omega Plan": 120000,
 };
 
 export const NODE_MIN_WITHDRAWAL: Record<string, number> = {
-  "Starter Plan": 50000,
-  "Alpha Plan": 75000,
-  "Sigma Plan": 200000,
-  "Omega Plan": 500000,
+  "Alpha Plan": 85000,
+  "Sigma Plan": 225000,
+  "Omega Plan": 600000,
 };
 
 export const NODE_MULTIPLIERS: Record<string, number> = {
-  "Starter Plan": 1,
   "Alpha Plan": 4,
   "Sigma Plan": 5,
   "Omega Plan": 6,
@@ -79,7 +76,7 @@ export async function submitWithdrawal(
     throw new Error("Your account is suspended. You cannot make withdrawals.");
   }
   
-  const tier = profile?.nodeTier || "Node Alpha";
+  const tier = profile?.nodeTier || "Alpha Plan";
   const minWithdrawal = NODE_MIN_WITHDRAWAL[tier] || 75000;
 
   if (amount < minWithdrawal) {
@@ -333,7 +330,7 @@ export async function getSettings() {
     bankName:      COMPANY_BANK.name,
     bankAccount:   COMPANY_BANK.account,
     bankHolder:    COMPANY_BANK.holder,
-    minWithdrawal: { "Node Alpha": 75000, "Node Sigma": 200000, "Node Omega": 500000 },
+    minWithdrawal: { "Alpha Plan": 85000, "Sigma Plan": 225000, "Omega Plan": 600000 },
     referralBonus: 50,
   };
 }

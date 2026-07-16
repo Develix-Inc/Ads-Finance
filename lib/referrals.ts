@@ -6,7 +6,11 @@ import {
 import { recordTransaction } from "./transactions";
 import { sendNotification } from "./notifications";
 
-export const REFERRAL_COMMISSION = 50; // ₦50 flat per referral node purchase
+export const TIER_COMMISSIONS: Record<string, number> = {
+  "Alpha Plan": 450,
+  "Sigma Plan": 700,
+  "Omega Plan": 1000,
+};
 
 /** Generate a deterministic referral code from uid */
 export function generateReferralCode(uid: string): string {
@@ -19,7 +23,8 @@ export async function processReferralSignup(newUid: string, referralCode: string
   const snap = await getDocs(q);
   if (snap.empty) return;
 
-  const referrerUid = snap.docs[0].id;
+  const referrerDoc = snap.docs[0];
+  const referrerUid = referrerDoc.id;
   if (referrerUid === newUid) return; // can't refer yourself
 
   // check if referral already exists
@@ -33,31 +38,30 @@ export async function processReferralSignup(newUid: string, referralCode: string
   const refSnap = await getDocs(query(collection(db, "users"), where("uid", "==", newUid)));
   const refereeEmail = refSnap.docs[0]?.data()?.email || "";
 
+  // Get referrer tier
+  const referrerData = referrerDoc.data();
+  const referrerTier = referrerData.nodeTier || "none";
+  const commission = TIER_COMMISSIONS[referrerTier] || 200;
+
+  // Add the referral as instantly active
   await addDoc(collection(db, "referrals"), {
     referrerUid,
     refereeUid:    newUid,
     refereeEmail,
-    status:        "pending",
-    commission:    REFERRAL_COMMISSION,
+    status:        "active",
+    commission:    commission,
     createdAt:     serverTimestamp(),
-    paidAt:        null,
+    paidAt:        serverTimestamp(),
   });
+
+  // Pay referrer immediately
+  await recordTransaction(referrerUid, "referral_bonus", commission, `Referral bonus — new user registered`);
+  await sendNotification(referrerUid, "Referral Bonus Earned!", `You earned ₦${commission} because a new user signed up with your link.`, "success");
 }
 
-/** Pay referrer when referee activates a node */
+/** Legacy: No longer needed since commission is paid instantly on sign up */
 export async function payReferralCommission(refereeUid: string) {
-  const q    = query(collection(db, "referrals"),
-    where("refereeUid", "==", refereeUid),
-    where("status", "==", "pending"));
-  const snap = await getDocs(q);
-  if (snap.empty) return;
-
-  for (const refDoc of snap.docs) {
-    const data = refDoc.data();
-    await recordTransaction(data.referrerUid, "referral_bonus", REFERRAL_COMMISSION, `Referral bonus — new node activated`);
-    await sendNotification(data.referrerUid, "Referral Bonus Earned!", `You earned ₦${REFERRAL_COMMISSION} — one of your referrals just activated their node.`, "success");
-    await updateDoc(refDoc.ref, { status: "active", paidAt: serverTimestamp() });
-  }
+  // no-op
 }
 
 /** Get all referrals made by a user (no orderBy — avoids composite index) */
@@ -74,6 +78,10 @@ export async function getReferralEarnings(uid: string) {
   try {
     const q    = query(collection(db, "referrals"), where("referrerUid", "==", uid), where("status", "==", "active"));
     const snap = await getDocs(q);
-    return snap.size * REFERRAL_COMMISSION;
+    let total = 0;
+    snap.docs.forEach(doc => {
+      total += (doc.data().commission || 0);
+    });
+    return total;
   } catch { return 0; }
 }

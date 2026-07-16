@@ -1,0 +1,376 @@
+.container {
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: #FAFAFA;
+  min-height: 100vh;
+  padding-bottom: 80px;
+  color: #1A1A1A;
+}
+
+/* Page Header */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  background: white;
+  border-bottom: 1px solid #F1F5F9;
+}
+
+.backBtn {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: #F8FAFC;
+  border: 1px solid #F1F5F9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748B;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+
+.backBtn:hover {
+  background: #F1F5F9;
+  color: #0A1128;
+}
+
+.pageTitle {
+  font-size: 20px;
+  font-weight: 900;
+  color: #0A1128;
+}
+
+.savedPill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  color: #059669;
+  background: #ECFDF5;
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1px solid #D1FAE5;
+  margin-left: auto;
+}
+
+.content {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Tab Bar */
+.tabContainer {
+  display: flex;
+  gap: 4px;
+  background: white;
+  border: 1px solid #F1F5F9;
+  border-radius: 16px;
+  padding: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.tabContainer::-webkit-scrollbar {
+  display: none;
+}
+
+.tabBtn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  color: #64748B;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+
+.tabBtn:hover {
+  color: #0A1128;
+}
+
+.tabBtn.active {
+  background: #059669;
+  color: white;
+  box-shadow: 0 2px 4px rgba(5, 150, 105, 0.2);
+}
+
+.tabIcon {
+  width: 16px;
+  height: 16px;
+}
+
+/* Content Card */
+.card {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+  border: 1px solid #F1F5F9;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.cardIconWrap {
+  width: 48px;
+  height: 48px;
+  background: #ECFDF5;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #059669;
+}
+
+.cardTitle {
+  font-size: 16px;
+  font-weight: 800;
+  color: #0A1128;
+  margin-bottom: 2px;
+}
+
+.cardSubtitle {
+  font-size: 12px;
+  color: #64748B;
+  font-weight: 500;
+}
+
+/* Warning Banner */
+.warningBanner {
+  background: #FFFBEB;
+  border: 1px solid #FEF3C7;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 24px;
+}
+
+.warningText {
+  color: #B45309;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+/* Form Fields */
+.formGroup {
+  margin-bottom: 20px;
+}
+
+.label {
+  display: block;
+  font-size: 11px;
+  font-weight: 800;
+  color: #64748B;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.inputWrap {
+  position: relative;
+}
+
+.input {
+  width: 100%;
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  padding: 14px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #0A1128;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.input:focus {
+  border-color: #059669;
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+  background: white;
+}
+
+.input:disabled {
+  background: #F1F5F9;
+  color: #94A3B8;
+  cursor: not-allowed;
+}
+
+.inputError {
+  border-color: #EF4444;
+}
+
+.inputPin {
+  text-align: center;
+  letter-spacing: 0.5em;
+  font-family: monospace;
+  font-size: 18px;
+}
+
+.eyeBtn {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #94A3B8;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.eyeBtn:hover {
+  color: #64748B;
+}
+
+.helperText {
+  font-size: 11px;
+  color: #94A3B8;
+  font-weight: 500;
+  margin-top: 6px;
+}
+
+/* Save Button */
+.submitBtn {
+  width: 100%;
+  background: #059669;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 16px;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+.submitBtn:hover:not(:disabled) {
+  background: #047857;
+}
+
+.submitBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Profile Avatar Edit */
+.avatarEditRow {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #F1F5F9;
+  margin-bottom: 24px;
+}
+
+.avatarDisplay {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 900;
+  color: #64748B;
+  object-fit: cover;
+}
+
+.avatarInfo {
+  flex: 1;
+}
+
+.avatarName {
+  font-size: 16px;
+  font-weight: 800;
+  color: #0A1128;
+  margin-bottom: 2px;
+}
+
+.avatarEmail {
+  font-size: 13px;
+  color: #64748B;
+  font-weight: 500;
+}
+
+/* Notifications List */
+.notifList {
+  display: flex;
+  flex-direction: column;
+}
+
+.notifRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 0;
+  border-bottom: 1px solid #F1F5F9;
+  cursor: pointer;
+}
+
+.notifRow:last-child {
+  border-bottom: none;
+}
+
+.notifLabel {
+  font-size: 13px;
+  font-weight: 800;
+  color: #0A1128;
+  text-transform: capitalize;
+}
+
+.toggleSwitch {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  border-radius: 12px;
+  background: #E2E8F0;
+  transition: all 0.2s;
+  border: none;
+  cursor: pointer;
+}
+
+.toggleSwitch.active {
+  background: #059669;
+}
+
+.toggleKnob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  background: white;
+  border-radius: 50%;
+  transition: all 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.toggleSwitch.active .toggleKnob {
+  left: 22px;
+}

@@ -69,7 +69,7 @@ export function SettingsTab() {
         <div className="space-y-4">
           <h3 className="text-sm font-bold text-teal-400 uppercase tracking-widest">Minimum Withdrawal (₦)</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {["Node Alpha", "Node Sigma", "Node Omega"].map(node => (
+            {["Alpha Plan", "Sigma Plan", "Omega Plan"].map(node => (
               <div key={node}>
                 <label className="block text-xs font-bold text-slate-500 uppercase mb-1">{node}</label>
                 <input required type="number" min="0" value={settings.minWithdrawal?.[node] || 0} 

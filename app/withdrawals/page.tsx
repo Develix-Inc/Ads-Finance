@@ -1,30 +1,31 @@
 "use client";
+
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import styles from "./styles.module.css";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
-import { getUserProfile } from "@/lib/admin";
-import { adminGetWithdrawals, NODE_MIN_WITHDRAWAL, getSettings } from "@/lib/admin";
+import { getUserProfile, adminGetWithdrawals, NODE_MIN_WITHDRAWAL, getSettings } from "@/lib/admin";
 import { WithdrawModal } from "@/components/ui/WithdrawModal";
-import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, ArrowUpRight, CheckCircle2, Clock, XCircle, Wallet, Lock } from "lucide-react";
+import { AnimatePresence } from "framer-motion";
+import {
+  Bell, CheckCircle2, Clock, ShieldCheck, ChevronRight,
+  Wallet, Home, ClipboardList, Users, User as UserIcon, Lock,
+  ArrowLeft
+} from "lucide-react";
 
-const fmt = (n: number) => "₦" + (n ?? 0).toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-const ts  = (t: any)    => t?.seconds ? new Date(t.seconds * 1000).toLocaleString("en-NG", { dateStyle: "medium", timeStyle: "short" }) : "";
-
-const STATUS_STYLE: Record<string, { color: string; icon: any }> = {
-  pending:   { color: "text-amber-500 bg-amber-50 border-amber-200",   icon: Clock },
-  processed: { color: "text-emerald-500 bg-emerald-50 border-emerald-200", icon: CheckCircle2 },
-  rejected:  { color: "text-rose-500 bg-rose-50 border-rose-200",      icon: XCircle },
-};
+const fmt = (n: number) => "₦" + (n ?? 0).toLocaleString("en-NG", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+const ts = (t: any) => t?.seconds ? new Date(t.seconds * 1000).toLocaleString("en-NG", { dateStyle: "medium", timeStyle: "short" }) : "";
 
 export default function WithdrawalsPage() {
   const router = useRouter();
-  const [user, setUser]           = useState<any>(null);
-  const [profile, setProfile]     = useState<any>(null);
-  const [history, setHistory]     = useState<any[]>([]);
-  const [loading, setLoading]     = useState(true);
+
+  const [uid, setUid] = useState("");
+  const [user, setUser] = useState<any>(null);
+  const [profile, setProfile] = useState<any>(null);
+  const [history, setHistory] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [minWLimits, setMinWLimits] = useState<any>(null);
 
@@ -32,134 +33,241 @@ export default function WithdrawalsPage() {
     const unsub = onAuthStateChanged(auth, async u => {
       if (!u) { router.push("/login"); return; }
       setUser(u);
-      const p = await getUserProfile(u.uid);
-      setProfile(p);
-      // get only this user's withdrawals
-      const all = await adminGetWithdrawals();
-      setHistory(all.filter((w: any) => w.uid === u.uid));
-      // fetch dynamic limits
-      const stgs = await getSettings();
-      if (stgs?.minWithdrawal) setMinWLimits(stgs.minWithdrawal);
-      setLoading(false);
+      setUid(u.uid);
+      
+      try {
+        const p = await getUserProfile(u.uid);
+        setProfile(p);
+        
+        const all = await adminGetWithdrawals();
+        setHistory(all.filter((w: any) => w.uid === u.uid));
+        
+        const stgs = await getSettings();
+        if (stgs?.minWithdrawal) setMinWLimits(stgs.minWithdrawal);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
     });
     return unsub;
   }, [router]);
 
-  const nodeActive  = profile?.nodeStatus === "active";
-  const nodeTier    = profile?.nodeTier ?? "Starter Plan";
-  const activeLimits= minWLimits || NODE_MIN_WITHDRAWAL;
-  const minW        = (activeLimits as Record<string, number>)[nodeTier] ?? 50000;
-  const balance     = profile?.walletBalance ?? 0;
-  const canWithdraw = nodeActive && balance >= minW;
+  if (loading) return <div className={styles.container} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Loading...</div>;
 
-  const pending   = history.filter(w => w.status === "pending").length;
+  const name = profile?.displayName || user?.displayName || user?.email?.split("@")[0] || "User";
+  const avatar = name[0].toUpperCase();
+
+  const nodeActive = profile?.nodeStatus === "active";
+  const nodeTier = profile?.nodeTier ?? "none";
+  const minW = (minWLimits || NODE_MIN_WITHDRAWAL as Record<string, number>)[nodeTier] ?? 85000;
+  const balance = profile?.walletBalance ?? 0;
+  
+  const canWithdraw = nodeActive && balance >= minW;
+  const progressPercent = Math.min((balance / minW) * 100, 100);
+  const remaining = Math.max(minW - balance, 0);
+
+  const pending = history.filter(w => w.status === "pending").length;
   const processed = history.filter(w => w.status === "processed").length;
-  const total     = history.reduce((s, w) => w.status !== "rejected" ? s + (w.amount ?? 0) : s, 0);
+  const totalPaid = history.reduce((s, w) => w.status === "processed" ? s + (w.amount ?? 0) : s, 0);
 
   return (
-    <div className="min-h-screen bg-background text-slate-900 pb-10">
+    <div className={styles.container}>
+      {/* Header */}
+      <header className={styles.header}>
+        <div className={styles.logoArea}>
+          <div className={styles.logoIcon}>AF</div>
+          <span className={styles.logoText}>AdsFinance</span>
+        </div>
+        <div className={styles.headerRight}>
+          <div className={styles.bellWrapper}>
+            <Bell className={styles.bellIcon} />
+            <span className={styles.bellBadge}>2</span>
+          </div>
+          <div className={styles.avatar}>{avatar}</div>
+        </div>
+      </header>
+
+      <main className={styles.content}>
+        
+        {/* Page Header */}
+        <section className={styles.pageHeader}>
+          <Link href="/dashboard" className={styles.backBtn}>
+            <ArrowLeft size={20} />
+          </Link>
+          <div>
+            <h1 className={styles.pageTitle}>Withdrawals</h1>
+            <p className={styles.pageSubtitle}>Manage your earnings and withdraw securely</p>
+          </div>
+        </section>
+
+        {/* Available Balance Card */}
+        <section className={styles.balanceCard}>
+          <div className={styles.balanceLeft}>
+            <div className={styles.balanceLabel}>Available Balance</div>
+            <div className={styles.balanceAmount}>{fmt(balance)}</div>
+            <div className={styles.minWithdrawBadge}>
+              <ShieldCheck size={14} /> Minimum Withdrawal: {fmt(minW)}
+            </div>
+          </div>
+          <div 
+            className={`${styles.withdrawBtnBox} ${canWithdraw ? styles.active : ''}`}
+            onClick={() => { if (canWithdraw) setShowModal(true); }}
+          >
+            <div className={styles.withdrawBtnTitle}>
+              {canWithdraw ? <Wallet size={16} /> : <Lock size={16} />} 
+              Withdraw
+            </div>
+            <div className={styles.withdrawBtnSub}>
+              {canWithdraw ? "Ready to cash out" : `Available at ${fmt(minW)}`}
+            </div>
+          </div>
+        </section>
+
+        {/* Withdrawal Progress */}
+        <section className={styles.progressCard}>
+          <div className={styles.progressLeft}>
+            <div className={styles.progressTitle}>Withdrawal Progress</div>
+            <div className={styles.progressFraction}>{fmt(balance)} / {fmt(minW)}</div>
+            <div className={styles.progressBarContainer}>
+              <div className={styles.progressBarFill} style={{ width: `${progressPercent}%` }}></div>
+            </div>
+            <div className={styles.progressFooter}>
+              <span className={styles.progressPercent}>{progressPercent.toFixed(1)}%</span>
+              <span className={styles.progressRemaining}>{fmt(remaining)} more to unlock</span>
+            </div>
+          </div>
+          <div className={styles.progressWalletGraphic}>
+            <svg viewBox="0 0 100 100" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+              <rect x="15" y="30" width="70" height="50" rx="10" fill="#A7F3D0" />
+              <path d="M15 45 C 35 35, 65 35, 85 45 L 85 70 C 65 80, 35 80, 15 70 Z" fill="#6EE7B7" />
+              <circle cx="50" cy="55" r="14" fill="white" />
+              <rect x="47" y="52" width="6" height="8" rx="2" fill="#059669" />
+              <circle cx="80" cy="50" r="4" fill="#34D399" opacity="0.5" />
+            </svg>
+          </div>
+        </section>
+
+        {/* Stats */}
+        <section className={styles.statsCard}>
+          <div className={styles.statItem}>
+            <div className={`${styles.statIconWrap} ${styles.orange}`}>
+              <Clock size={18} strokeWidth={2.5} />
+            </div>
+            <div className={`${styles.statValue} ${styles.orange}`}>{pending}</div>
+            <div className={styles.statLabel}>Pending</div>
+          </div>
+          <div className={styles.statItem}>
+            <div className={`${styles.statIconWrap} ${styles.green}`}>
+              <CheckCircle2 size={18} strokeWidth={2.5} />
+            </div>
+            <div className={`${styles.statValue} ${styles.green}`}>{processed}</div>
+            <div className={styles.statLabel}>Completed</div>
+          </div>
+          <div className={styles.statItem}>
+            <div className={`${styles.statIconWrap} ${styles.blue}`}>
+              <Wallet size={18} strokeWidth={2.5} />
+            </div>
+            <div className={`${styles.statValue} ${styles.blue}`}>{fmt(totalPaid)}</div>
+            <div className={styles.statLabel}>Total Paid</div>
+          </div>
+        </section>
+
+        {/* Trust Banner */}
+        <section className={styles.trustBanner}>
+          <div className={styles.shieldWrap}>
+            <ShieldCheck size={20} />
+          </div>
+          <div className={styles.trustContent}>
+            <div className={styles.trustTitle}>Secure & Transparent</div>
+            <div className={styles.trustDesc}>Your payments are safe with us. No hidden fees, no delays.</div>
+          </div>
+          <ChevronRight size={16} color="#1765DC" />
+        </section>
+
+        {/* History List */}
+        <section>
+          <div className={styles.historyHeader}>
+            <div className={styles.historyTitle}>Withdrawal History</div>
+            <Link href="#" className={styles.viewAll}>View All <ChevronRight size={14} /></Link>
+          </div>
+          
+          {history.length === 0 ? (
+            <div className={styles.emptyState}>
+              <div className={styles.emptyIcon}>
+                <ClipboardList size={32} />
+              </div>
+              <div className={styles.emptyContent}>
+                <div className={styles.emptyTitle}>No withdrawals yet</div>
+                <div className={styles.emptyDesc}>Complete tasks and reach the minimum withdrawal balance to withdraw your earnings.</div>
+              </div>
+            </div>
+          ) : (
+            <div className={styles.historyList}>
+              {history.map((w, i) => (
+                <div key={w.id} className={styles.historyItem}>
+                  <div className={styles.bankLogo}>{w.bankName?.substring(0, 3).toUpperCase() || 'BNK'}</div>
+                  <div className={styles.historyInfo}>
+                    <div className={styles.historyAmountRow}>
+                      <span className={styles.historyAmount}>{fmt(w.amount)}</span>
+                      <span className={`${styles.statusBadge} ${styles[w.status] || styles.pending}`}>
+                        {w.status === 'processed' ? 'Processed' : w.status === 'pending' ? 'Pending' : 'Rejected'} 
+                        {w.status === 'processed' ? <CheckCircle2 size={10} /> : <Clock size={10} />}
+                      </span>
+                    </div>
+                    <div className={styles.historyDetails}>{w.bankName} • {w.accountNumber}</div>
+                    <div className={styles.historyFooter}>
+                      <span>{ts(w.requestedAt)}</span>
+                      <span className={styles.historyRef}>Ref. #{w.id.substring(0, 8).toUpperCase()} <ChevronRight size={12} /></span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+
+      </main>
+
+      {/* Bottom Nav */}
+      <nav className={styles.bottomNav}>
+        <Link href="/dashboard" className={styles.navItem}>
+          <Home className={styles.navIcon} />
+          <span className={styles.navLabel}>Dashboard</span>
+        </Link>
+        <Link href="/tasks" className={styles.navItem}>
+          <ClipboardList className={styles.navIcon} />
+          <span className={styles.navLabel}>Tasks</span>
+        </Link>
+        <Link href="/withdrawals" className={`${styles.navItem} ${styles.active}`}>
+          <Wallet className={styles.navIcon} />
+          <span className={styles.navLabel}>Withdrawals</span>
+        </Link>
+        <Link href="/referrals" className={styles.navItem}>
+          <Users className={styles.navIcon} />
+          <span className={styles.navLabel}>Referrals</span>
+        </Link>
+        <Link href="/profile" className={styles.navItem}>
+          <UserIcon className={styles.navIcon} />
+          <span className={styles.navLabel}>Profile</span>
+        </Link>
+      </nav>
+
+      {/* Modal */}
       <AnimatePresence>
         {showModal && nodeActive && (
           <WithdrawModal
-            uid={user.uid} userEmail={user.email || user.phoneNumber || ""}
-            balance={balance} minWithdrawal={minW}
-            bankName={profile?.bankName ?? ""} accountNumber={profile?.accountNumber ?? ""} accountName={profile?.accountName ?? ""}
+            uid={uid} 
+            userEmail={user.email || user.phoneNumber || ""}
+            balance={balance} 
+            minWithdrawal={minW}
+            bankName={profile?.bankName ?? ""} 
+            accountNumber={profile?.accountNumber ?? ""} 
+            accountName={profile?.accountName ?? ""}
             onClose={() => { setShowModal(false); router.refresh(); }}
           />
         )}
       </AnimatePresence>
-
-      <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/80 backdrop-blur-xl px-5 py-4 flex items-center gap-4">
-        <Link href="/dashboard" className="p-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-colors">
-          <ArrowLeft className="w-4 h-4 text-slate-600" />
-        </Link>
-        <div className="flex-1">
-          <h1 className="text-lg font-black text-slate-900 tracking-tight">Withdrawals</h1>
-          <p className="text-xs text-slate-500 font-medium">Min: {fmt(minW)} · Balance: {fmt(balance)}</p>
-        </div>
-        {nodeActive && (
-          <button onClick={() => setShowModal(true)} disabled={!canWithdraw}
-            className="flex items-center gap-2 bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-primary-foreground font-bold px-5 py-2.5 rounded-xl text-sm transition-colors shadow-sm">
-            <ArrowUpRight className="w-4 h-4" /> Withdraw
-          </button>
-        )}
-      </header>
-
-      <div className="max-w-3xl mx-auto px-4 md:px-8 py-8 space-y-6">
-        {!canWithdraw && nodeActive && (
-          <div className="bg-amber-50 border border-amber-200 rounded-2xl px-6 py-5 shadow-sm">
-            <p className="text-amber-800 font-bold text-sm">Minimum Balance Not Reached</p>
-            <p className="text-amber-700/80 text-xs mt-1 font-medium leading-relaxed">
-              You need {fmt(minW)} to withdraw on your {nodeTier}. Current balance: {fmt(balance)}. Keep earning!
-            </p>
-          </div>
-        )}
-
-        {!nodeActive && (
-          <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center shadow-sm relative overflow-hidden">
-            <div className="absolute top-0 left-0 p-8 opacity-5 pointer-events-none">
-              <Lock className="w-32 h-32" />
-            </div>
-            <Wallet className="w-12 h-12 text-slate-400 mx-auto mb-4 relative z-10" />
-            <p className="font-black text-slate-900 text-lg relative z-10">Premium Plan Required</p>
-            <p className="text-slate-500 text-sm mt-2 mb-6 font-medium relative z-10">Activate a membership plan to enable withdrawals to your local bank account.</p>
-            <Link href="/upgrade" className="inline-block bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-8 py-3 rounded-xl text-sm transition-colors shadow-md relative z-10">
-              Upgrade Account
-            </Link>
-          </div>
-        )}
-
-        {/* stats */}
-        {nodeActive && (
-          <div className="grid grid-cols-3 gap-4">
-            {[
-              { label: "Pending",   value: pending,        color: "text-amber-500" },
-              { label: "Processed", value: processed,      color: "text-emerald-500" },
-              { label: "Total Paid",value: fmt(total),     color: "text-slate-900" },
-            ].map((s, i) => (
-              <div key={i} className="bg-white border border-slate-200 rounded-2xl p-5 text-center shadow-sm">
-                <p className={`text-xl font-black ${s.color}`}>{s.value}</p>
-                <p className="text-slate-400 font-bold text-[10px] uppercase tracking-wider mt-1">{s.label}</p>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* history */}
-        <div>
-          <h3 className="font-bold text-slate-900 text-base mb-4 px-2">Withdrawal History</h3>
-          {loading ? (
-            <div className="flex justify-center py-10"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>
-          ) : history.length === 0 ? (
-            <div className="text-center py-16 bg-white border border-slate-200 rounded-2xl shadow-sm">
-              <ArrowUpRight className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-              <p className="text-slate-500 font-bold text-sm">No withdrawals yet</p>
-            </div>
-          ) : (
-            <div className="bg-white border border-slate-200 rounded-2xl divide-y divide-slate-100 overflow-hidden shadow-sm">
-              {history.map((w, i) => {
-                const s = STATUS_STYLE[w.status] ?? STATUS_STYLE.pending;
-                return (
-                  <motion.div key={w.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.04 }}
-                    className="flex items-center gap-4 px-6 py-5 hover:bg-slate-50 transition-colors">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${s.color.split(" ").slice(1).join(" ")}`}>
-                      <s.icon className={`w-5 h-5 ${s.color.split(" ")[0]}`} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <p className="text-sm font-bold text-slate-900">{fmt(w.amount)}</p>
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${s.color}`}>{w.status}</span>
-                      </div>
-                      <p className="text-slate-500 text-xs mt-1 font-medium truncate">{w.bankName} · {w.accountNumber}</p>
-                      <p className="text-slate-400 text-[10px] font-bold tracking-wider uppercase mt-1">{ts(w.requestedAt)}</p>
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      </div>
     </div>
   );
 }

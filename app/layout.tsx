@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import { SupportChatWidget } from "@/components/ui/SupportChatWidget";
 
 export const viewport: Viewport = {
   themeColor: "#F2F5FB",
@@ -59,9 +58,7 @@ export default function RootLayout({
       </head>
       <body className="font-sans antialiased bg-background text-foreground min-h-screen relative overflow-x-hidden">
         {children}
-        <SupportChatWidget />
       </body>
     </html>
   );
 }
-

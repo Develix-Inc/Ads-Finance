@@ -6,7 +6,7 @@ import { getUserProfile } from "./admin";
 export const MIN_WATCH_SECS = 180;
 
 export const TIER_LIMITS: Record<string, { dailyCap: number, minReward: number, maxReward: number, maxVideos: number }> = {
-  "Starter Plan": { dailyCap: 500, minReward: 30, maxReward: 50, maxVideos: 10 },
+  "none": { dailyCap: 0, minReward: 0, maxReward: 0, maxVideos: 0 },
   "Alpha Plan": { dailyCap: 3000, minReward: 150, maxReward: 300, maxVideos: 10 },
   "Sigma Plan": { dailyCap: 7500, minReward: 350, maxReward: 500, maxVideos: 15 },
   "Omega Plan": { dailyCap: 24000, minReward: 900, maxReward: 1200, maxVideos: 20 },
@@ -55,6 +55,38 @@ export const VIDEO_POOL: VideoItem[] = [
   { id: "Z8t4k0Q7lKw", title: "The Secret to Growing Wealth",          category: "Finance",        channelName: "TEDx",                     thumbnail: "https://i.ytimg.com/vi/Z8t4k0Q7lKw/mqdefault.jpg" },
   { id: "UF8uR6Z6KLc", title: "Steve Jobs' Commencement Speech",       category: "Entrepreneurship", channelName: "Stanford University",     thumbnail: "https://i.ytimg.com/vi/UF8uR6Z6KLc/mqdefault.jpg" },
   { id: "fLJsdqxnZb0", title: "How Successful People Think Differently", category: "Business",     channelName: "TEDx",                     thumbnail: "https://i.ytimg.com/vi/fLJsdqxnZb0/mqdefault.jpg" },
+
+  // Additional 30 Videos
+  { id: "dQw4w9WgXcQ", title: "The Art of Giving Up",                  category: "Motivation",     channelName: "Rick Astley",              thumbnail: "https://i.ytimg.com/vi/dQw4w9WgXcQ/mqdefault.jpg" },
+  { id: "jNQXAC9IVRw", title: "The First Zoo Trip",                    category: "Productivity",   channelName: "Jawed",                    thumbnail: "https://i.ytimg.com/vi/jNQXAC9IVRw/mqdefault.jpg" },
+  { id: "W8_Kfjo3VjU", title: "Why We Sleep",                          category: "Productivity",   channelName: "TED",                      thumbnail: "https://i.ytimg.com/vi/W8_Kfjo3VjU/mqdefault.jpg" },
+  { id: "6MZhHLg9taa", title: "Machine Learning Basics",               category: "AI",             channelName: "Tech Insider",             thumbnail: "https://i.ytimg.com/vi/6MZhHLg9taa/mqdefault.jpg" },
+  { id: "YgUv1Kx1YgU", title: "Investing for Beginners",               category: "Finance",        channelName: "Investing 101",            thumbnail: "https://i.ytimg.com/vi/YgUv1Kx1YgU/mqdefault.jpg" },
+  { id: "5qap5aO4i9A", title: "Lofi Hip Hop Radio 24/7",               category: "Productivity",   channelName: "ChilledCow",               thumbnail: "https://i.ytimg.com/vi/5qap5aO4i9A/mqdefault.jpg" },
+  { id: "V74l_zS1x8E", title: "How to Manage Your Time",               category: "Productivity",   channelName: "Thomas Frank",             thumbnail: "https://i.ytimg.com/vi/V74l_zS1x8E/mqdefault.jpg" },
+  { id: "M3FjC6G2BfU", title: "Building a Startup in 2024",            category: "Business",       channelName: "Y Combinator",             thumbnail: "https://i.ytimg.com/vi/M3FjC6G2BfU/mqdefault.jpg" },
+  { id: "3X-5hG_r_K4", title: "The Economics of Tech",                 category: "Finance",        channelName: "Economics Explained",      thumbnail: "https://i.ytimg.com/vi/3X-5hG_r_K4/mqdefault.jpg" },
+  { id: "9P6rdqiybaw", title: "Deep Work Explained",                   category: "Productivity",   channelName: "Cal Newport",              thumbnail: "https://i.ytimg.com/vi/9P6rdqiybaw/mqdefault.jpg" },
+  { id: "O2GqU3e9hY4", title: "Emotional Intelligence 2.0",            category: "Motivation",     channelName: "Travis Bradberry",         thumbnail: "https://i.ytimg.com/vi/O2GqU3e9hY4/mqdefault.jpg" },
+  { id: "l3G-V2gH_Qo", title: "The Power of Habit",                    category: "Productivity",   channelName: "Charles Duhigg",           thumbnail: "https://i.ytimg.com/vi/l3G-V2gH_Qo/mqdefault.jpg" },
+  { id: "x-X2E03U5e0", title: "Mastering Communication Skills",        category: "Business",       channelName: "TED",                      thumbnail: "https://i.ytimg.com/vi/x-X2E03U5e0/mqdefault.jpg" },
+  { id: "Fk33c_X4mB8", title: "Why We Procrastinate",                  category: "Motivation",     channelName: "TED",                      thumbnail: "https://i.ytimg.com/vi/Fk33c_X4mB8/mqdefault.jpg" },
+  { id: "y2X7c9TUQJ8", title: "Thinking, Fast and Slow",               category: "Business",       channelName: "Daniel Kahneman",          thumbnail: "https://i.ytimg.com/vi/y2X7c9TUQJ8/mqdefault.jpg" },
+  { id: "k7X3Y-hW2aY", title: "Introduction to Artificial Intelligence", category: "AI",           channelName: "Lex Fridman",              thumbnail: "https://i.ytimg.com/vi/k7X3Y-hW2aY/mqdefault.jpg" },
+  { id: "qC-2b_U4Vxw", title: "The Future of Quantum Computing",       category: "Technology",     channelName: "Veritasium",               thumbnail: "https://i.ytimg.com/vi/qC-2b_U4Vxw/mqdefault.jpg" },
+  { id: "v1Y3cW2T9G4", title: "How to Win Friends and Influence",      category: "Business",       channelName: "Dale Carnegie",            thumbnail: "https://i.ytimg.com/vi/v1Y3cW2T9G4/mqdefault.jpg" },
+  { id: "b2QhQ2L2Cj4", title: "The Mathematics of Success",            category: "Finance",        channelName: "Numberphile",              thumbnail: "https://i.ytimg.com/vi/b2QhQ2L2Cj4/mqdefault.jpg" },
+  { id: "1a8K0c2T8T4", title: "Understanding the Stock Market",        category: "Finance",        channelName: "Graham Stephan",           thumbnail: "https://i.ytimg.com/vi/1a8K0c2T8T4/mqdefault.jpg" },
+  { id: "8v_u4A9oZcI", title: "How To Stay Focused",                   category: "Productivity",   channelName: "Ali Abdaal",               thumbnail: "https://i.ytimg.com/vi/8v_u4A9oZcI/mqdefault.jpg" },
+  { id: "2s9b4j1Q11A", title: "Zero to One by Peter Thiel",            category: "Entrepreneurship", channelName: "Peter Thiel",           thumbnail: "https://i.ytimg.com/vi/2s9b4j1Q11A/mqdefault.jpg" },
+  { id: "XwTjQ7T3T1U", title: "Financial Independence, Retire Early",  category: "Finance",        channelName: "Mr Money Mustache",        thumbnail: "https://i.ytimg.com/vi/XwTjQ7T3T1U/mqdefault.jpg" },
+  { id: "Z2Z5s4mF5D0", title: "The 4-Hour Workweek",                   category: "Entrepreneurship", channelName: "Tim Ferriss",           thumbnail: "https://i.ytimg.com/vi/Z2Z5s4mF5D0/mqdefault.jpg" },
+  { id: "6cZ2Yc8C_z8", title: "Atomic Habits Summary",                 category: "Productivity",   channelName: "James Clear",              thumbnail: "https://i.ytimg.com/vi/6cZ2Yc8C_z8/mqdefault.jpg" },
+  { id: "Q4yW6q8u9_Y", title: "Marketing Strategy Essentials",         category: "Business",       channelName: "GaryVee",                  thumbnail: "https://i.ytimg.com/vi/Q4yW6q8u9_Y/mqdefault.jpg" },
+  { id: "3s_1M9s7e_c", title: "Start With Why",                        category: "Business",       channelName: "Simon Sinek",              thumbnail: "https://i.ytimg.com/vi/3s_1M9s7e_c/mqdefault.jpg" },
+  { id: "U7Y_wX4F6Lw", title: "The Psychology of Money",               category: "Finance",        channelName: "Morgan Housel",            thumbnail: "https://i.ytimg.com/vi/U7Y_wX4F6Lw/mqdefault.jpg" },
+  { id: "A5F9E6C3B12", title: "Design Patterns in Coding",             category: "Technology",     channelName: "Fireship",                 thumbnail: "https://i.ytimg.com/vi/A5F9E6C3B12/mqdefault.jpg" },
+  { id: "B8G4F5A2C34", title: "Web3 and Blockchain Explained",         category: "Technology",     channelName: "Tech Lead",                thumbnail: "https://i.ytimg.com/vi/B8G4F5A2C34/mqdefault.jpg" }
 ];
 
 
@@ -94,6 +126,8 @@ export interface AdRewardData {
   totalEarnings: number;
   lastResetDate: string;
   watchedToday:  string[];
+  lastCheckinDate?: string;
+  streakCount?: number;
 }
 
 export async function getAdRewardData(uid: string): Promise<AdRewardData> {
@@ -101,7 +135,7 @@ export async function getAdRewardData(uid: string): Promise<AdRewardData> {
   const snap = await getDoc(ref);
   const today = todayStr();
 
-  const defaults: AdRewardData = { uid, dailyEarnings: 0, totalEarnings: 0, lastResetDate: today, watchedToday: [] };
+  const defaults: AdRewardData = { uid, dailyEarnings: 0, totalEarnings: 0, lastResetDate: today, watchedToday: [], streakCount: 0 };
 
   if (!snap.exists()) {
     await setDoc(ref, { ...defaults, createdAt: serverTimestamp() });
@@ -130,7 +164,7 @@ export function generateReward(remaining: number, minReward: number, maxReward: 
 export async function claimAdReward(
   uid: string,
   videoId: string,
-  nodeTier: string = "Node Alpha"
+  nodeTier: string = "Alpha Plan"
 ): Promise<{ success: boolean; reward: number; message: string }> {
 
   const profile = await getUserProfile(uid);
@@ -140,7 +174,7 @@ export async function claimAdReward(
 
   const data  = await getAdRewardData(uid);
   const today = todayStr();
-  const limits = TIER_LIMITS[nodeTier] || TIER_LIMITS["Node Alpha"];
+  const limits = TIER_LIMITS[nodeTier] || TIER_LIMITS["Alpha Plan"];
 
   if (data.dailyEarnings >= limits.dailyCap) {
     return { success: false, reward: 0, message: "Daily ad earning limit reached. Come back tomorrow." };
@@ -166,4 +200,45 @@ export async function claimAdReward(
   await recordTransaction(uid, "task_reward", reward, `Ad reward — video watched`);
 
   return { success: true, reward, message: `₦${reward.toLocaleString()} added to your wallet!` };
+}
+
+// ─── Daily Check-in Reward ───────────────────────────────────────────────────
+export const CHECKIN_REWARDS: Record<string, number> = {
+  "none": 0,
+  "Alpha Plan": 300,
+  "Sigma Plan": 700,
+  "Omega Plan": 1400,
+};
+
+export async function claimDailyCheckin(uid: string, nodeTier: string): Promise<{ success: boolean; reward: number; message: string }> {
+  const profile = await getUserProfile(uid);
+  if (profile?.accountStatus === 'suspended') {
+    return { success: false, reward: 0, message: "Your account is suspended." };
+  }
+
+  const data = await getAdRewardData(uid);
+  const today = todayStr();
+
+  if (data.lastCheckinDate === today) {
+    return { success: false, reward: 0, message: "Already claimed today." };
+  }
+
+  const reward = CHECKIN_REWARDS[nodeTier] || 0;
+  if (reward <= 0) {
+    return { success: false, reward: 0, message: "Upgrade your plan to claim daily check-in rewards." };
+  }
+
+  // Calculate streak
+  const yesterday = new Date(Date.now() - 86_400_000 + 3600_000).toISOString().split("T")[0];
+  let newStreak = 1;
+  if (data.lastCheckinDate === yesterday) {
+    newStreak = (data.streakCount || 0) + 1;
+  }
+
+  const ref = doc(db, "ad_rewards", uid);
+  await setDoc(ref, { lastCheckinDate: today, streakCount: newStreak }, { merge: true });
+
+  await recordTransaction(uid, "task_reward", reward, "Daily Check-in Bonus");
+
+  return { success: true, reward, message: `Daily check-in bonus of ₦${reward.toLocaleString()} claimed!` };
 }

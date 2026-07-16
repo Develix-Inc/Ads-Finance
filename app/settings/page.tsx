@@ -4,13 +4,14 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import styles from "./styles.module.css";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged, updateProfile } from "firebase/auth";
 import { getUserProfile, upsertUserProfile } from "@/lib/admin";
 import { ArrowLeft, User, Building, Bell, Shield, CheckCircle2, Eye, EyeOff, Key } from "lucide-react";
 import Swal from "sweetalert2";
 
-const SWAL = { background: "#ffffff", color: "#0f172a", customClass: { popup: "!rounded-2xl !border !border-slate-200 !shadow-xl", confirmButton: "!rounded-xl px-6 py-2 !bg-primary" } };
+const SWAL = { background: "#ffffff", color: "#0f172a", customClass: { popup: "!rounded-2xl !border !border-slate-200 !shadow-xl", confirmButton: "!rounded-xl px-6 py-2 !bg-[#059669]" } };
 type Tab = "profile" | "bank" | "pin" | "notifications";
 
 export default function SettingsPage() {
@@ -20,6 +21,17 @@ export default function SettingsPage() {
   const [tab, setTab]         = useState<Tab>("profile");
   const [saving, setSaving]   = useState(false);
   const [saved, setSaved]     = useState(false);
+
+  // read initial tab from URL
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const t = params.get("tab") as Tab;
+      if (t && ["profile", "bank", "pin", "notifications"].includes(t)) {
+        setTab(t);
+      }
+    }
+  }, []);
 
   // form states
   const [displayName, setDisplayName]     = useState("");
@@ -107,192 +119,196 @@ export default function SettingsPage() {
 
   function flash() { setSaved(true); setTimeout(() => setSaved(false), 2000); }
 
-  const TABS: { id: Tab; label: string; icon: any }[] = [
-    { id: "profile",       label: "Profile",         icon: User },
-    { id: "bank",          label: "Bank Account",    icon: Building },
-    { id: "pin",           label: "Withdrawal PIN",  icon: Key },
-    { id: "notifications", label: "Notifications",   icon: Bell },
-  ];
+  const TABS: Record<Tab, { label: string }> = {
+    profile: { label: "Personal Information" },
+    bank: { label: "Payment Methods" },
+    pin: { label: "Security" },
+    notifications: { label: "Notifications" },
+  };
 
-  if (!user) return <div className="min-h-screen bg-background flex items-center justify-center"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>;
+  if (!user) return <div className={styles.container} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Loading...</div>;
 
   return (
-    <div className="min-h-screen bg-background text-slate-900 pb-24 md:pb-10">
-      <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/80 backdrop-blur-xl px-4 md:px-8 py-4 flex items-center gap-4">
-        <Link href="/dashboard" className="p-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-colors">
-          <ArrowLeft className="w-4 h-4 text-slate-600" />
+    <div className={styles.container}>
+      {/* Header */}
+      <header className={styles.header}>
+        <Link href="/profile" className={styles.backBtn}>
+          <ArrowLeft size={16} strokeWidth={2.5} />
         </Link>
-        <div className="flex-1">
-          <h1 className="text-lg font-black text-slate-900 tracking-tight">Settings</h1>
-        </div>
+        <h1 className={styles.pageTitle}>{TABS[tab].label}</h1>
         {saved && (
-          <div className="flex items-center gap-1.5 text-xs text-emerald-500 font-bold bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200">
-            <CheckCircle2 className="w-3.5 h-3.5" /> Saved
+          <div className={styles.savedPill}>
+            <CheckCircle2 size={14} strokeWidth={3} /> Saved
           </div>
         )}
       </header>
 
-      <div className="max-w-3xl mx-auto px-4 md:px-8 py-8">
-        {/* tabs */}
-        <div className="flex gap-2 bg-white border border-slate-200 shadow-sm rounded-2xl p-1.5 mb-6 overflow-x-auto">
-          {TABS.map(t => (
-            <button key={t.id} onClick={() => setTab(t.id)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-all flex-1 justify-center ${tab === t.id ? "bg-primary text-primary-foreground shadow-sm" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"}`}>
-              <t.icon className="w-4 h-4" />
-              <span className="hidden sm:inline">{t.label}</span>
-            </button>
-          ))}
-        </div>
+      <main className={styles.content}>
 
         {/* PROFILE */}
         {tab === "profile" && (
-          <div className="bg-white border border-slate-200 shadow-sm rounded-2xl p-6 md:p-8 space-y-6">
-            <h2 className="font-bold text-slate-900 text-base">Profile Information</h2>
+          <div className={styles.card}>
+            <div className={styles.cardHeader}>
+              <div className={styles.cardIconWrap}>
+                <User size={24} />
+              </div>
+              <div>
+                <h2 className={styles.cardTitle}>Profile Information</h2>
+                <p className={styles.cardSubtitle}>Update your personal details</p>
+              </div>
+            </div>
             
             {/* Avatar display */}
-            <div className="flex items-center gap-5 py-2 border-b border-slate-100 pb-6">
+            <div className={styles.avatarEditRow}>
               {profile?.photoURL || user?.photoURL ? (
-                <Image src={profile?.photoURL || user?.photoURL} alt={displayName} width={72} height={72} className="w-16 h-16 md:w-20 md:h-20 rounded-full object-cover border-2 border-slate-200 shadow-sm" />
+                <Image src={profile?.photoURL || user?.photoURL} alt={displayName} width={72} height={72} className={styles.avatarDisplay} />
               ) : (
-                <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center font-black text-slate-600 text-2xl shadow-sm">
+                <div className={styles.avatarDisplay}>
                   {(displayName || "U")[0].toUpperCase()}
                 </div>
               )}
-              <div>
-                <p className="text-base font-bold text-slate-900">{displayName || "Premium Member"}</p>
-                <p className="text-sm font-medium text-slate-500">{user?.email || "No email"}</p>
+              <div className={styles.avatarInfo}>
+                <p className={styles.avatarName}>{displayName || "Premium Member"}</p>
+                <p className={styles.avatarEmail}>{user?.email || "No email"}</p>
               </div>
             </div>
 
-            <div className="space-y-5">
-              <div>
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">Display Name</label>
-                <input value={displayName} onChange={e => setDisplayName(e.target.value)} placeholder="Your name"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 text-sm font-medium focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
-              </div>
-              <div>
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">Email / Phone</label>
-                <input value={user?.email || user?.phoneNumber || ""} disabled
-                  className="w-full bg-slate-50/50 border border-slate-200 rounded-xl px-4 py-3 text-slate-400 text-sm font-medium cursor-not-allowed" />
-                <p className="text-xs font-medium text-slate-400 mt-1.5">Cannot be changed.</p>
-              </div>
-              <div>
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">Referral Code</label>
-                <input value={profile?.referralCode || "—"} disabled
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-primary text-sm font-mono font-bold cursor-not-allowed tracking-wider" />
-              </div>
-              <button onClick={saveProfile} disabled={saving}
-                className="w-full py-4 mt-2 rounded-xl bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground font-bold text-sm transition-colors shadow-sm">
-                {saving ? "Saving…" : "Save Profile"}
-              </button>
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Display Name</label>
+              <input value={displayName} onChange={e => setDisplayName(e.target.value)} placeholder="Your name" className={styles.input} />
             </div>
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Email / Phone</label>
+              <input value={user?.email || user?.phoneNumber || ""} disabled className={styles.input} />
+              <p className={styles.helperText}>Cannot be changed.</p>
+            </div>
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Referral Code</label>
+              <input value={profile?.referralCode || "—"} disabled className={styles.input} style={{ fontFamily: 'monospace', fontWeight: 800, color: '#1765DC' }} />
+            </div>
+            
+            <button onClick={saveProfile} disabled={saving} className={styles.submitBtn}>
+              {saving ? "Saving…" : "Save Profile"}
+            </button>
           </div>
         )}
 
         {/* BANK */}
         {tab === "bank" && (
-          <div className="bg-white border border-slate-200 shadow-sm rounded-2xl p-6 md:p-8 space-y-6">
-            <div>
-              <h2 className="font-bold text-slate-900 text-base">Withdrawal Bank Account</h2>
-              <p className="text-slate-500 text-sm font-medium mt-1">This account receives all your withdrawals. Ensure details are exactly correct.</p>
+          <div className={styles.card}>
+            <div className={styles.cardHeader}>
+              <div className={styles.cardIconWrap}>
+                <Building size={24} />
+              </div>
+              <div>
+                <h2 className={styles.cardTitle}>Withdrawal Bank Account</h2>
+                <p className={styles.cardSubtitle}>This account receives all your withdrawals</p>
+              </div>
             </div>
             
-            <div className="space-y-5">
-              {[
-                { label: "Bank Name",      val: bankName,      set: setBankName,      ph: "e.g. GTBank, Access, UBA" },
-                { label: "Account Number", val: accountNumber, set: setAccountNumber, ph: "10-digit account number", max: 10 },
-                { label: "Account Name",   val: accountName,   set: setAccountName,   ph: "Account holder full name" },
-              ].map(f => (
-                <div key={f.label}>
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">{f.label}</label>
-                  <input value={f.val} onChange={e => f.set(e.target.value)} placeholder={f.ph} maxLength={f.max}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 text-sm font-medium focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
-                </div>
-              ))}
-              <button onClick={saveBank} disabled={saving}
-                className="w-full py-4 mt-2 rounded-xl bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground font-bold text-sm transition-colors shadow-sm">
-                {saving ? "Saving…" : "Save Bank Details"}
-              </button>
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Bank Name</label>
+              <input value={bankName} onChange={e => setBankName(e.target.value)} placeholder="e.g. GTBank, Access, UBA" className={styles.input} />
             </div>
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Account Number</label>
+              <input value={accountNumber} onChange={e => setAccountNumber(e.target.value)} placeholder="10-digit account number" maxLength={10} className={styles.input} />
+            </div>
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Account Name</label>
+              <input value={accountName} onChange={e => setAccountName(e.target.value)} placeholder="Account holder full name" className={styles.input} />
+            </div>
+            
+            <button onClick={saveBank} disabled={saving} className={styles.submitBtn}>
+              {saving ? "Saving…" : "Save Bank Details"}
+            </button>
           </div>
         )}
 
         {/* WITHDRAWAL PIN */}
         {tab === "pin" && (
-          <div className="bg-white border border-slate-200 shadow-sm rounded-2xl p-6 md:p-8 space-y-6">
-            <div className="flex items-center gap-4 mb-2">
-              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20">
-                <Shield className="w-6 h-6 text-primary" />
+          <div className={styles.card}>
+            <div className={styles.cardHeader}>
+              <div className={styles.cardIconWrap}>
+                <Shield size={24} />
               </div>
               <div>
-                <h2 className="font-bold text-slate-900 text-base">Withdrawal PIN</h2>
-                <p className="text-sm font-medium text-slate-500 mt-0.5">{hasPin ? "Change your 4-digit withdrawal security PIN" : "Set a 4-digit PIN required for all withdrawals"}</p>
+                <h2 className={styles.cardTitle}>Withdrawal PIN</h2>
+                <p className={styles.cardSubtitle}>{hasPin ? "Change your 4-digit security PIN" : "Set a 4-digit PIN required for all withdrawals"}</p>
               </div>
             </div>
 
-            <div className="bg-amber-50 border border-amber-200 rounded-xl px-5 py-4">
-              <p className="text-amber-800 text-xs font-medium leading-relaxed">
+            <div className={styles.warningBanner}>
+              <p className={styles.warningText}>
                 This PIN protects your withdrawals. You will be asked to enter it every time you request a payout. Keep it secret.
               </p>
             </div>
 
-            <div className="space-y-5">
-              {hasPin && (
-                <div className="relative">
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">Current PIN</label>
+            {hasPin && (
+              <div className={styles.formGroup}>
+                <label className={styles.label}>Current PIN</label>
+                <div className={styles.inputWrap}>
                   <input type={showPin ? "text" : "password"} value={currentPin} onChange={e => setCurrentPin(e.target.value.slice(0, 4))}
-                    placeholder="••••" maxLength={4} inputMode="numeric"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 pr-12 text-slate-900 text-sm text-center tracking-[0.5em] font-mono font-bold focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
+                    placeholder="••••" maxLength={4} inputMode="numeric" className={`${styles.input} ${styles.inputPin}`} />
                 </div>
-              )}
+              </div>
+            )}
 
-              <div className="relative">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">{hasPin ? "New PIN" : "Set PIN"}</label>
+            <div className={styles.formGroup}>
+              <label className={styles.label}>{hasPin ? "New PIN" : "Set PIN"}</label>
+              <div className={styles.inputWrap}>
                 <input type={showPin ? "text" : "password"} value={newPin} onChange={e => setNewPin(e.target.value.slice(0, 4))}
-                  placeholder="••••" maxLength={4} inputMode="numeric"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 pr-12 text-slate-900 text-sm text-center tracking-[0.5em] font-mono font-bold focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
-                <button onClick={() => setShowPin(p => !p)} className="absolute right-4 top-10 text-slate-400 hover:text-slate-600 transition-colors">
-                  {showPin ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  placeholder="••••" maxLength={4} inputMode="numeric" className={`${styles.input} ${styles.inputPin}`} />
+                <button onClick={() => setShowPin(p => !p)} className={styles.eyeBtn}>
+                  {showPin ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
-
-              <div>
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">Confirm PIN</label>
-                <input type={showPin ? "text" : "password"} value={confirmPin} onChange={e => setConfirmPin(e.target.value.slice(0, 4))}
-                  placeholder="••••" maxLength={4} inputMode="numeric"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 text-sm text-center tracking-[0.5em] font-mono font-bold focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
-              </div>
-
-              <button onClick={savePin} disabled={saving}
-                className="w-full py-4 mt-2 rounded-xl bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground font-bold text-sm transition-colors shadow-sm">
-                {saving ? "Saving…" : hasPin ? "Update PIN" : "Set Withdrawal PIN"}
-              </button>
             </div>
+
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Confirm PIN</label>
+              <div className={styles.inputWrap}>
+                <input type={showPin ? "text" : "password"} value={confirmPin} onChange={e => setConfirmPin(e.target.value.slice(0, 4))}
+                  placeholder="••••" maxLength={4} inputMode="numeric" className={`${styles.input} ${styles.inputPin}`} />
+              </div>
+            </div>
+
+            <button onClick={savePin} disabled={saving} className={styles.submitBtn}>
+              {saving ? "Saving…" : hasPin ? "Update PIN" : "Set Withdrawal PIN"}
+            </button>
           </div>
         )}
 
         {/* NOTIFICATIONS */}
         {tab === "notifications" && (
-          <div className="bg-white border border-slate-200 shadow-sm rounded-2xl p-6 md:p-8 space-y-6">
-            <h2 className="font-bold text-slate-900 text-base">Notification Preferences</h2>
-            <div className="space-y-2">
+          <div className={styles.card}>
+            <div className={styles.cardHeader}>
+              <div className={styles.cardIconWrap}>
+                <Bell size={24} />
+              </div>
+              <div>
+                <h2 className={styles.cardTitle}>Notification Preferences</h2>
+                <p className={styles.cardSubtitle}>Manage your alerts and emails</p>
+              </div>
+            </div>
+
+            <div className={styles.notifList}>
               {(Object.keys(notifPrefs) as (keyof typeof notifPrefs)[]).map(k => (
-                <label key={k} className="flex items-center justify-between py-4 border-b border-slate-100 cursor-pointer">
-                  <span className="text-sm font-bold capitalize text-slate-700">{k.charAt(0).toUpperCase() + k.slice(1)} notifications</span>
-                  <button onClick={() => setNotifPrefs(p => ({ ...p, [k]: !p[k] }))}
-                    className={`relative w-12 h-6 rounded-full transition-colors shadow-inner ${notifPrefs[k] ? "bg-primary" : "bg-slate-200"}`}>
-                    <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-all ${notifPrefs[k] ? "left-7" : "left-1"}`} />
+                <div key={k} className={styles.notifRow} onClick={() => setNotifPrefs(p => ({ ...p, [k]: !p[k] }))}>
+                  <span className={styles.notifLabel}>{k}</span>
+                  <button className={`${styles.toggleSwitch} ${notifPrefs[k] ? styles.active : ""}`}>
+                    <span className={styles.toggleKnob} />
                   </button>
-                </label>
+                </div>
               ))}
             </div>
-            <button onClick={saveNotifPrefs} disabled={saving}
-              className="w-full py-4 mt-4 rounded-xl bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground font-bold text-sm transition-colors shadow-sm">
+
+            <button onClick={saveNotifPrefs} disabled={saving} className={styles.submitBtn}>
               {saving ? "Saving…" : "Save Preferences"}
             </button>
           </div>
         )}
-      </div>
+      </main>
     </div>
   );
 }
