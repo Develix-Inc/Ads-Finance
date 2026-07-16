@@ -7,9 +7,12 @@ export const MIN_WATCH_SECS = 180;
 
 export const TIER_LIMITS: Record<string, { dailyCap: number, minReward: number, maxReward: number, maxVideos: number }> = {
   "none": { dailyCap: 0, minReward: 0, maxReward: 0, maxVideos: 0 },
-  "Alpha": { dailyCap: 3000, minReward: 150, maxReward: 300, maxVideos: 10 },`n    "Alpha Plan": { dailyCap: 3000, minReward: 150, maxReward: 300, maxVideos: 10 },
-  "Sigma": { dailyCap: 7500, minReward: 350, maxReward: 500, maxVideos: 15 },`n    "Sigma Plan": { dailyCap: 7500, minReward: 350, maxReward: 500, maxVideos: 15 },
-  "Omega": { dailyCap: 24000, minReward: 900, maxReward: 1200, maxVideos: 20 },`n    "Omega Plan": { dailyCap: 24000, minReward: 900, maxReward: 1200, maxVideos: 20 },
+  "Alpha": { dailyCap: 3000, minReward: 150, maxReward: 300, maxVideos: 10 },
+  "Alpha Plan": { dailyCap: 3000, minReward: 150, maxReward: 300, maxVideos: 10 },
+  "Sigma": { dailyCap: 7500, minReward: 350, maxReward: 500, maxVideos: 15 },
+  "Sigma Plan": { dailyCap: 7500, minReward: 350, maxReward: 500, maxVideos: 15 },
+  "Omega": { dailyCap: 24000, minReward: 900, maxReward: 1200, maxVideos: 20 },
+  "Omega Plan": { dailyCap: 24000, minReward: 900, maxReward: 1200, maxVideos: 20 },
 };
 
 export interface VideoItem {
