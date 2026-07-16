@@ -15,21 +15,21 @@ export const COMPANY_BANK = {
 };
 
 export const NODE_PRICES: Record<string, number> = {
-  "Alpha Plan": 17000,
-  "Sigma Plan": 45000,
-  "Omega Plan": 120000,
+  "Alpha": 85000,`n  "Alpha Plan": 17000,
+  "Sigma": 225000,`n  "Sigma Plan": 45000,
+  "Omega": 600000,`n  "Omega Plan": 120000,
 };
 
 export const NODE_MIN_WITHDRAWAL: Record<string, number> = {
-  "Alpha Plan": 85000,
-  "Sigma Plan": 225000,
-  "Omega Plan": 600000,
+  "Alpha": 85000,`n  "Alpha Plan": 85000,
+  "Sigma": 225000,`n  "Sigma Plan": 225000,
+  "Omega": 600000,`n  "Omega Plan": 600000,
 };
 
 export const NODE_MULTIPLIERS: Record<string, number> = {
-  "Alpha Plan": 4,
-  "Sigma Plan": 5,
-  "Omega Plan": 6,
+  "Alpha": 85000,`n  "Alpha Plan": 4,
+  "Sigma": 225000,`n  "Sigma Plan": 5,
+  "Omega": 600000,`n  "Omega Plan": 6,
 };
 
 /* ─── User profile ─── */
@@ -330,7 +330,7 @@ export async function getSettings() {
     bankName:      COMPANY_BANK.name,
     bankAccount:   COMPANY_BANK.account,
     bankHolder:    COMPANY_BANK.holder,
-    minWithdrawal: { "Alpha Plan": 85000, "Sigma Plan": 225000, "Omega Plan": 600000 },
+    minWithdrawal: { "Alpha": 85000,`n  "Alpha Plan": 85000, "Sigma": 225000,`n  "Sigma Plan": 225000, "Omega": 600000,`n  "Omega Plan": 600000 },
     referralBonus: 50,
   };
 }

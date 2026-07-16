@@ -117,6 +117,17 @@ export default function DashboardPage() {
     verifyPayment();
   }, [user?.uid]);
 
+    useEffect(() => {
+    if (!loading && profile) {
+      // Allow onboarding to finish on dashboard
+      if (typeof showOnboarding !== 'undefined' && showOnboarding) return;
+      
+      if (!profile.nodeTier || profile.nodeTier === "none") {
+        router.push("/upgrade");
+      }
+    }
+  }, [loading, profile, router]);
+
   if (loading) return <div className={styles.container} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}></div>;
 
   const name = profile?.displayName || user?.displayName || user?.email?.split("@")[0] || "User";
