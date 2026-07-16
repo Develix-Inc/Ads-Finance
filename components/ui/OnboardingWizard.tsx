@@ -8,15 +8,15 @@ import { upsertUserProfile } from "@/lib/admin";
 import { sendNotification } from "@/lib/notifications";
 import { generateReferralCode, processReferralSignup } from "@/lib/referrals";
 
-const SWAL_DARK = {
-  background: "#020617",
-  color: "#f8fafc",
-  confirmButtonColor: "#14b8a6",
-  cancelButtonColor: "#1e293b",
+const SWAL_LIGHT = {
+  background: "#ffffff",
+  color: "#0f172a",
+  confirmButtonColor: "#0f172a", // slate-900 (primary)
+  cancelButtonColor: "#f1f5f9", // slate-100
   customClass: {
-    popup: "!rounded-[24px] !border !border-white/10 !shadow-2xl",
-    confirmButton: "!rounded-full !px-8 !py-3 !font-bold !text-sm",
-    cancelButton: "!rounded-full !px-8 !py-3 !font-semibold !text-sm",
+    popup: "!rounded-[24px] !border !border-slate-200 !shadow-xl",
+    confirmButton: "!rounded-xl !px-8 !py-3 !font-bold !text-sm !text-white",
+    cancelButton: "!rounded-xl !px-8 !py-3 !font-semibold !text-sm !text-slate-900",
   },
 };
 
@@ -37,14 +37,14 @@ export function OnboardingWizard({ uid, userEmail, onComplete }: Props) {
   async function runWizard() {
     /* ── Step 1: Welcome & Skip Option ── */
     const welcomeResult = await Swal.fire({
-      ...SWAL_DARK,
+      ...SWAL_LIGHT,
       title: "Welcome to AdsFinance",
       html: `
         <div style="text-align:center; padding: 8px 0">
-          <img src="/logo-transparent.png" style="width:80px; margin: 0 auto 16px; display:block" onerror="this.style.display='none'"/>
-          <p style="color:#94a3b8; font-size:14px; line-height:1.6">
-            You're about to join an <strong style="color:#fff">institutional-grade</strong> digital engagement network.<br/><br/>
-            We'll set up your Validator Node in a few quick steps.
+          <img src="/logo.png" style="width:80px; margin: 0 auto 16px; display:block" onerror="this.style.display='none'"/>
+          <p style="color:#64748b; font-size:15px; line-height:1.6">
+            You're about to join an <strong style="color:#0f172a">institutional-grade</strong> digital engagement network.<br/><br/>
+            We'll set up your account in a few quick steps.
           </p>
         </div>
       `,
@@ -57,19 +57,19 @@ export function OnboardingWizard({ uid, userEmail, onComplete }: Props) {
     if (welcomeResult.isDismissed || welcomeResult.dismiss === Swal.DismissReason.cancel) {
       await saveProfileAndFinish(
         "passive_income",
-        "moderate",
+        "10_mins",
         "Pending Setup",
         "0000000000",
         "Pending Setup"
       );
       
       await Swal.fire({
-        ...SWAL_DARK,
+        ...SWAL_LIGHT,
         icon: "success",
         title: "Setup Skipped",
-        html: `<p style="color:#94a3b8; font-size:14px">Your account has been initialized with basic defaults. You can update your bank settings anytime under Profile Settings.</p>`,
+        html: `<p style="color:#64748b; font-size:15px">Your account has been initialized with basic defaults. You can update your bank settings anytime under Profile Settings.</p>`,
         showCancelButton: true,
-        confirmButtonText: "⚡ Upgrade Node",
+        confirmButtonText: "⚡ Upgrade Plan",
         cancelButtonText: "📅 Go to Dashboard",
         allowOutsideClick: false,
       }).then(r => {
@@ -83,16 +83,16 @@ export function OnboardingWizard({ uid, userEmail, onComplete }: Props) {
       return;
     }
 
-    /* ── Step 2: Investment Goal ── */
+    /* ── Step 2: Primary Goal ── */
     const goalResult = await Swal.fire({
-      ...SWAL_DARK,
-      title: "What's your investment goal?",
+      ...SWAL_LIGHT,
+      title: "What's your primary goal?",
       html: `
         <div style="display:flex; flex-direction:column; gap:10px; margin-top:16px; text-align:left">
-          ${["Passive Income", "Full-Time Income", "Capital Growth & Savings"].map((g, i) => `
-            <label style="display:flex; align-items:center; gap:12px; padding:12px 16px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:14px; cursor:pointer">
-              <input type="radio" name="goal" value="${["passive_income","full_time","savings"][i]}" style="accent-color:#14b8a6; width:18px; height:18px"/>
-              <span style="color:#e2e8f0; font-size:14px; font-weight:600">${g}</span>
+          ${["Earn passive income", "Save for a specific goal", "Just exploring"].map((g, i) => `
+            <label style="display:flex; align-items:center; gap:12px; padding:16px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:16px; cursor:pointer; transition:all 0.2s">
+              <input type="radio" name="goal" value="${["passive_income","savings","exploring"][i]}" style="accent-color:#0f172a; width:20px; height:20px"/>
+              <span style="color:#334155; font-size:15px; font-weight:600">${g}</span>
             </label>
           `).join("")}
         </div>
@@ -109,27 +109,27 @@ export function OnboardingWizard({ uid, userEmail, onComplete }: Props) {
     });
 
     if (goalResult.isDismissed || goalResult.dismiss === Swal.DismissReason.cancel) {
-      await saveProfileAndFinish("passive_income", "moderate", "Pending Setup", "0000000000", "Pending Setup");
+      await saveProfileAndFinish("passive_income", "10_mins", "Pending Setup", "0000000000", "Pending Setup");
       onComplete();
       router.push("/dashboard");
       return;
     }
     const investmentGoal = goalResult.value;
 
-    /* ── Step 3: Risk Level ── */
-    const riskResult = await Swal.fire({
-      ...SWAL_DARK,
-      title: "Your risk appetite?",
+    /* ── Step 3: Time Commitment ── */
+    const timeResult = await Swal.fire({
+      ...SWAL_LIGHT,
+      title: "How much time can you dedicate daily?",
       html: `
         <div style="display:flex; flex-direction:column; gap:10px; margin-top:16px; text-align:left">
           ${[
-            { label: "Conservative — steady, low risk", val: "conservative" },
-            { label: "Moderate — balanced growth", val: "moderate" },
-            { label: "Aggressive — max yield, higher risk", val: "aggressive" },
+            { label: "Less than 10 mins (Casual)", val: "less_10" },
+            { label: "10-30 mins (Active)", val: "10_30" },
+            { label: "1 hour+ (Power User)", val: "1_hour" },
           ].map(r => `
-            <label style="display:flex; align-items:center; gap:12px; padding:12px 16px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:14px; cursor:pointer">
-              <input type="radio" name="risk" value="${r.val}" style="accent-color:#14b8a6; width:18px; height:18px"/>
-              <span style="color:#e2e8f0; font-size:14px; font-weight:600">${r.label}</span>
+            <label style="display:flex; align-items:center; gap:12px; padding:16px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:16px; cursor:pointer; transition:all 0.2s">
+              <input type="radio" name="time" value="${r.val}" style="accent-color:#0f172a; width:20px; height:20px"/>
+              <span style="color:#334155; font-size:15px; font-weight:600">${r.label}</span>
             </label>
           `).join("")}
         </div>
@@ -139,38 +139,38 @@ export function OnboardingWizard({ uid, userEmail, onComplete }: Props) {
       cancelButtonText: "Skip Setup ✕",
       allowOutsideClick: false,
       preConfirm: () => {
-        const val = (document.querySelector('input[name="risk"]:checked') as HTMLInputElement)?.value;
+        const val = (document.querySelector('input[name="time"]:checked') as HTMLInputElement)?.value;
         if (!val) { Swal.showValidationMessage("Please select an option"); return false; }
         return val;
       },
     });
 
-    if (riskResult.isDismissed || riskResult.dismiss === Swal.DismissReason.cancel) {
-      await saveProfileAndFinish(investmentGoal, "moderate", "Pending Setup", "0000000000", "Pending Setup");
+    if (timeResult.isDismissed || timeResult.dismiss === Swal.DismissReason.cancel) {
+      await saveProfileAndFinish(investmentGoal, "10_mins", "Pending Setup", "0000000000", "Pending Setup");
       onComplete();
       router.push("/dashboard");
       return;
     }
-    const riskLevel = riskResult.value;
+    const timeCommitment = timeResult.value;
 
     /* ── Step 4: Bank Account Setup ── */
     const bankResult = await Swal.fire({
-      ...SWAL_DARK,
+      ...SWAL_LIGHT,
       title: "Set up your withdrawal account",
       html: `
-        <p style="color:#94a3b8; font-size:13px; margin-bottom:16px">This is where your earnings will be sent. You can update this in Settings.</p>
-        <div style="display:flex; flex-direction:column; gap:10px; text-align:left">
+        <p style="color:#64748b; font-size:14px; margin-bottom:20px">This is where your earnings will be sent. You can update this later in Settings.</p>
+        <div style="display:flex; flex-direction:column; gap:16px; text-align:left">
           <div>
-            <label style="color:#64748b; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.1em">Bank Name</label>
-            <input id="swal-bank" placeholder="e.g. GTBank, Access, UBA" style="width:100%; margin-top:6px; padding:12px 14px; background:#0f172a; border:1px solid rgba(255,255,255,0.1); border-radius:12px; color:#fff; font-size:14px; outline:none; box-sizing:border-box"/>
+            <label style="color:#94a3b8; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em">Bank Name</label>
+            <input id="swal-bank" placeholder="e.g. GTBank, Access, UBA" style="width:100%; margin-top:8px; padding:14px 16px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; color:#0f172a; font-size:15px; font-weight:500; outline:none; box-sizing:border-box"/>
           </div>
           <div>
-            <label style="color:#64748b; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.1em">Account Number</label>
-            <input id="swal-accnum" placeholder="10-digit account number" maxlength="10" style="width:100%; margin-top:6px; padding:12px 14px; background:#0f172a; border:1px solid rgba(255,255,255,0.1); border-radius:12px; color:#fff; font-size:14px; outline:none; box-sizing:border-box"/>
+            <label style="color:#94a3b8; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em">Account Number</label>
+            <input id="swal-accnum" placeholder="10-digit account number" maxlength="10" style="width:100%; margin-top:8px; padding:14px 16px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; color:#0f172a; font-size:15px; font-weight:500; outline:none; box-sizing:border-box"/>
           </div>
           <div>
-            <label style="color:#64748b; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.1em">Account Name</label>
-            <input id="swal-accname" placeholder="Account holder name" style="width:100%; margin-top:6px; padding:12px 14px; background:#0f172a; border:1px solid rgba(255,255,255,0.1); border-radius:12px; color:#fff; font-size:14px; outline:none; box-sizing:border-box"/>
+            <label style="color:#94a3b8; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em">Account Name</label>
+            <input id="swal-accname" placeholder="Account holder name" style="width:100%; margin-top:8px; padding:14px 16px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; color:#0f172a; font-size:15px; font-weight:500; outline:none; box-sizing:border-box"/>
           </div>
         </div>
       `,
@@ -189,7 +189,7 @@ export function OnboardingWizard({ uid, userEmail, onComplete }: Props) {
     });
 
     if (bankResult.isDismissed || bankResult.dismiss === Swal.DismissReason.cancel) {
-      await saveProfileAndFinish(investmentGoal, riskLevel, "Pending Setup", "0000000000", "Pending Setup");
+      await saveProfileAndFinish(investmentGoal, timeCommitment, "Pending Setup", "0000000000", "Pending Setup");
       onComplete();
       router.push("/dashboard");
       return;
@@ -197,16 +197,16 @@ export function OnboardingWizard({ uid, userEmail, onComplete }: Props) {
     const { bankName, accountNumber, accountName } = bankResult.value;
 
     /* ── Save to Firestore ── */
-    await saveProfileAndFinish(investmentGoal, riskLevel, bankName, accountNumber, accountName);
+    await saveProfileAndFinish(investmentGoal, timeCommitment, bankName, accountNumber, accountName);
 
     /* ── Step 5: All done → go to upgrade ── */
     const choiceResult = await Swal.fire({
-      ...SWAL_DARK,
+      ...SWAL_LIGHT,
       icon: "success",
       title: "Profile Complete!",
-      html: `<p style="color:#94a3b8; font-size:14px">Your Validator Node profile has been successfully built.<br/><br/>Choose to activate your node tier now, or head straight to the dashboard to look around.</p>`,
+      html: `<p style="color:#64748b; font-size:15px">Your account has been successfully set up.<br/><br/>Choose to activate your Premium Plan now, or head straight to the dashboard to look around.</p>`,
       showCancelButton: true,
-      confirmButtonText: "⚡ Upgrade / Pay Now",
+      confirmButtonText: "⚡ Activate Premium",
       cancelButtonText: "📅 Pay Later (Dashboard)",
       allowOutsideClick: false,
     });
@@ -219,7 +219,7 @@ export function OnboardingWizard({ uid, userEmail, onComplete }: Props) {
     }
   }
 
-  async function saveProfileAndFinish(goal: string, risk: string, bank: string, accnum: string, accname: string) {
+  async function saveProfileAndFinish(goal: string, time: string, bank: string, accnum: string, accname: string) {
     try {
       const currentUser = auth.currentUser;
       const referralCode = generateReferralCode(uid);
@@ -228,7 +228,7 @@ export function OnboardingWizard({ uid, userEmail, onComplete }: Props) {
         displayName: currentUser?.displayName || userEmail.split("@")[0],
         photoURL: currentUser?.photoURL || "",
         investmentGoal: goal,
-        riskLevel: risk,
+        riskLevel: time, // Repurposing 'riskLevel' field in DB to store time commitment instead
         bankName: bank,
         accountNumber: accnum,
         accountName: accname,
@@ -247,7 +247,7 @@ export function OnboardingWizard({ uid, userEmail, onComplete }: Props) {
       await sendNotification(
         uid,
         "Welcome to AdsFinance!",
-        `Your profile is set up. Your referral code is ${referralCode}. Now activate a Validator Node to start earning.`,
+        `Your profile is set up. Your referral code is ${referralCode}. Now activate a Premium Plan to start earning.`,
         "success"
       );
       // process referral if someone referred this user
