@@ -1,5 +1,7 @@
 "use client";
 
+import { NotificationBell } from "@/components/ui/NotificationBell";
+
 import React, { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -143,10 +145,7 @@ export default function TasksPage() {
           <span className={styles.logoText}>AdsFinance</span>
         </div>
         <div className={styles.headerRight}>
-          <Link href="/notifications" className={styles.bellWrapper}>
-            <Bell className={styles.bellIcon} />
-            <span className={styles.bellBadge}>2</span>
-          </Link>
+          {user?.uid && <NotificationBell uid={user.uid} />}
           <Link href="/profile" className={styles.avatar}>{avatar}</Link>
         </div>
       </header>

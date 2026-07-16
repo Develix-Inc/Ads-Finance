@@ -1,5 +1,7 @@
 "use client";
 
+import { NotificationBell } from "@/components/ui/NotificationBell";
+
 import Image from "next/image";
 
 import React, { useEffect, useState } from "react";
@@ -61,7 +63,7 @@ export default function ProfilePage() {
     router.push("/login");
   };
 
-  if (loading) return <div className={styles.container} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Loading...</div>;
+  if (loading) return <div className={styles.container} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}></div>;
 
   const name = profile?.displayName || user?.displayName || user?.email?.split("@")[0] || "User";
   const email = user?.email || "";
@@ -87,10 +89,7 @@ export default function ProfilePage() {
           <span className={styles.logoText}>AdsFinance</span>
         </div>
         <div className={styles.headerRight}>
-          <Link href="/notifications" className={styles.bellWrapper}>
-            <Bell className={styles.bellIcon} />
-            <span className={styles.bellBadge}>2</span>
-          </Link>
+          {user?.uid && <NotificationBell uid={user.uid} />}
         </div>
       </header>
 

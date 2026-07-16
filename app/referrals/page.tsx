@@ -1,5 +1,7 @@
 "use client";
 
+import { NotificationBell } from "@/components/ui/NotificationBell";
+
 import Image from "next/image";
 
 import React, { useEffect, useState, useRef } from "react";
@@ -81,7 +83,7 @@ export default function ReferralsPage() {
     }
   };
 
-  if (loading) return <div className={styles.container} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Loading...</div>;
+  if (loading) return <div className={styles.container} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}></div>;
 
   const name = profile?.displayName || user?.displayName || user?.email?.split("@")[0] || "User";
   const avatar = name[0].toUpperCase();
@@ -111,10 +113,7 @@ export default function ReferralsPage() {
           <span className={styles.logoText}>AdsFinance</span>
         </div>
         <div className={styles.headerRight}>
-          <Link href="/notifications" className={styles.bellWrapper}>
-            <Bell className={styles.bellIcon} />
-            <span className={styles.bellBadge}>2</span>
-          </Link>
+          {user?.uid && <NotificationBell uid={user.uid} />}
           <Link href="/profile" className={styles.avatar}>{avatar}</Link>
         </div>
       </header>
