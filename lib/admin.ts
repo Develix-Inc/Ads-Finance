@@ -33,9 +33,12 @@ export const NODE_MIN_WITHDRAWAL: Record<string, number> = {
 };
 
 export const NODE_MULTIPLIERS: Record<string, number> = {
-  "Alpha": 85000,`n  "Alpha Plan": 4,
-  "Sigma": 225000,`n  "Sigma Plan": 5,
-  "Omega": 600000,`n  "Omega Plan": 6,
+  "Alpha": 4,
+  "Alpha Plan": 4,
+  "Sigma": 5,
+  "Sigma Plan": 5,
+  "Omega": 6,
+  "Omega Plan": 6,
 };
 
 /* ─── User profile ─── */
@@ -336,7 +339,7 @@ export async function getSettings() {
     bankName:      COMPANY_BANK.name,
     bankAccount:   COMPANY_BANK.account,
     bankHolder:    COMPANY_BANK.holder,
-    minWithdrawal: { "Alpha": 85000,`n  "Alpha Plan": 85000, "Sigma": 225000,`n  "Sigma Plan": 225000, "Omega": 600000,`n  "Omega Plan": 600000 },
+    minWithdrawal: { "Alpha": 85000, "Alpha Plan": 85000, "Sigma": 225000, "Sigma Plan": 225000, "Omega": 600000, "Omega Plan": 600000 },
     referralBonus: 50,
   };
 }

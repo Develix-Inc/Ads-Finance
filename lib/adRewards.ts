@@ -208,9 +208,12 @@ export async function claimAdReward(
 // ─── Daily Check-in Reward ───────────────────────────────────────────────────
 export const CHECKIN_REWARDS: Record<string, number> = {
   "none": 0,
-  "Alpha": { dailyCap: 3000, minReward: 150, maxReward: 300, maxVideos: 10 },`n    "Alpha Plan": 300,
-  "Sigma": { dailyCap: 7500, minReward: 350, maxReward: 500, maxVideos: 15 },`n    "Sigma Plan": 700,
-  "Omega": { dailyCap: 24000, minReward: 900, maxReward: 1200, maxVideos: 20 },`n    "Omega Plan": 1400,
+  "Alpha": 300,
+  "Alpha Plan": 300,
+  "Sigma": 700,
+  "Sigma Plan": 700,
+  "Omega": 1400,
+  "Omega Plan": 1400,
 };
 
 export async function claimDailyCheckin(uid: string, nodeTier: string): Promise<{ success: boolean; reward: number; message: string }> {
