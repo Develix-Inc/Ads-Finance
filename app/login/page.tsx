@@ -41,6 +41,10 @@ function LoginInner() {
   const [isSignUp, setIsSignUp] = useState(false);
 
   useEffect(() => {
+    const mode = searchParams?.get("mode");
+    if (mode === "signup") {
+      setIsSignUp(true);
+    }
     const ref = searchParams?.get("ref");
     if (ref) {
       localStorage.setItem("pendingRef", ref);

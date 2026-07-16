@@ -65,7 +65,7 @@ export default function PremiumLandingPage() {
           </div>
           <div className="flex items-center gap-3 sm:gap-6 text-sm font-semibold">
             <Link href="/login" className="text-slate-600 hover:text-slate-900 transition-colors uppercase tracking-wider text-xs sm:text-sm">Login</Link>
-            <Link href="/login">
+            <Link href="/login?mode=signup">
               <button className="rounded-xl font-bold bg-primary text-primary-foreground hover:bg-primary/90 transition-colors shadow-md px-4 sm:px-6 py-2 sm:py-2.5 text-xs sm:text-sm flex items-center gap-1.5">
                 Get Started <ArrowRight className="w-4 h-4" />
               </button>
@@ -132,7 +132,7 @@ export default function PremiumLandingPage() {
               transition={{ duration: 0.5, delay: 0.3 }}
               className="mt-10 flex flex-col sm:flex-row gap-4 w-full"
             >
-              <Link href="/login">
+              <Link href="/login?mode=signup">
                 <Button className="w-full sm:w-auto rounded-xl h-14 px-8 text-base font-bold bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20">
                   Create Account <ChevronRight className="w-5 h-5 ml-2" />
                 </Button>

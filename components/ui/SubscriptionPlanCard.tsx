@@ -62,7 +62,7 @@ export function SubscriptionPlanCard({ title, price, highlightText, benefits, is
       </div>
 
       {/* Action Area */}
-      <Link href="/login" className="w-full mt-4">
+      <Link href="/login?mode=signup" className="w-full mt-4">
         <Button 
           className={`w-full rounded-xl py-6 text-sm font-semibold tracking-wide transition-all shadow-md ${
             isPopular 
