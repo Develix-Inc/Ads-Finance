@@ -139,7 +139,7 @@ export default function TasksPage() {
       {/* Header */}
       <header className={styles.header}>
         <div className={styles.logoArea}>
-          <div className={styles.logoIcon}>AF</div>
+          <Image src="/logo.png" alt="AdsFinance Logo" width={32} height={32} className={styles.logoIcon} />
           <span className={styles.logoText}>AdsFinance</span>
         </div>
         <div className={styles.headerRight}>

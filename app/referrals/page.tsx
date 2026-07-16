@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 import React, { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -105,7 +107,7 @@ export default function ReferralsPage() {
       {/* Header */}
       <header className={styles.header}>
         <div className={styles.logoArea}>
-          <div className={styles.logoIcon}>AF</div>
+          <Image src="/logo.png" alt="AdsFinance Logo" width={32} height={32} className={styles.logoIcon} />
           <span className={styles.logoText}>AdsFinance</span>
         </div>
         <div className={styles.headerRight}>

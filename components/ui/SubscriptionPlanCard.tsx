@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
@@ -60,15 +62,17 @@ export function SubscriptionPlanCard({ title, price, highlightText, benefits, is
       </div>
 
       {/* Action Area */}
-      <Button 
-        className={`w-full rounded-xl py-6 text-sm font-semibold tracking-wide transition-all shadow-md mt-4 ${
-          isPopular 
-            ? 'bg-primary text-primary-foreground hover:bg-primary/90' 
-            : 'bg-slate-900 text-white hover:bg-slate-800'
-        }`}
-      >
-        Select Plan <ArrowRight className="w-4 h-4 ml-2" />
-      </Button>
+      <Link href="/login" className="w-full mt-4">
+        <Button 
+          className={`w-full rounded-xl py-6 text-sm font-semibold tracking-wide transition-all shadow-md ${
+            isPopular 
+              ? 'bg-primary text-primary-foreground hover:bg-primary/90' 
+              : 'bg-slate-900 text-white hover:bg-slate-800'
+          }`}
+        >
+          Select Plan <ArrowRight className="w-4 h-4 ml-2" />
+        </Button>
+      </Link>
     </motion.div>
   );
 }
