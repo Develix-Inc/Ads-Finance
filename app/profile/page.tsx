@@ -87,10 +87,10 @@ export default function ProfilePage() {
           <span className={styles.logoText}>AdsFinance</span>
         </div>
         <div className={styles.headerRight}>
-          <div className={styles.bellWrapper}>
+          <Link href="/notifications" className={styles.bellWrapper}>
             <Bell className={styles.bellIcon} />
             <span className={styles.bellBadge}>2</span>
-          </div>
+          </Link>
         </div>
       </header>
 

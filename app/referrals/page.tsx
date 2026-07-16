@@ -111,11 +111,11 @@ export default function ReferralsPage() {
           <span className={styles.logoText}>AdsFinance</span>
         </div>
         <div className={styles.headerRight}>
-          <div className={styles.bellWrapper}>
+          <Link href="/notifications" className={styles.bellWrapper}>
             <Bell className={styles.bellIcon} />
             <span className={styles.bellBadge}>2</span>
-          </div>
-          <div className={styles.avatar}>{avatar}</div>
+          </Link>
+          <Link href="/profile" className={styles.avatar}>{avatar}</Link>
         </div>
       </header>
 

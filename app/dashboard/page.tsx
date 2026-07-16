@@ -169,11 +169,11 @@ export default function DashboardPage() {
           <span className={styles.logoText}>AdsFinance</span>
         </div>
         <div className={styles.headerRight}>
-          <div className={styles.bellWrapper}>
+          <Link href="/notifications" className={styles.bellWrapper}>
             <Bell className={styles.bellIcon} />
             {user?.uid && <span className={styles.bellBadge}>2</span> /* Real notifications count could go here */}
-          </div>
-          <div className={styles.avatar}>{avatar}</div>
+          </Link>
+          <Link href="/profile" className={styles.avatar}>{avatar}</Link>
         </div>
       </header>
 
@@ -360,8 +360,8 @@ export default function DashboardPage() {
                 <div className={`${styles.quickIconWrap} ${styles.purple}`}>
                   <Gift size={20} fill="currentColor" />
                 </div>
-                <div className={styles.quickTitle}>Promotions</div>
-                <div className={styles.quickSub}>Active Offers</div>
+                <div className={styles.quickTitle}>Plans</div>
+                <div className={styles.quickSub}>Upgrade Now</div>
               </div>
             </Link>
             <Link href="/settings" style={{ textDecoration: 'none', color: 'inherit' }}>
