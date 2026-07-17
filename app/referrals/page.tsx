@@ -48,7 +48,7 @@ export default function ReferralsPage() {
         setReferrals(refs);
         
         const code = p?.referralCode || generateReferralCode(u.uid);
-        setRefLink(`${window.location.origin}/register?ref=${code}`);
+        setRefLink(`${window.location.origin}/login?mode=signup&ref=${code}`);
       } catch (err) {
         console.error(err);
       } finally {
@@ -188,8 +188,7 @@ export default function ReferralsPage() {
             </div>
             <input type="text" className={styles.linkInput} value={refLink} readOnly />
             <button className={styles.copyBtn} onClick={copyLink}>
-              {copied ? <CheckCircle2 size={14} /> : <Copy size={14} />} 
-              {copied ? "Copied" : "Copy"}
+              {copied ? <CheckCircle2 size={16} /> : <Copy size={16} />}
             </button>
           </div>
 
