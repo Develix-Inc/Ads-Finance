@@ -87,7 +87,7 @@ export default function ReferralsPage() {
     useEffect(() => {
     if (!loading && profile) {
       
-      if (!profile.nodeTier || profile.nodeTier === "none") {
+      if (normalizeTier(profile?.nodeTier) === "none") {
         router.push("/upgrade");
       }
     }

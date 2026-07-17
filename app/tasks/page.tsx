@@ -118,7 +118,7 @@ export default function TasksPage() {
     useEffect(() => {
     if (!loading && profile) {
       
-      if (!profile.nodeTier || profile.nodeTier === "none") {
+      if (normalizeTier(profile?.nodeTier) === "none") {
         router.push("/upgrade");
       }
     }
@@ -129,7 +129,7 @@ export default function TasksPage() {
   const name = profile?.displayName || user?.displayName || user?.email?.split("@")[0] || "User";
   const avatar = name[0].toUpperCase();
   
-  const nodeTier = profile?.nodeTier || "none";
+  const nodeTier = normalizeTier(profile?.nodeTier);
   const limits = TIER_LIMITS[nodeTier] || TIER_LIMITS["none"];
   const maxVideos = limits.maxVideos;
   const watched = rewardData?.watchedToday ?? [];

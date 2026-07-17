@@ -11,7 +11,7 @@ import Link from "next/link";
 import styles from "./styles.module.css";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
-import { getUserProfile, adminGetWithdrawals, NODE_MIN_WITHDRAWAL, getSettings } from "@/lib/admin";
+import { getUserProfile, adminGetWithdrawals, NODE_MIN_WITHDRAWAL, normalizeTier, getSettings } from "@/lib/admin";
 import { getUserReferrals } from "@/lib/referrals";
 import { TIER_LIMITS } from "@/lib/adRewards";
 import {
@@ -30,7 +30,6 @@ export default function ProfilePage() {
   const [withdrawals, setWithdrawals] = useState<any[]>([]);
   const [referrals, setReferrals] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [minWLimits, setMinWLimits] = useState<any>(null);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async u => {
@@ -49,7 +48,6 @@ export default function ProfilePage() {
         
         setWithdrawals(allW.filter((w: any) => w.uid === u.uid));
         setReferrals(refs);
-        if (stgs?.minWithdrawal) setMinWLimits(stgs.minWithdrawal);
       } catch (err) {
         console.error(err);
       } finally {
@@ -70,15 +68,14 @@ export default function ProfilePage() {
   const email = user?.email || "";
   const avatar = name[0].toUpperCase();
 
-  const nodeTier = profile?.nodeTier ?? "none";
+  const nodeTier = normalizeTier(profile?.nodeTier);
   const nodeActive = profile?.nodeStatus === "active";
   
   const balance = profile?.walletBalance ?? 0;
   const totalEarned = profile?.totalEarnings ?? 0;
   const totalWithdrawn = withdrawals.reduce((s, w) => w.status === "processed" ? s + (w.amount ?? 0) : s, 0);
   
-  const activeLimits = minWLimits || NODE_MIN_WITHDRAWAL;
-  const minW = (activeLimits as Record<string, number>)[nodeTier] ?? 85000;
+  const minW = (NODE_MIN_WITHDRAWAL as Record<string, number>)[nodeTier] ?? 85000;
   const taskLimit = TIER_LIMITS[nodeTier]?.maxVideos ?? 5;
 
   return (

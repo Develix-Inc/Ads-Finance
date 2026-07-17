@@ -11,7 +11,7 @@ import Link from "next/link";
 import styles from "./styles.module.css";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
-import { getUserProfile, adminGetWithdrawals, NODE_MIN_WITHDRAWAL, getSettings } from "@/lib/admin";
+import { getUserProfile, adminGetWithdrawals, NODE_MIN_WITHDRAWAL, normalizeTier, getSettings } from "@/lib/admin";
 import { WithdrawModal } from "@/components/ui/WithdrawModal";
 import { AnimatePresence } from "framer-motion";
 import {
@@ -32,7 +32,6 @@ export default function WithdrawalsPage() {
   const [history, setHistory] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const [minWLimits, setMinWLimits] = useState<any>(null);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async u => {
@@ -48,7 +47,6 @@ export default function WithdrawalsPage() {
         setHistory(all.filter((w: any) => w.uid === u.uid));
         
         const stgs = await getSettings();
-        if (stgs?.minWithdrawal) setMinWLimits(stgs.minWithdrawal);
       } catch (err) {
         console.error(err);
       } finally {
@@ -61,7 +59,7 @@ export default function WithdrawalsPage() {
     useEffect(() => {
     if (!loading && profile) {
       
-      if (!profile.nodeTier || profile.nodeTier === "none") {
+      if (normalizeTier(profile?.nodeTier) === "none") {
         router.push("/upgrade");
       }
     }
@@ -73,8 +71,8 @@ export default function WithdrawalsPage() {
   const avatar = name[0].toUpperCase();
 
   const nodeActive = profile?.nodeStatus === "active";
-  const nodeTier = profile?.nodeTier ?? "none";
-  const minW = (minWLimits || NODE_MIN_WITHDRAWAL as Record<string, number>)[nodeTier] ?? 85000;
+  const nodeTier = normalizeTier(profile?.nodeTier);
+  const minW = (NODE_MIN_WITHDRAWAL as Record<string, number>)[nodeTier] ?? 85000;
   const balance = profile?.walletBalance ?? 0;
   
   const canWithdraw = nodeActive && balance >= minW;

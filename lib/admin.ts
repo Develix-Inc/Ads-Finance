@@ -14,6 +14,15 @@ export const COMPANY_BANK = {
   holder:  "AdsFinance Technologies Ltd", // ← REPLACE WITH REAL NAME
 };
 
+export function normalizeTier(tier: string | undefined): string {
+  if (!tier) return "none";
+  const t = tier.toLowerCase();
+  if (t.includes("alpha")) return "Alpha";
+  if (t.includes("sigma")) return "Sigma";
+  if (t.includes("omega")) return "Omega";
+  return "none";
+}
+
 export const NODE_PRICES: Record<string, number> = {
   "Alpha": 85000,
   "Alpha Plan": 17000,

@@ -10,7 +10,7 @@ import styles from "./styles.module.css";
 import { auth, db } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { doc, onSnapshot, query, collection, where, getDocs } from "firebase/firestore";
-import { getUserProfile, upsertUserProfile, NODE_MIN_WITHDRAWAL, adminVerifyPayment } from "@/lib/admin";
+import { getUserProfile, upsertUserProfile, NODE_MIN_WITHDRAWAL, normalizeTier, adminVerifyPayment } from "@/lib/admin";
 import { WithdrawModal } from "@/components/ui/WithdrawModal";
 import { OnboardingWizard } from "@/components/ui/OnboardingWizard";
 import { NotificationBell } from "@/components/ui/NotificationBell";
@@ -123,7 +123,7 @@ export default function DashboardPage() {
       // Allow onboarding to finish on dashboard
       if (typeof showOnboarding !== 'undefined' && showOnboarding) return;
       
-      if (!profile.nodeTier || profile.nodeTier === "none") {
+      if (normalizeTier(profile?.nodeTier) === "none") {
         router.push("/upgrade");
       }
     }
@@ -135,7 +135,7 @@ export default function DashboardPage() {
   const avatar = name[0].toUpperCase();
   const nodeActive = profile?.nodeStatus === "active";
   const nodePending = profile?.nodeStatus === "pending";
-  const nodeTier = profile?.nodeTier ?? "none";
+  const nodeTier = normalizeTier(profile?.nodeTier);
   
   const minWithdraw = (NODE_MIN_WITHDRAWAL as Record<string, number>)[nodeTier] ?? 85000;
   const taskLimits = TIER_LIMITS[nodeTier] || TIER_LIMITS["none"];
@@ -302,9 +302,20 @@ export default function DashboardPage() {
             <div className={styles.trustTitle}>We're anti-scam & transparent</div>
             <div className={styles.trustDesc}>No hidden fees. No false promises. Just real rewards.</div>
           </div>
-          <Link href="/settings" className={styles.trustLink} style={{ textDecoration: 'none' }}>
+          <button 
+            onClick={() => {
+              import("sweetalert2").then(Swal => Swal.default.fire({ 
+                title: "Fair & Transparent", 
+                text: "To earn your daily reward, you must watch the full 3-minute video. Skipping or exiting early will cancel your earnings for that task. We have no hidden fees or deductions on your earnings.", 
+                icon: "info", 
+                confirmButtonColor: "#1765DC" 
+              }))
+            }} 
+            className={styles.trustLink} 
+            style={{ background: 'none', border: 'none', cursor: 'pointer', outline: 'none' }}
+          >
             Learn more <ChevronRight size={16} />
-          </Link>
+          </button>
         </section>
 
         {/* Current Tier */}
@@ -373,7 +384,7 @@ export default function DashboardPage() {
                 <div className={styles.quickSub}>Upgrade Now</div>
               </div>
             </Link>
-            <Link href="/settings" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <Link href="/support" style={{ textDecoration: 'none', color: 'inherit' }}>
               <div className={styles.quickCard}>
                 <div className={`${styles.quickIconWrap} ${styles.orange}`}>
                   <HelpCircle size={20} fill="currentColor" />
