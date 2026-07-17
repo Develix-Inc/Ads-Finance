@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
-import { COMPANY_BANK, NODE_PRICES, NODE_MIN_WITHDRAWAL, submitPayment, getUserProfile, upsertUserProfile } from "@/lib/admin";
+import { COMPANY_BANK, NODE_PRICES, NODE_MIN_WITHDRAWAL, normalizeTier, submitPayment, getUserProfile, upsertUserProfile } from "@/lib/admin";
 import {
   ShieldCheck, Zap, Star, CheckCircle2, ArrowLeft,
   Clock, Receipt, ChevronRight
@@ -168,7 +168,7 @@ export default function UpgradePage() {
               
               <div className={styles.plansGrid}>
                 {TIERS.map(t => {
-                  const isCurrent = profile?.nodeTier === t.name && profile?.nodeStatus === "active";
+                  const isCurrent = normalizeTier(profile?.nodeTier) === t.name && profile?.nodeStatus === "active";
                   const cardClass = `${styles.planCard} ${styles[t.cssClass]} ${isCurrent ? styles.current : ''}`;
                   
                   return (

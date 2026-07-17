@@ -1,7 +1,7 @@
 import { db } from "./firebase";
 import { doc, getDoc, setDoc, serverTimestamp, arrayUnion } from "firebase/firestore";
 import { recordTransaction } from "./transactions";
-import { getUserProfile } from "./admin";
+import { getUserProfile, normalizeTier } from "./admin";
 
 export const MIN_WATCH_SECS = 180;
 
@@ -177,7 +177,8 @@ export async function claimAdReward(
 
   const data  = await getAdRewardData(uid);
   const today = todayStr();
-  const limits = TIER_LIMITS[nodeTier] || TIER_LIMITS["Alpha Plan"];
+  const resolvedTier = normalizeTier(nodeTier);
+  const limits = TIER_LIMITS[resolvedTier] || TIER_LIMITS["Alpha Plan"];
 
   if (data.dailyEarnings >= limits.dailyCap) {
     return { success: false, reward: 0, message: "Daily ad earning limit reached. Come back tomorrow." };
@@ -229,7 +230,7 @@ export async function claimDailyCheckin(uid: string, nodeTier: string): Promise<
     return { success: false, reward: 0, message: "Already claimed today." };
   }
 
-  const reward = CHECKIN_REWARDS[nodeTier] || 0;
+  const reward = CHECKIN_REWARDS[normalizeTier(nodeTier)] || 0;
   if (reward <= 0) {
     return { success: false, reward: 0, message: "Upgrade your plan to claim daily check-in rewards." };
   }

@@ -14,12 +14,19 @@ export const COMPANY_BANK = {
   holder:  "AdsFinance Technologies Ltd", // ← REPLACE WITH REAL NAME
 };
 
-export function normalizeTier(tier: string | undefined): string {
-  if (!tier) return "none";
-  const t = tier.toLowerCase();
-  if (t.includes("alpha")) return "Alpha";
-  if (t.includes("sigma")) return "Sigma";
-  if (t.includes("omega")) return "Omega";
+/**
+ * Normalize any tier string from Firestore into the canonical tier name
+ * used across all lookup maps (TIER_LIMITS, NODE_MIN_WITHDRAWAL, etc.).
+ * 
+ * This handles variants like "Alpha", "Alpha Plan", "alpha", "node alpha", etc.
+ * The canonical names are: "Alpha Plan", "Sigma Plan", "Omega Plan", "none".
+ */
+export function normalizeTier(tier: string | undefined | null): string {
+  if (!tier || tier === "none" || tier === "") return "none";
+  const t = tier.toLowerCase().trim();
+  if (t.includes("alpha")) return "Alpha Plan";
+  if (t.includes("sigma")) return "Sigma Plan";
+  if (t.includes("omega")) return "Omega Plan";
   return "none";
 }
 
@@ -94,7 +101,7 @@ export async function submitWithdrawal(
     throw new Error("Your account is suspended. You cannot make withdrawals.");
   }
   
-  const tier = profile?.nodeTier || "Alpha Plan";
+  const tier = normalizeTier(profile?.nodeTier);
   const minWithdrawal = NODE_MIN_WITHDRAWAL[tier] || 85000;
 
   if (amount < minWithdrawal) {
