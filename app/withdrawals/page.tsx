@@ -9,9 +9,10 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import styles from "./styles.module.css";
-import { auth } from "@/lib/firebase";
+import { auth, db } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
-import { getUserProfile, adminGetWithdrawals, NODE_MIN_WITHDRAWAL, normalizeTier, getSettings } from "@/lib/admin";
+import { doc, onSnapshot } from "firebase/firestore";
+import { getUserProfile, adminGetWithdrawals, NODE_MIN_WITHDRAWAL, normalizeTier } from "@/lib/admin";
 import { WithdrawModal } from "@/components/ui/WithdrawModal";
 import { AnimatePresence } from "framer-motion";
 import {
@@ -45,8 +46,6 @@ export default function WithdrawalsPage() {
         
         const all = await adminGetWithdrawals();
         setHistory(all.filter((w: any) => w.uid === u.uid));
-        
-        const stgs = await getSettings();
       } catch (err) {
         console.error(err);
       } finally {
@@ -55,6 +54,15 @@ export default function WithdrawalsPage() {
     });
     return unsub;
   }, [router]);
+
+  /* Real-time profile updates */
+  useEffect(() => {
+    if (!user?.uid) return;
+    const unsub = onSnapshot(doc(db, "users", user.uid), snap => {
+      if (snap.exists()) setProfile(snap.data());
+    });
+    return unsub;
+  }, [user?.uid]);
 
     useEffect(() => {
     if (!loading && profile) {
@@ -198,7 +206,6 @@ export default function WithdrawalsPage() {
         <section>
           <div className={styles.historyHeader}>
             <div className={styles.historyTitle}>Withdrawal History</div>
-            <Link href="#" className={styles.viewAll}>View All <ChevronRight size={14} /></Link>
           </div>
           
           {history.length === 0 ? (

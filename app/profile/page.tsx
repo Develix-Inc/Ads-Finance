@@ -9,9 +9,10 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import styles from "./styles.module.css";
-import { auth } from "@/lib/firebase";
+import { auth, db } from "@/lib/firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
-import { getUserProfile, adminGetWithdrawals, NODE_MIN_WITHDRAWAL, normalizeTier, getSettings } from "@/lib/admin";
+import { doc, onSnapshot } from "firebase/firestore";
+import { getUserProfile, adminGetWithdrawals, NODE_MIN_WITHDRAWAL, normalizeTier } from "@/lib/admin";
 import { getUserReferrals } from "@/lib/referrals";
 import { TIER_LIMITS } from "@/lib/adRewards";
 import {
@@ -40,10 +41,9 @@ export default function ProfilePage() {
         const p = await getUserProfile(u.uid);
         setProfile(p);
         
-        const [allW, refs, stgs] = await Promise.all([
+        const [allW, refs] = await Promise.all([
           adminGetWithdrawals(),
           getUserReferrals(u.uid),
-          getSettings()
         ]);
         
         setWithdrawals(allW.filter((w: any) => w.uid === u.uid));
@@ -56,6 +56,15 @@ export default function ProfilePage() {
     });
     return unsub;
   }, [router]);
+
+  /* Real-time profile updates */
+  useEffect(() => {
+    if (!user?.uid) return;
+    const unsub = onSnapshot(doc(db, "users", user.uid), snap => {
+      if (snap.exists()) setProfile(snap.data());
+    });
+    return unsub;
+  }, [user?.uid]);
 
   const handleLogout = async () => {
     await signOut(auth);

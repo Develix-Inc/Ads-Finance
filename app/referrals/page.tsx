@@ -9,8 +9,9 @@ import React, { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import styles from "./styles.module.css";
-import { auth } from "@/lib/firebase";
+import { auth, db } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
+import { doc, onSnapshot } from "firebase/firestore";
 import { getUserProfile, normalizeTier } from "@/lib/admin";
 import { getUserReferrals, generateReferralCode } from "@/lib/referrals";
 import { HowItWorksModal } from "@/components/ui/HowItWorksModal";
@@ -56,6 +57,15 @@ export default function ReferralsPage() {
     });
     return unsub;
   }, [router]);
+
+  /* Real-time profile updates */
+  useEffect(() => {
+    if (!user?.uid) return;
+    const unsub = onSnapshot(doc(db, "users", user.uid), snap => {
+      if (snap.exists()) setProfile(snap.data());
+    });
+    return unsub;
+  }, [user?.uid]);
 
   const copyLink = async () => {
     if (!refLink) return;
@@ -245,7 +255,6 @@ export default function ReferralsPage() {
         <section>
           <div className={styles.historyHeader}>
             <h3 className={styles.historyTitle}>Recent Referrals</h3>
-            <Link href="#" className={styles.viewAll}>View All <ChevronRight size={14} /></Link>
           </div>
           
           {referrals.length === 0 ? (

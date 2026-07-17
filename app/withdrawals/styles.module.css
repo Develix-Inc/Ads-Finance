@@ -1,4 +1,6 @@
 .container {
+  overflow-x: hidden;
+  max-width: 100vw;
   font-family: 'Inter', system-ui, sans-serif;
   background-color: #FAFAFA;
   min-height: 100vh;

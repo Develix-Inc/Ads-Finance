@@ -305,17 +305,17 @@ export default function PremiumLandingPage() {
           <div>
             <h4 className="font-bold text-slate-900 mb-4 text-sm">Platform</h4>
             <ul className="space-y-3 text-slate-500 text-sm font-medium">
-              <li><Link href="#" className="hover:text-primary transition-colors">Membership Plans</Link></li>
-              <li><Link href="#" className="hover:text-primary transition-colors">Advertiser Portal</Link></li>
-              <li><Link href="#" className="hover:text-primary transition-colors">Help Center</Link></li>
+              <li><Link href="/upgrade" className="hover:text-primary transition-colors">Membership Plans</Link></li>
+              <li><Link href="/login" className="hover:text-primary transition-colors">Get Started</Link></li>
+              <li><Link href="/support" className="hover:text-primary transition-colors">Help Center</Link></li>
             </ul>
           </div>
           <div>
             <h4 className="font-bold text-slate-900 mb-4 text-sm">Legal</h4>
             <ul className="space-y-3 text-slate-500 text-sm font-medium">
-              <li><Link href="#" className="hover:text-primary transition-colors">Terms of Service</Link></li>
-              <li><Link href="#" className="hover:text-primary transition-colors">Privacy Policy</Link></li>
-              <li><Link href="#" className="hover:text-primary transition-colors">Anti-Fraud Policy</Link></li>
+              <li><Link href="/support" className="hover:text-primary transition-colors">Terms of Service</Link></li>
+              <li><Link href="/support" className="hover:text-primary transition-colors">Privacy Policy</Link></li>
+              <li><Link href="/support" className="hover:text-primary transition-colors">Anti-Fraud Policy</Link></li>
             </ul>
           </div>
         </div>
