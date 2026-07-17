@@ -11,7 +11,7 @@ import Link from "next/link";
 import styles from "./styles.module.css";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
-import { getUserProfile } from "@/lib/admin";
+import { getUserProfile, normalizeTier } from "@/lib/admin";
 import { getUserReferrals, generateReferralCode } from "@/lib/referrals";
 import { HowItWorksModal } from "@/components/ui/HowItWorksModal";
 import {

@@ -9,6 +9,7 @@ import Image from "next/image";
 import Link from "next/link";
 import styles from "./styles.module.css";
 import { auth, db } from "@/lib/firebase";
+import { normalizeTier } from "@/lib/admin";
 import { onAuthStateChanged } from "firebase/auth";
 import { doc, onSnapshot } from "firebase/firestore";
 import {
